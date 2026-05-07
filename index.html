@@ -305,14 +305,14 @@
         <span class="brand">WaterWise Smart Farm</span>
         <span class="status-pill">System Healthy</span>
       </div>
-      <h1>Good afternoon, Sarah 👋</h1>
-      <p class="subtitle">Automation active across 7 connected field devices.</p>
+      <h1 id="greeting">Welcome back, Sarah 👋</h1>
+      <p class="subtitle" id="device-summary">Automation active across connected field devices.</p>
     </header>
 
     <section class="content">
       <article class="card weather-hero span-2">
         <h2 class="card-title">Today at Emerald Acres</h2>
-        <p class="card-subtitle">Partly cloudy • Light wind • Next irrigation cycle in 35 min</p>
+        <p class="card-subtitle" id="weather-summary">Partly cloudy • Light wind • Next irrigation cycle planned</p>
         <div class="metrics">
           <div class="metric"><div class="metric-label">Temperature</div><div class="metric-value">24°C</div></div>
           <div class="metric"><div class="metric-label">Humidity</div><div class="metric-value">61%</div></div>
@@ -351,11 +351,7 @@
       <article class="card span-2">
         <h2 class="card-title">Alerts & Schedule</h2>
         <p class="card-subtitle">Prioritized events for the next 24 hours.</p>
-        <ul class="list">
-          <li><span>North Tank Refill · 17:40</span><span class="tag warn">Attention</span></li>
-          <li><span>Drip Line 2 Pressure Check · 18:10</span><span class="tag ok">On Track</span></li>
-          <li><span>Solar Pump Maintenance · Tomorrow 08:30</span><span class="tag ok">Planned</span></li>
-        </ul>
+        <ul class="list" id="schedule-list"></ul>
       </article>
     </section>
 
@@ -368,6 +364,44 @@
   </main>
 
   <script>
+    const dashboardData = {
+      userName: 'Sarah',
+      connectedDevices: 7,
+      weather: { condition: 'Partly cloudy', wind: 'Light wind', nextIrrigationMinutes: 35 },
+      schedule: [
+        { label: 'North Tank Refill', minutesFromNow: 30, tag: 'Attention', className: 'warn' },
+        { label: 'Drip Line 2 Pressure Check', minutesFromNow: 60, tag: 'On Track', className: 'ok' },
+        { label: 'Solar Pump Maintenance', minutesFromNow: 930, tag: 'Planned', className: 'ok' }
+      ]
+    };
+
+    const getGreeting = (date) => {
+      const hour = date.getHours();
+      if (hour < 12) return 'Good morning';
+      if (hour < 18) return 'Good afternoon';
+      return 'Good evening';
+    };
+
+    const formatRelativeTime = (minutesFromNow) => {
+      if (minutesFromNow < 60) return `in ${minutesFromNow} min`;
+      const hours = Math.floor(minutesFromNow / 60);
+      const minutes = minutesFromNow % 60;
+      return minutes === 0 ? `in ${hours}h` : `in ${hours}h ${minutes}m`;
+    };
+
+    const greetingEl = document.getElementById('greeting');
+    const deviceSummaryEl = document.getElementById('device-summary');
+    const weatherSummaryEl = document.getElementById('weather-summary');
+    const scheduleListEl = document.getElementById('schedule-list');
+    const now = new Date();
+
+    greetingEl.textContent = `${getGreeting(now)}, ${dashboardData.userName} 👋`;
+    deviceSummaryEl.textContent = `Automation active across ${dashboardData.connectedDevices} connected field devices.`;
+    weatherSummaryEl.textContent = `${dashboardData.weather.condition} • ${dashboardData.weather.wind} • Next irrigation cycle ${formatRelativeTime(dashboardData.weather.nextIrrigationMinutes)}`;
+    scheduleListEl.innerHTML = dashboardData.schedule
+      .map((item) => `<li><span>${item.label} · ${formatRelativeTime(item.minutesFromNow)}</span><span class="tag ${item.className}">${item.tag}</span></li>`)
+      .join('');
+
     const navButtons = document.querySelectorAll('.nav-btn');
     navButtons.forEach((button) => {
       button.addEventListener('click', () => {
