@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WaterWise - Futuristic Smart Irrigation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <style>
+    :root {
+      --bg:#04070f;--panel:rgba(11,20,40,.55);--line:rgba(137,255,236,.18);--text:#e8fbff;
+      --muted:#9ec7d1;--green:#26f7a2;--cyan:#00d9ff;--blue:#3368ff;--danger:#ff5370;--warn:#ffc857;
+    }
+    *{box-sizing:border-box} html,body{height:100%;margin:0;font-family:Inter,sans-serif;background:radial-gradient(circle at 20% 10%,#0e1e3d 0%,#04070f 45%,#02040a 100%);color:var(--text);overflow:hidden}
+    #three-bg,#particles-js{position:fixed;inset:0;z-index:0;pointer-events:none}
+    #particles-js{opacity:.35}
+    .screen{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;z-index:5;transition:.8s ease;backdrop-filter:blur(5px)}
+    .hidden{opacity:0;pointer-events:none;transform:scale(.98)}
+    .glass{background:var(--panel);border:1px solid var(--line);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.45),0 0 30px rgba(0,217,255,.15);backdrop-filter:blur(14px)}
+    .logo{font-size:2.7rem;font-weight:800;letter-spacing:1px;background:linear-gradient(90deg,var(--green),var(--cyan),#fff);-webkit-background-clip:text;color:transparent;text-shadow:0 0 18px rgba(38,247,162,.4)}
+    .pulse{width:120px;height:120px;border-radius:50%;border:2px solid var(--cyan);display:grid;place-items:center;animation:pulse 2s infinite}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(0,217,255,.6)}100%{box-shadow:0 0 0 40px rgba(0,217,255,0)}}
+    .loader{width:220px;height:8px;border-radius:999px;background:#10223f;margin-top:24px;overflow:hidden}
+    .loader span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--cyan));animation:load 2.5s forwards}
+    @keyframes load{to{width:100%}}
+    .login-card{width:min(92vw,420px);padding:28px}
+    .input{width:100%;background:rgba(7,15,30,.7);border:1px solid var(--line);border-radius:14px;color:var(--text);padding:12px 14px;margin:.4rem 0 1rem}
+    .btn{border:none;background:linear-gradient(135deg,var(--green),var(--cyan));padding:12px 16px;border-radius:14px;font-weight:700;color:#022230;cursor:pointer;transition:.3s;box-shadow:0 8px 24px rgba(0,217,255,.35)}
+    .btn:hover{transform:translateY(-2px) scale(1.02)}
+    #app{position:relative;z-index:2;height:100%;display:flex}
+    .sidebar{width:86px;background:rgba(4,10,22,.85);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;padding:18px 10px;gap:14px}
+    .nav-btn{width:58px;height:58px;border-radius:18px;border:1px solid transparent;display:grid;place-items:center;color:var(--muted);cursor:pointer;transition:.3s;background:transparent}
+    .nav-btn.active,.nav-btn:hover{color:var(--text);border-color:var(--line);background:rgba(0,217,255,.1);box-shadow:0 0 18px rgba(0,217,255,.24)}
+    .main{flex:1;overflow:auto;padding:18px}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;position:sticky;top:0;z-index:3;padding-bottom:12px;background:linear-gradient(180deg,rgba(4,7,15,.9),rgba(4,7,15,.45),transparent)}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+    .card{padding:16px;border-radius:20px}
+    .metric{grid-column:span 3;min-height:120px}
+    .wide{grid-column:span 6}.full{grid-column:span 12}
+    .value{font-size:1.8rem;font-weight:800}
+    .muted{color:var(--muted);font-size:.88rem}
+    .ring{width:86px;height:86px;border-radius:50%;background:conic-gradient(var(--green) calc(var(--p)*1%),#14324f 0);display:grid;place-items:center}
+    .ring::after{content:"";width:68px;height:68px;background:#07162d;border-radius:50%}
+    .metric-wrap{display:flex;justify-content:space-between;align-items:center}
+    .tank{height:200px;position:relative;overflow:hidden}
+    .tank-shell{height:100%;border-radius:20px;border:2px solid #4ecbff40;position:relative;background:linear-gradient(180deg,#0b1f35,#061221)}
+    .water{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(180deg,#20c6ff,#1af3a8);height:50%;transition:1.4s}
+    .water::before{content:"";position:absolute;inset:-12px 0 auto;background:radial-gradient(circle at 30% 40%,#fff8,transparent 45%);height:24px;animation:wave 2s infinite linear}
+    @keyframes wave{to{transform:translateX(30px)}}
+    .status-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:7px;box-shadow:0 0 8px currentColor}
+    .controls .btn{margin:6px 6px 0 0}
+    canvas.chart{height:220px!important}
+    .notif{max-height:220px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+    .item{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.18)}
+    .assistant{min-height:220px}
+    .ai-msg{padding:10px 12px;border-left:3px solid var(--green);margin:.6rem 0;background:rgba(9,31,40,.45);border-radius:8px;animation:fade .5s}
+    @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .settings .row{margin:12px 0}
+    .toggle{accent-color:var(--cyan)}
+    .fab{position:fixed;right:18px;bottom:18px;z-index:5;width:58px;height:58px;border-radius:50%;border:0;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#fff;box-shadow:0 10px 25px rgba(51,104,255,.45)}
+    @media (max-width:980px){.metric{grid-column:span 6}.wide{grid-column:span 12}}
+    @media (max-width:700px){.sidebar{position:fixed;left:0;right:0;bottom:0;top:auto;height:72px;width:auto;flex-direction:row;justify-content:space-around;z-index:6}.main{padding-bottom:86px}.metric,.wide,.full{grid-column:span 12}}
+    .light{--bg:#edf8ff;--panel:rgba(255,255,255,.7);--line:rgba(0,88,132,.2);--text:#04213a;--muted:#366785}
+    .light body{background:#eef6ff}
+  </style>
+</head>
+<body>
+<div id="three-bg"></div><div id="particles-js"></div>
+<section id="splash" class="screen">
+  <div style="text-align:center"><div class="pulse"><i class="fa-solid fa-droplet" style="font-size:2.5rem;color:var(--cyan)"></i></div><div class="logo" style="margin-top:22px">WaterWise</div><div class="muted">Booting smart irrigation core...</div><div class="loader"><span></span></div></div>
+</section>
+<section id="login" class="screen hidden">
+  <div class="glass login-card"><h2>Welcome Back</h2><p class="muted">Secure farm access portal</p><input id="email" class="input" placeholder="farmer@waterwise.ai"><input id="pass" class="input" type="password" placeholder="••••••••"><label class="muted"><input type="checkbox" class="toggle"> Remember me</label><br><br><button id="loginBtn" class="btn" style="width:100%">Login to Dashboard</button></div>
+</section>
+
+<div id="app" class="hidden">
+  <aside class="sidebar glass" id="nav"></aside>
+  <main class="main">
+    <div class="topbar"><h2 style="margin:0">Smart Irrigation Command Center</h2><div><span class="status-dot" id="wifiDot" style="color:var(--green)"></span><span id="clock"></span></div></div>
+    <section id="dash" class="view"><div class="grid" id="metrics"></div></section>
+    <section id="monitor" class="view hidden"><div class="grid"><div class="card glass full"><canvas id="sensorChart" class="chart"></canvas></div></div></section>
+    <section id="control" class="view hidden"><div class="grid"><div class="card glass wide controls"><h3>Pump Control System</h3><button class="btn" onclick="setPump(true)">Start Pump</button><button class="btn" onclick="setPump(false)">Stop Pump</button><button class="btn" onclick="setValve(true)">Open Valve</button><button class="btn" onclick="setValve(false)">Close Valve</button><button class="btn" style="background:linear-gradient(135deg,#ff7a7a,#ff2f5f);color:#fff" onclick="emergency()">Emergency Shutdown</button><p id="pumpStatus" class="muted"></p></div><div class="card glass wide tank"><div class="tank-shell"><div id="water" class="water"></div></div><div class="value" id="tankPct" style="position:absolute;inset:auto 16px 14px auto">50%</div></div></div></section>
+    <section id="analytics" class="view hidden"><div class="grid"><div class="card glass metric"><h4>Daily Usage</h4><div class="value" id="daily">0 L</div></div><div class="card glass metric"><h4>Weekly Usage</h4><div class="value" id="weekly">0 L</div></div><div class="card glass wide"><canvas id="usageChart" class="chart"></canvas></div></div></section>
+    <section id="weather" class="view hidden"><div class="grid"><div class="card glass wide"><h3><i class="fa-solid fa-cloud-sun-rain"></i> Weather Intelligence</h3><div class="metric-wrap"><div><div class="value" id="wTemp"></div><div class="muted" id="wMeta"></div></div><div style="font-size:2.8rem" id="wIcon">🌦️</div></div></div></div></section>
+    <section id="notify" class="view hidden"><div class="card glass"><h3><i class="fa-solid fa-bell"></i> Notification Center</h3><div id="notif" class="notif"></div></div></section>
+    <section id="settings" class="view hidden"><div class="card glass settings"><h3>Settings</h3><div class="row">Theme <input id="theme" type="checkbox" class="toggle"> Light Mode</div><div class="row">Irrigation Threshold <input id="threshold" type="range" min="20" max="80" value="45"> <span id="thv">45%</span></div><div class="row">Notifications <input id="notifToggle" type="checkbox" class="toggle" checked></div><div class="row">Wi-Fi SSID <input class="input" placeholder="FarmNet-5G"></div><div class="row">Language <select class="input"><option>English</option><option>Hindi</option><option>Spanish</option></select></div></div></section>
+    <section id="ai" class="view hidden"><div class="card glass assistant"><h3><i class="fa-solid fa-robot"></i> AI Farm Assistant</h3><div id="aiFeed"></div></div></section>
+  </main>
+</div>
+<button class="fab" onclick="toast('Voice command module coming soon')"><i class="fa-solid fa-microphone"></i></button>
+
+<script>
+const navItems=[['dash','fa-chart-pie'],['monitor','fa-wave-square'],['control','fa-sliders'],['analytics','fa-chart-line'],['weather','fa-cloud'],['notify','fa-bell'],['settings','fa-gear'],['ai','fa-robot']];
+const nav=document.getElementById('nav'); navItems.forEach(([id,ic],i)=>{const b=document.createElement('button');b.className='nav-btn'+(i===0?' active':'');b.innerHTML=`<i class="fa-solid ${ic}"></i>`;b.onclick=()=>switchView(id,b);nav.appendChild(b)});
+function switchView(id,b){document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');}
+particlesJS('particles-js',{particles:{number:{value:70},color:{value:'#41ffe1'},size:{value:2},line_linked:{enable:true,color:'#00d9ff33'},move:{speed:1.2}},interactivity:{events:{onhover:{enable:true,mode:'repulse'}}}});
+const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1000);camera.position.z=16;const renderer=new THREE.WebGLRenderer({alpha:true});renderer.setSize(innerWidth,innerHeight);document.getElementById('three-bg').appendChild(renderer.domElement);
+const geo=new THREE.IcosahedronGeometry(4,1),mat=new THREE.MeshBasicMaterial({color:0x00d9ff,wireframe:true,transparent:true,opacity:.2});const globe=new THREE.Mesh(geo,mat);scene.add(globe);
+const pts=new THREE.Points(new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(Array.from({length:600},()=> (Math.random()-.5)*80),3)),new THREE.PointsMaterial({size:.08,color:0x26f7a2}));scene.add(pts);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+(function animate(){requestAnimationFrame(animate);globe.rotation.y+=.003;pts.rotation.y+=.0008;renderer.render(scene,camera)})();
+setTimeout(()=>{splash.classList.add('hidden');login.classList.remove('hidden')},2800);
+loginBtn.onclick=()=>{if(!email.value||!pass.value)return toast('Please enter credentials');login.classList.add('hidden');app.classList.remove('hidden');gsap.from('.card',{opacity:0,y:30,stagger:.04,duration:.6,ease:'power2.out'})};
+const metricsData={soil:52,tank:50,flow:18,temp:27,humidity:64,pump:0,solar:84,battery:78,wifi:96,health:93,valve:0};
+const metricKeys=[['soil','Soil Moisture','fa-seedling'],['tank','Tank Level','fa-water'],['flow','Water Flow','fa-gauge-high'],['temp','Temperature','fa-temperature-three-quarters'],['humidity','Humidity','fa-droplet'],['pump','Pump Status','fa-fan'],['solar','Solar','fa-solar-panel'],['battery','Battery','fa-battery-three-quarters'],['wifi','Wi-Fi','fa-wifi'],['health','System Health','fa-heart-pulse']];
+metrics.innerHTML=metricKeys.map(([k,t,i])=>`<div class='card glass metric'><div class='metric-wrap'><div><div class='muted'><i class='fa-solid ${i}'></i> ${t}</div><div class='value' id='v_${k}'></div></div><div class='ring' id='r_${k}' style='--p:0'></div></div></div>`).join('');
+const chart=new Chart(sensorChart,{type:'line',data:{labels:[...Array(12)].map((_,i)=>i),datasets:[{label:'Soil %',borderColor:'#26f7a2',data:[],tension:.4},{label:'Tank %',borderColor:'#00d9ff',data:[],tension:.4},{label:'Flow L/m',borderColor:'#ffc857',data:[],tension:.4},{label:'Temp °C',borderColor:'#ff6f91',data:[],tension:.4}]},options:{plugins:{legend:{labels:{color:'#cde'}}},scales:{x:{ticks:{color:'#8eb'}},y:{ticks:{color:'#8eb'}}}}});
+const usage=new Chart(usageChart,{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{label:'Liters',data:[320,290,350,280,410,260,300],backgroundColor:'#00d9ff88',borderColor:'#00d9ff'}]},options:{plugins:{legend:{labels:{color:'#cde'}}},scales:{x:{ticks:{color:'#8eb'}},y:{ticks:{color:'#8eb'}}}}});
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function update(){metricsData.soil=clamp(metricsData.soil+(Math.random()*6-3)-(metricsData.pump?1.8:0),20,85);metricsData.tank=clamp(metricsData.tank+(metricsData.pump?-1.2:Math.random()*1.3),8,99);metricsData.flow=clamp((metricsData.pump?14:2)+Math.random()*8,0,30);metricsData.temp=clamp(metricsData.temp+(Math.random()*1.5-.7),20,39);metricsData.humidity=clamp(metricsData.humidity+(Math.random()*4-2),35,90);metricsData.battery=clamp(metricsData.battery+(metricsData.solar>35?.2:-.3),11,100);metricsData.wifi=clamp(metricsData.wifi+(Math.random()*4-2),70,100);metricsData.health=clamp((metricsData.battery+metricsData.wifi+metricsData.soil)/3,45,100);
+metricKeys.forEach(([k])=>{const v=metricsData[k];const pct=k==='temp'?v*2.2:(k==='flow'?v*3.2:v);document.getElementById('v_'+k).textContent=(k==='pump'?(metricsData.pump?'ON':'OFF'):Math.round(v)+(k==='flow'?' L/m':k==='temp'?'°C':'%'));document.getElementById('r_'+k).style.setProperty('--p',clamp(pct,0,100));});
+water.style.height=metricsData.tank+'%';tankPct.textContent=Math.round(metricsData.tank)+'%';if(metricsData.tank<20)notify('Low tank warning','warn');if(metricsData.battery<25)notify('Low battery detected','warn');
+chart.data.datasets[0].data.push(metricsData.soil);chart.data.datasets[1].data.push(metricsData.tank);chart.data.datasets[2].data.push(metricsData.flow);chart.data.datasets[3].data.push(metricsData.temp);if(chart.data.datasets[0].data.length>12)chart.data.datasets.forEach(d=>d.data.shift());chart.update();
+daily.textContent=Math.round((100-metricsData.tank)*9)+' L';weekly.textContent=Math.round((100-metricsData.tank)*48)+' L';
+wTemp.textContent=Math.round(metricsData.temp)+'°C';wMeta.textContent=`Humidity ${Math.round(metricsData.humidity)}% • Rain ${Math.round(100-metricsData.temp*2)}% • Wind ${Math.round(metricsData.flow)} km/h`;
+}
+function setPump(on){metricsData.pump=on?1:0;pumpStatus.textContent='Pump '+(on?'running':'stopped');toast(pumpStatus.textContent)}
+function setValve(on){metricsData.valve=on?1:0;toast('Valve '+(on?'opened':'closed'))}
+function emergency(){metricsData.pump=0;metricsData.valve=0;notify('Emergency shutdown engaged','danger');pumpStatus.textContent='System in safe mode';}
+function notify(msg,type='info'){if(!notifToggle.checked)return;const el=document.createElement('div');el.className='item';el.innerHTML=`<b>${new Date().toLocaleTimeString()}</b> - ${msg}`;notif.prepend(el);while(notif.children.length>20)notif.lastChild.remove();if(type!=='info')toast(msg)}
+function toast(msg){const t=document.createElement('div');t.className='glass';t.style.cssText='position:fixed;top:16px;right:16px;padding:10px 14px;z-index:12';t.textContent=msg;document.body.appendChild(t);gsap.fromTo(t,{opacity:0,y:-12},{opacity:1,y:0,duration:.3});setTimeout(()=>gsap.to(t,{opacity:0,y:-10,duration:.3,onComplete:()=>t.remove()}),2200)}
+const aiTips=['Rain expected soon. Irrigation paused.','Soil moisture low in Zone A.','Battery operating normally.','Leak probability rising near valve cluster.','Solar harvest optimal for daytime pumping.'];setInterval(()=>{const m=document.createElement('div');m.className='ai-msg';m.textContent=aiTips[Math.floor(Math.random()*aiTips.length)];aiFeed.prepend(m);while(aiFeed.children.length>6)aiFeed.lastChild.remove();},5000);
+setInterval(update,2500);update();setInterval(()=>clock.textContent=new Date().toLocaleString(),1000);
+threshold.oninput=()=>thv.textContent=threshold.value+'%';theme.onchange=()=>document.documentElement.classList.toggle('light',theme.checked);
+</script>
+</body>
+</html>
