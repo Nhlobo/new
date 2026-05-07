@@ -1,3 +1,0 @@
-import React,{useEffect,useState} from 'react';import {LineChart,Line,XAxis,YAxis,Tooltip,ResponsiveContainer} from 'recharts';import {io} from 'socket.io-client';
-export default function App(){const [data,setData]=useState([]);useEffect(()=>{const s=io('http://localhost:4000');s.on('sensor_update',d=>setData(p=>[...p.slice(-20),{t:new Date().toLocaleTimeString(),soil:Math.round(d.soil),tank:Math.round(d.tank)}]));return()=>s.close();},[]);
-return <div style={{padding:24,fontFamily:'Inter'}}><h1>WaterWise Admin Dashboard</h1><ResponsiveContainer width='100%' height={320}><LineChart data={data}><XAxis dataKey='t'/><YAxis/><Tooltip/><Line dataKey='soil' stroke='#2abf88'/><Line dataKey='tank' stroke='#2f8cff'/></LineChart></ResponsiveContainer></div>}
