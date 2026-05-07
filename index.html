@@ -351,17 +351,17 @@
       <article class="card span-2">
         <h2 class="card-title">Alerts & Schedule</h2>
         <p class="card-subtitle">Prioritized events for the next 24 hours.</p>
-        <ul class="list" id="schedule-list">
+        <ul class="list" id="schedule-list" aria-live="polite" aria-busy="true">
           <li><span>Loading schedule...</span><span class="tag ok">Syncing</span></li>
         </ul>
       </article>
     </section>
 
     <nav class="footer-nav" aria-label="Primary navigation">
-      <button class="nav-btn active" type="button" aria-label="Navigate to Home" aria-current="page">🏠<span>Home</span></button>
-      <button class="nav-btn" type="button" aria-label="Navigate to Insights">📊<span>Insights</span></button>
-      <button class="nav-btn" type="button" aria-label="Navigate to Sensors">🛰️<span>Sensors</span></button>
-      <button class="nav-btn" type="button" aria-label="Navigate to Settings">⚙️<span>Settings</span></button>
+      <button class="nav-btn active" type="button" aria-label="Navigate to Home" aria-current="page"><span aria-hidden="true">🏠</span><span>Home</span></button>
+      <button class="nav-btn" type="button" aria-label="Navigate to Insights"><span aria-hidden="true">📊</span><span>Insights</span></button>
+      <button class="nav-btn" type="button" aria-label="Navigate to Sensors"><span aria-hidden="true">🛰️</span><span>Sensors</span></button>
+      <button class="nav-btn" type="button" aria-label="Navigate to Settings"><span aria-hidden="true">⚙️</span><span>Settings</span></button>
     </nav>
   </main>
 
@@ -408,17 +408,21 @@
       const label = document.createElement('span');
       label.textContent = `${item.label} · ${formatRelativeTime(item.minutesFromNow)}`;
       const tag = document.createElement('span');
-      tag.className = `tag ${item.className}`;
+      const tagClass = item.className === 'warn' ? 'warn' : 'ok';
+      tag.className = `tag ${tagClass}`;
       tag.textContent = item.tag;
       li.append(label, tag);
       scheduleListEl.appendChild(li);
     });
+    scheduleListEl.setAttribute('aria-busy', 'false');
 
     const navButtons = document.querySelectorAll('.nav-btn');
     navButtons.forEach((button) => {
       button.addEventListener('click', () => {
-        navButtons.forEach((item) => item.classList.remove('active'));
-        navButtons.forEach((item) => item.removeAttribute('aria-current'));
+        navButtons.forEach((item) => {
+          item.classList.remove('active');
+          item.removeAttribute('aria-current');
+        });
         button.classList.add('active');
         button.setAttribute('aria-current', 'page');
       });
