@@ -1,4 +1,7 @@
 const STORAGE_KEY = 'waterwise-v9-demo-state';
+const TICK_INTERVAL_MS = 3000;
+const TICK_INTERVAL_SECONDS = TICK_INTERVAL_MS / 1000;
+const MAX_HISTORY_POINTS = 7 * 24 * 20;
 const ROUTES = ['dashboard', 'control', 'history', 'faults', 'users', 'weather', 'settings'];
 const routeTitles = {
   dashboard: 'Dashboard',
@@ -71,7 +74,7 @@ const toastWrap = document.getElementById('toastWrap');
 init();
 
 function init() {
-  if (!location.hash || !ROUTES.includes(location.hash.slice(2))) {
+  if (!location.hash || !ROUTES.includes(location.hash.replace(/^#\/?/, ''))) {
     history.replaceState({}, '', '#/dashboard');
   }
   state.route = getRouteFromHash();
@@ -84,7 +87,7 @@ function init() {
   });
 
   if (tickHandle) clearInterval(tickHandle);
-  tickHandle = setInterval(simulateTick, 3000);
+  tickHandle = setInterval(simulateTick, TICK_INTERVAL_MS);
 }
 
 function loadState() {
@@ -100,7 +103,9 @@ function loadState() {
 }
 
 function deepMerge(base, incoming) {
+  const blockedKeys = new Set(['__proto__', 'prototype', 'constructor']);
   Object.keys(incoming || {}).forEach((key) => {
+    if (blockedKeys.has(key)) return;
     if (incoming[key] && typeof incoming[key] === 'object' && !Array.isArray(incoming[key])) {
       base[key] = deepMerge(base[key] || {}, incoming[key]);
     } else {
@@ -116,7 +121,7 @@ function saveState() {
 }
 
 function getRouteFromHash() {
-  const route = location.hash.replace('#/', '');
+  const route = location.hash.replace(/^#\/?/, '');
   return ROUTES.includes(route) ? route : 'dashboard';
 }
 
@@ -649,7 +654,7 @@ function simulateTick() {
     state.tankLevel = clamp(state.tankLevel - 0.8, 0, 100);
   }
 
-  const timeoutTicks = Math.max(1, Math.round((state.settings.flowTimeoutMinutes * 60) / 3));
+  const timeoutTicks = Math.max(1, Math.round((state.settings.flowTimeoutMinutes * 60) / TICK_INTERVAL_SECONDS));
   if (state.pumpOn && state.noFlowTicks >= timeoutTicks) {
     state.noFlowSim = true;
     addFault('no flow detected', 'critical', 'Pump commanded on but flow remains below expected threshold.');
@@ -724,9 +729,8 @@ function pushHistoryPoint() {
     temp: state.temperature,
     battery: state.batteryVoltage
   });
-  const maxPoints = 7 * 24 * 20;
-  if (state.history.length > maxPoints) {
-    state.history.splice(0, state.history.length - maxPoints);
+  if (state.history.length > MAX_HISTORY_POINTS) {
+    state.history.splice(0, state.history.length - MAX_HISTORY_POINTS);
   }
 }
 
