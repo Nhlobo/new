@@ -1,0 +1,13 @@
+import express from 'express';import http from 'http';import cors from 'cors';import {Server} from 'socket.io';
+const app=express();app.use(cors());app.use(express.json());
+let pump=false;let alerts=[];
+app.post('/api/auth/login',(req,res)=>res.json({token:'demo.jwt.token',user:{name:'Demo Farmer'}}));
+app.post('/api/auth/register',(req,res)=>res.status(201).json({message:'registered'}));
+app.get('/api/sensors',(req,res)=>res.json({soil:55,tank:80,flow:pump?15:0,temp:29,pump}));
+app.post('/api/pump',(req,res)=>{pump=!!req.body.enabled;res.json({pump});});
+app.get('/api/notifications',(req,res)=>res.json(alerts));
+app.get('/api/history',(req,res)=>res.json([{day:'Mon',water:1280},{day:'Tue',water:980}]));
+app.get('/api/settings',(req,res)=>res.json({darkMode:true,threshold:38,auto:true}));
+const server=http.createServer(app);const io=new Server(server,{cors:{origin:'*'}});
+io.on('connection',s=>{const i=setInterval(()=>s.emit('sensor_update',{soil:40+Math.random()*30,tank:40+Math.random()*50,temp:24+Math.random()*10,pump}),2000);s.on('disconnect',()=>clearInterval(i));});
+server.listen(4000,()=>console.log('WaterWise backend on :4000'));
