@@ -1,0 +1,13 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/nav_graph" app:startDestination="@id/splash">
+ <fragment android:id="@+id/splash" android:name="com.waterwise.ui.ScreenFragment"><argument android:name="title" app:argType="string" android:defaultValue="Splash"/></fragment>
+ <fragment android:id="@+id/onboarding" android:name="com.waterwise.ui.ScreenFragment"><argument android:name="title" app:argType="string" android:defaultValue="Onboarding"/></fragment>
+ <fragment android:id="@+id/auth" android:name="com.waterwise.ui.ScreenFragment"><argument android:name="title" app:argType="string" android:defaultValue="Login / Register"/></fragment>
+ <fragment android:id="@+id/dashboard" android:name="com.waterwise.ui.ScreenFragment"><argument android:name="title" app:argType="string" android:defaultValue="Main Dashboard"/></fragment>
+ <fragment android:id="@+id/pump" android:name="com.waterwise.ui.ScreenFragment"><argument android:name="title" app:argType="string" android:defaultValue="Pump Control"/></fragment>
+ <fragment android:id="@+id/sensors" android:name="com.waterwise.ui.ScreenFragment"><argument android:name="title" app:argType="string" android:defaultValue="Sensor Monitoring"/></fragment>
+ <fragment android:id="@+id/history" android:name="com.waterwise.ui.ScreenFragment"><argument android:name="title" app:argType="string" android:defaultValue="History & Analytics"/></fragment>
+ <fragment android:id="@+id/notifications" android:name="com.waterwise.ui.ScreenFragment"><argument android:name="title" app:argType="string" android:defaultValue="Notifications"/></fragment>
+ <fragment android:id="@+id/weather" android:name="com.waterwise.ui.ScreenFragment"><argument android:name="title" app:argType="string" android:defaultValue="Weather"/></fragment>
+ <fragment android:id="@+id/settings" android:name="com.waterwise.ui.ScreenFragment"><argument android:name="title" app:argType="string" android:defaultValue="Settings"/></fragment>
+ <fragment android:id="@+id/profile" android:name="com.waterwise.ui.ScreenFragment"><argument android:name="title" app:argType="string" android:defaultValue="Profile"/></fragment>
+</navigation>
