@@ -1,137 +1,357 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Login Account</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Irrigation</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
   <style>
-    /* General page setup */
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #fdfdf0; /* light yellow background */
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:'Poppins',sans-serif;
     }
 
-    /* Container for login form */
-    .login-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
+    body{
+      overflow:hidden;
+      background:#F7F6E8;
     }
 
-    /* Title and subtitle */
-    .login-container h1 {
-      font-size: 24px;
-      margin-bottom: 5px;
-      color: #333;
+    .app{
+      width:100%;
+      height:100vh;
+      position:relative;
     }
 
-    .login-container p {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 20px;
+    /* ================= SPLASH SCREEN ================= */
+
+    .splash-screen{
+      position:absolute;
+      inset:0;
+      background:#F6F4D9;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      overflow:hidden;
+      z-index:20;
+      animation:hideSplash 1s ease forwards;
+      animation-delay:3.2s;
     }
 
-    /* Input fields */
-    .input-field {
-      width: 100%;
-      max-width: 320px;
-      margin-bottom: 15px;
-      position: relative;
-    }
-
-    .input-field label {
-      display: block;
-      font-size: 13px;
-      color: #444;
-      margin-bottom: 5px;
-    }
-
-    .input-field input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-
-    .input-field input:focus {
-      border-color: #4caf50;
-      outline: none;
-    }
-
-    /* Password eye icon */
-    .input-field .toggle-password {
-      position: absolute;
-      right: 10px;
-      top: 36px;
-      cursor: pointer;
-      font-size: 14px;
-      color: #888;
-    }
-
-    /* Sign In button */
-    button.sign-in {
-      width: 100%;
-      max-width: 320px;
-      padding: 12px;
-      background-color: #4caf50;
-      border: none;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    button.sign-in:hover {
-      background-color: #43a047;
-    }
-
-    /* Decorative bottom illustration */
-    .footer-illustration {
-      width: 100%;
-      height: 120px;
-      background: url('nature-illustration.png') no-repeat center bottom;
-      background-size: cover;
-    }
-  </style>
-</head>
-<body>
-  <div class="login-container">
-    <h1>Login Account</h1>
-    <p>Please login with registered account.</p>
-
-    <div class="input-field">
-      <label>Email or Phone Number</label>
-      <input type="text" placeholder="Enter your email">
-    </div>
-
-    <div class="input-field">
-      <label>Password</label>
-      <input type="password" id="password" placeholder="Enter your password">
-      <span class="toggle-password" onclick="togglePassword()">👁</span>
-    </div>
-
-    <button class="sign-in">Sign In</button>
-  </div>
-
-  <div class="footer-illustration"></div>
-
-  <script>
-    function togglePassword() {
-      const passwordInput = document.getElementById('password');
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-      } else {
-        passwordInput.type = 'password';
+    @keyframes hideSplash{
+      to{
+        opacity:0;
+        visibility:hidden;
       }
     }
-  </script>
+
+    .splash-content{
+      width:100%;
+      padding:0 35px;
+      position:absolute;
+      top:42%;
+      transform:translateY(-50%);
+    }
+
+    .title{
+      font-size:58px;
+      font-weight:800;
+      color:#20743D;
+      line-height:1.1;
+      margin-bottom:14px;
+      letter-spacing:-2px;
+    }
+
+    .subtitle{
+      color:#7E7E7E;
+      font-size:17px;
+      font-weight:400;
+      line-height:1.6;
+    }
+
+    .greenhouse-wrap{
+      position:absolute;
+      bottom:0;
+      width:100%;
+      display:flex;
+      justify-content:center;
+      align-items:flex-end;
+    }
+
+    .greenhouse{
+      width:100%;
+      max-width:550px;
+      object-fit:cover;
+      transform:translateY(4px);
+    }
+
+    /* ================= LOGIN SCREEN ================= */
+
+    .login-screen{
+      position:absolute;
+      inset:0;
+      background:#FFFFFF;
+      padding:60px 42px 0;
+      opacity:0;
+      pointer-events:none;
+      transition:1s ease;
+      overflow:hidden;
+    }
+
+    .login-screen.active{
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .login-title{
+      margin-top:55px;
+      color:#13152D;
+      font-size:54px;
+      font-weight:800;
+      line-height:1.1;
+      letter-spacing:-2px;
+    }
+
+    .login-subtitle{
+      margin-top:14px;
+      color:#8A8A8A;
+      font-size:20px;
+      font-weight:400;
+    }
+
+    .form-group{
+      margin-top:55px;
+    }
+
+    .label{
+      font-size:22px;
+      font-weight:700;
+      color:#111329;
+      margin-bottom:20px;
+    }
+
+    .input-box{
+      width:100%;
+      height:100px;
+      border-radius:24px;
+      border:2px solid #E8ECE8;
+      background:#F8FAF8;
+      display:flex;
+      align-items:center;
+      padding:0 24px;
+      position:relative;
+    }
+
+    .input-box i{
+      color:#7D7D7D;
+      font-size:34px;
+      width:50px;
+    }
+
+    .input-box input{
+      border:none;
+      background:transparent;
+      outline:none;
+      width:100%;
+      font-size:20px;
+      color:#222;
+      padding-left:14px;
+      font-weight:500;
+    }
+
+    .input-box input::placeholder{
+      color:#808080;
+      font-weight:400;
+    }
+
+    .eye{
+      position:absolute;
+      right:24px;
+      font-size:32px !important;
+      cursor:pointer;
+    }
+
+    .signin-btn{
+      width:100%;
+      height:92px;
+      border:none;
+      margin-top:95px;
+      border-radius:30px;
+      background:#2A7A3E;
+      color:white;
+      font-size:24px;
+      font-weight:500;
+      cursor:pointer;
+      transition:0.3s;
+      box-shadow:0 10px 25px rgba(42,122,62,0.18);
+    }
+
+    .signin-btn:active{
+      transform:scale(0.98);
+    }
+
+    /* Bottom Illustration */
+
+    .bottom-bg{
+      position:absolute;
+      bottom:-5px;
+      left:0;
+      width:100%;
+      z-index:0;
+    }
+
+    .bottom-bg img{
+      width:100%;
+      display:block;
+      object-fit:cover;
+    }
+
+    /* Responsive */
+
+    @media(max-width:480px){
+
+      .title{
+        font-size:42px;
+      }
+
+      .login-title{
+        font-size:42px;
+      }
+
+      .subtitle,
+      .login-subtitle{
+        font-size:16px;
+      }
+
+      .input-box{
+        height:82px;
+      }
+
+      .signin-btn{
+        height:80px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- SPLASH SCREEN -->
+
+  <section class="splash-screen" id="splash">
+
+    <div class="splash-content">
+      <h1 class="title">Smart Irrigation</h1>
+
+      <p class="subtitle">
+        Real time status of all your Irrigation Device
+      </p>
+    </div>
+
+    <div class="greenhouse-wrap">
+      <img 
+        class="greenhouse"
+        src="https://i.imgur.com/0o7Ww0A.png"
+        alt="greenhouse"
+      >
+    </div>
+
+  </section>
+
+  <!-- LOGIN SCREEN -->
+
+  <section class="login-screen" id="login">
+
+    <h1 class="login-title">Login Account</h1>
+
+    <p class="login-subtitle">
+      Please login with registered account
+    </p>
+
+    <!-- Email -->
+
+    <div class="form-group">
+
+      <div class="label">Email or Phone Number</div>
+
+      <div class="input-box">
+        <i class="fa-regular fa-envelope"></i>
+
+        <input type="text" placeholder="Enter your email">
+      </div>
+
+    </div>
+
+    <!-- Password -->
+
+    <div class="form-group">
+
+      <div class="label">Password</div>
+
+      <div class="input-box">
+
+        <i class="fa-solid fa-lock"></i>
+
+        <input type="password" id="password" placeholder="Enter your password">
+
+        <i class="fa-regular fa-eye eye" id="toggle"></i>
+
+      </div>
+
+    </div>
+
+    <button class="signin-btn">
+      Sign In
+    </button>
+
+    <div class="bottom-bg">
+      <img src="https://i.imgur.com/0o7Ww0A.png" alt="nature">
+    </div>
+
+  </section>
+
+</div>
+
+<script>
+
+  // SPLASH TO LOGIN TRANSITION
+
+  setTimeout(() => {
+    document.getElementById("login").classList.add("active");
+  }, 3200);
+
+
+  // PASSWORD SHOW / HIDE
+
+  const toggle = document.getElementById("toggle");
+  const password = document.getElementById("password");
+
+  toggle.addEventListener("click", () => {
+
+    if(password.type === "password"){
+      password.type = "text";
+      toggle.classList.remove("fa-eye");
+      toggle.classList.add("fa-eye-slash");
+    }else{
+      password.type = "password";
+      toggle.classList.remove("fa-eye-slash");
+      toggle.classList.add("fa-eye");
+    }
+
+  });
+
+</script>
+
 </body>
 </html>
