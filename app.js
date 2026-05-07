@@ -44,9 +44,9 @@ const defaultState = {
   },
   faults: [],
   users: [
-    { id: crypto.randomUUID(), name: 'Nomsa Dlamini', role: 'owner' },
-    { id: crypto.randomUUID(), name: 'Sipho Mokoena', role: 'worker' },
-    { id: crypto.randomUUID(), name: 'Lerato Naidoo', role: 'admin' }
+    { id: 'demo-owner-1', name: 'Nomsa Dlamini', role: 'owner' },
+    { id: 'demo-worker-1', name: 'Sipho Mokoena', role: 'worker' },
+    { id: 'demo-admin-1', name: 'Lerato Naidoo', role: 'admin' }
   ],
   weather: {
     current: 'Sunny',
@@ -914,7 +914,7 @@ function createForecast() {
     const condition = rain >= 65 ? 'Light Rain' : rain >= 35 ? 'Cloudy' : 'Sunny';
     const low = Math.round(randomBetween(15, 20));
     const high = Math.round(randomBetween(low + 4, low + 12));
-    return { day: label, condition, rain, low, high: high + i };
+    return { day: label, condition, rain, low, high };
   });
 }
 
