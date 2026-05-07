@@ -1,4 +1,5 @@
 :root {
+  --banner-height: 44px;
   --bg: #0b1221;
   --panel: #111a2d;
   --panel-soft: #17243e;
@@ -29,7 +30,7 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.app-shell { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 44px); }
+.app-shell { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - var(--banner-height)); }
 .sidebar {
   border-right: 1px solid var(--line);
   padding: 1rem;

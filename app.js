@@ -1,11 +1,13 @@
 const STORAGE_KEY = 'waterwise-v9-demo-state';
 const TICK_INTERVAL_MS = 3000;
 const TICK_INTERVAL_SECONDS = TICK_INTERVAL_MS / 1000;
-const HISTORY_HOURS_RETAINED = 7 * 24;
+const HISTORY_RETENTION_HOURS = 7 * 24;
 const HISTORY_POINTS_PER_HOUR = 20;
-const MAX_HISTORY_POINTS = HISTORY_HOURS_RETAINED * HISTORY_POINTS_PER_HOUR;
+const MAX_HISTORY_POINTS = HISTORY_RETENTION_HOURS * HISTORY_POINTS_PER_HOUR;
 const SENSOR_ERROR_PROBABILITY = 0.015;
 const TEMPERATURE_CHANGE_PROBABILITY = 0.05;
+const SECONDS_PER_MINUTE = 60;
+const HISTORY_SEED_INTERVAL_MS = 15 * SECONDS_PER_MINUTE * 1000;
 const ROUTES = ['dashboard', 'control', 'history', 'faults', 'users', 'weather', 'settings'];
 const routeTitles = {
   dashboard: 'Dashboard',
@@ -745,7 +747,7 @@ function simulateTick() {
     state.tankLevel = clamp(state.tankLevel - 0.8, 0, 100);
   }
 
-  const timeoutTicks = Math.max(1, Math.round((state.settings.flowTimeoutMinutes * 60) / TICK_INTERVAL_SECONDS));
+  const timeoutTicks = Math.max(1, Math.round((state.settings.flowTimeoutMinutes * SECONDS_PER_MINUTE) / TICK_INTERVAL_SECONDS));
   if (state.pumpOn && state.noFlowTicks >= timeoutTicks) {
     state.noFlowSim = true;
     addFault('no flow detected', 'critical', 'Pump commanded on but flow remains below expected threshold.');
@@ -800,8 +802,9 @@ function ensureHistorySeed() {
   if (state.history.length > 0) return;
   const now = Date.now();
   for (let i = 40; i >= 1; i -= 1) {
+    // Seed previous points at 15-minute intervals for realistic starting history.
     state.history.push({
-      ts: now - i * 15 * 60 * 1000,
+      ts: now - i * HISTORY_SEED_INTERVAL_MS,
       soil: clamp(state.soilMoisture + randomBetween(-4.5, 3.2), 0, 100),
       tank: clamp(state.tankLevel + randomBetween(-7, 5), 0, 100),
       flow: clamp(state.flowRate + randomBetween(0, 6), 0, 14),
