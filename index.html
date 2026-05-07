@@ -1,1 +1,2353 @@
-work
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <title>WaterWise – Smart Farming</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'><path fill='%2307f195' d='M12 2c5.523 0 10 6.477 10 12-1.333-3.644-5-8-10-8S3.334 8.357 2 12C2 7.477 6.477 2 12 2Z'/></svg>">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* === GLOBAL RESETS === */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      width: 100vw;
+      height: 100vh;
+      font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+      background: var(--background);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      overscroll-behavior-y: contain;
+      scroll-behavior: smooth;
+    }
+    :root {
+      /* Colors */
+      --green: #07F195;
+      --green-dark: #119873;
+      --blue: #1BF2FB;
+      --deep-blue: #232D3A;
+      --gray-dark: #181D23;
+      --gray: #2B323B;
+      --gray-light: #30363d;
+      --white: #fff;
+      --error: #ff4955;
+      --warning: #f5b600;
+      --success: #18e58a;
+      --glass: rgba(30,36,50,0.7);
+
+      /* Backgrounds */
+      --gradient: linear-gradient(130deg,#12243F 50%,#1BF2FB 100%);
+      --gradient-light: linear-gradient(130deg,#33efa9 0%,#1BF2FB 100%);
+
+      /* App */
+      --background: #181d23;
+      --card-bg: rgba(32,40,50,0.7);
+      --glass-bg: rgba(26, 31, 45, 0.92);
+      --nav-bg: #21262B99;
+      --shadow: 0 2px 20px 0 rgba(11,74,75,0.10);
+      --surface: rgba(255,255,255,0.03);
+
+      --text: #fff;
+      --subtext: #b4d1e2;
+      --overlay-blur: 28px;
+
+      /* Animations */
+      --speed-fast: 250ms;
+      --speed: 600ms;
+    }
+    body.light {
+      --background: #F7FBFD;
+      --card-bg: rgba(255,255,255,0.82);
+      --glass-bg: rgba(245, 255, 251, 0.95);
+      --nav-bg: #eefaffcc;
+      --text: #121b18;
+      --subtext: #51677e;
+      --surface: rgba(0,40,147,0.05);
+      --gradient: linear-gradient(130deg,#D0FFE9 0%,#DFF6FF 100%);
+    }
+
+    /* === GLASSMORPHISM CARD === */
+    .glass-card {
+      background: var(--card-bg);
+      box-shadow: var(--shadow);
+      border-radius: 20px;
+      backdrop-filter: blur(var(--overlay-blur));
+      -webkit-backdrop-filter: blur(var(--overlay-blur));
+      padding: 1.3rem 1.1rem;
+      margin: .5rem 0;
+      border: 1px solid rgba(255,255,255,0.09);
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.3s cubic-bezier(.38,.76,.58,1.52);
+    }
+    .glass-card:hover {
+      box-shadow: 0 4px 28px 0 rgba(11,74,75,0.16);
+    }
+
+    /* === APP WRAPPER === */
+    #app {
+      min-height: 100vh;
+      width: 100vw;
+      background: var(--gradient);
+      position: relative;
+      z-index: 0;
+      user-select: none;
+    }
+
+    /* === SPLASH SCREEN === */
+    #splash {
+      position: fixed;
+      z-index: 99999;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(130deg, #36f7a6 30%, #1a468a 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      animation: splashIn 1.3s cubic-bezier(.68,-0.55,.27,1.55);
+    }
+    @keyframes splashIn {
+      0% { opacity: 0; transform: scale(0.98);}
+      100%{opacity: 1; transform: scale(1);}
+    }
+    #splash-logo {
+      margin-bottom: 1.9em;
+      animation: splashBounce 2.1s infinite alternate cubic-bezier(.82,-0.53,.19,1.72);
+    }
+    @keyframes splashBounce {
+      0% { transform: translateY(0);}
+      80% { transform: translateY(-9px);}
+      100%{ transform: translateY(1px);}
+    }
+    #splash-logo svg {
+      width: 100px; height: 100px;
+      filter: drop-shadow(0 2px 38px #58fcd6b3)
+              drop-shadow(0 0px 14px #1bf2fb4d);
+    }
+    #splash-loader {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1em;
+      font-size: 1.22em;
+    }
+    .water-dot {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 30%;
+      margin-right: 7px;
+      background: var(--green);
+      animation: dotIn .7s infinite alternate;
+    }
+    .water-dot:nth-child(2){ animation-delay: 0.25s;}
+    .water-dot:nth-child(3){ animation-delay: 0.5s;}
+    @keyframes dotIn {
+      from{transform: scale(1);}
+      to{transform: scale(1.7); background: var(--blue);}
+    }
+    .splash-seq {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: .87em;
+      color: #f4fff9;
+      opacity: .87;
+      letter-spacing: 0.04em;
+      margin-top: .6em;
+      white-space: pre;
+      text-align: left;
+      line-height: 1.3;
+      width: 220px;
+      padding-left: 12px;
+      animation: typeIn 1.8s steps(40);
+    }
+    @keyframes typeIn {
+      from { width: 0 }
+      to { width: 220px }
+    }
+
+    /* === WELCOME/ONBOARDING === */
+    #onboarding {
+      display: none;
+      position: fixed;
+      z-index: 40;
+      width: 100vw; height: 100vh;
+      top: 0; left: 0;
+      background: var(--background);
+      animation: fadein-onboard .7s;
+      justify-content: center;
+      align-items: center;
+    }
+    @keyframes fadein-onboard {
+      from { opacity: 0; }
+      to { opacity: 1;}
+    }
+    .onboard-wrap {
+      width: 94vw;
+      max-width: 420px;
+      background: var(--glass-bg);
+      border-radius: 23px;
+      box-shadow: var(--shadow);
+      padding: 1.7em 1.4em 1.3em 1.4em;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: start;
+      animation: fadein-onboard 0.62s;
+    }
+    .onboard-slides {
+      width: 100%;
+      min-height: 240px;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+      position: relative;
+    }
+    .slide {
+      min-width: 100%;
+      transition: transform var(--speed-fast) cubic-bezier(.68,-0.55,.27,1.55);
+      will-change: transform;
+      opacity: 0.99;
+      padding-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .slide.active {
+      transform: translateX(0%);
+      opacity: 1;
+    }
+    .slide.inactive {
+      transform: translateX(120%);
+      opacity: 0.12;
+    }
+    .onboard-img {
+      width: 68px; height: 68px;
+      border-radius: 20px;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.7em;
+      box-shadow: 0 4px 24px #0cebeb3e;
+    }
+    .onboard-img svg {
+      width: 44px; height: 44px;
+    }
+    .onboard-title {
+      font-weight: 700;
+      font-size: 1.11em;
+      margin-bottom: .5em;
+      color: var(--text);
+      text-align: center;
+    }
+    .onboard-desc {
+      font-weight: 400;
+      line-height: 1.45;
+      font-size: .99em;
+      color: var(--subtext);
+      margin-bottom: .6em;
+      text-align: center;
+    }
+    .onboard-controls {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 7px;
+    }
+    .onboard-progress {
+      display: flex; gap: 4px;
+      margin-inline: 6px;
+    }
+    .onboard-progress-dot {
+      width: 11px; height: 11px;
+      border-radius: 99px;
+      background: var(--green-dark);
+      opacity: 0.21;
+      transition: opacity .35s;
+    }
+    .onboard-progress-dot.active {
+      opacity: 1;
+      background: var(--green);
+      box-shadow: 0 0 0 3px #25e1b055;
+    }
+    .onboard-btn {
+      background: var(--gradient);
+      color: #fff;
+      font-weight: 600;
+      padding: 0.67em 2.1em;
+      border-radius: 15px;
+      font-size: 1em;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      box-shadow: 0 2px 18px #36f7a644;
+      transition: transform 0.17s;
+      margin-left:10px;
+      user-select: none;
+    }
+    .onboard-btn:active {
+      transform: scale(0.97);
+    }
+    .onboard-skip {
+      background: none;
+      border: none;
+      color: var(--blue);
+      font-weight: 400;
+      font-size: 1em;
+      opacity: .9;
+      margin-right: 18px;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    /* === LOGIN SCREEN === */
+    #login {
+      display: none;
+      position: fixed;
+      z-index: 20;
+      width: 100vw; height: 100vh;
+      top: 0; left: 0;
+      background: var(--background);
+      padding-top: 13vh;
+      animation: fadein-login .5s;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    @keyframes fadein-login {
+      from{opacity:0;}
+      to{opacity:1;}
+    }
+    .login-wrap {
+      width: 93vw;
+      max-width: 378px;
+      margin: auto;
+      background: var(--glass-bg);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 2.3em 1.4em 2.2em 1.4em;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: fadein-login 0.77s;
+    }
+    .login-logo {
+      background: var(--gradient-light);
+      padding: 15px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 1em;
+      box-shadow: 0 2px 18px #1bf2fb44;
+    }
+    .login-logo svg { width: 39px; height: 39px;}
+    .login-title {
+      font-weight: 700;
+      font-size: 1.24em;
+      letter-spacing: 0.04em;
+      margin-bottom: .33em;
+      color: var(--text);
+    }
+    .login-form {
+      width: 100%;
+    }
+    .login-field {
+      width: 100%;
+      margin-bottom: 1.15em;
+      position: relative;
+    }
+    .login-field label {
+      font-size: 1em;
+      font-weight: 500;
+      color: var(--subtext);
+      margin-bottom: 0.14em;
+      display: block;
+      padding-left: 2px;
+    }
+    .login-input {
+      width: 100%;
+      padding: .83em 3.1em .83em .94em;
+      border-radius: 14px;
+      border: none;
+      outline: none;
+      background: var(--surface);
+      font-size: 1em;
+      color: var(--text);
+      margin-top: 2px;
+      font-weight: 400;
+      transition: background 0.17s;
+    }
+    .login-input:focus {
+      background: rgba(2,210,143,0.07);
+      border: 1px solid var(--green);
+    }
+    .show-hide {
+      position: absolute;
+      right: 9px;
+      top: 39px;
+      font-size: 1.11em;
+      color: var(--subtext);
+      opacity: .73;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 1;
+      padding: 0;
+      outline: none;
+      transition: color .2s;
+    }
+    .show-hide:active { color:var(--green);}
+    .login-fp {
+      position: absolute;
+      left: 2px;
+      top: 41px;
+      font-size: 1.27em;
+      color: var(--blue);
+      opacity: .68;
+      background: none;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      user-select: none;
+    }
+    .login-btn {
+      width: 100%;
+      background: var(--gradient);
+      color: #fff;
+      font-weight: 600;
+      padding: 0.87em 0;
+      border-radius: 12px;
+      font-size: 1.06em;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      box-shadow: 0 2px 18px #1bf2fb2a;
+      margin-top: 1.1em;
+      transition: transform 0.13s;
+    }
+    .login-btn:active { 
+      transform: scale(.98);
+      filter: brightness(1.11);
+    }
+
+    /* === MOBILE/MAIN UI === */
+    .app-screen {
+      display: none;
+    }
+    .app-screen.active {
+      display: block;
+    }
+    /* === HEADER/BAR === */
+    #header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--nav-bg);
+      padding: 0.68em 1.13em 0.2em 1.2em;
+      position: sticky;
+      top: 0;
+      z-index: 12;
+      min-height:54px;
+      box-shadow: 0 2px 8px #36f7a623;
+      border-bottom: 1px solid rgba(44,66,95,0.075);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    .hdr-left {
+      display: flex;
+      align-items: center;
+    }
+    .hdr-logo svg {
+      width: 29px; height: 29px;
+    }
+    .hdr-title {
+      font-weight: 700;
+      font-size: 1.18em;
+      color: var(--text);
+      margin-left: 11px;
+      letter-spacing: .01em;
+      filter: drop-shadow(0 2px 7px #25ffc32e);
+    }
+    .hdr-actions {
+      display: flex;
+      gap:11px;
+      align-items: center;
+    }
+    .hdr-btn {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--blue);
+      font-size: 1.19em;
+      cursor:pointer;
+      margin-right: 1px;
+      padding: 4px 7px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 99px;
+      transition: background .16s;
+      position: relative;
+    }
+    .hdr-btn:active {
+      background: var(--surface);
+    }
+    .hdr-profile {
+      width: 32px;height:32px;
+      border-radius: 80px;
+      background: var(--surface);
+      overflow: hidden;
+      border:2px solid var(--green);
+      box-shadow: 0 3px 9px #36f7a629;
+      margin-left: 3px;
+      cursor:pointer;
+      transition: filter .17s;
+      filter: brightness(1);
+    }
+    .hdr-profile:hover { filter: brightness(1.18);}
+    .hdr-profile img {
+      width:100%;height:100%;
+      object-fit:cover;
+    }
+
+    /* === FLOATING PARTICLES === */
+    #fx-particles {
+      position:fixed;
+      pointer-events:none;
+      z-index:0;
+      left:0;top:0;width:100vw;height:100vh;
+      overflow:visible;
+    }
+    .fx-p {
+      position:absolute;
+      width:9px;height:9px;
+      border-radius:99px;
+      background:linear-gradient(140deg,#25ffc3 40%,#1bf2fb 80%);
+      opacity:.23;
+      filter: blur(0.7px);
+      animation: float-particle 5s linear infinite alternate;
+    }
+    .fx-p:nth-child(even){background:linear-gradient(140deg,#36f7a6 40%,#66b3ff 100%);}
+    @keyframes float-particle {
+      from{transform:translateY(0) scale(1);}
+      to{transform:translateY(-34px) scale(0.8);}
+    }
+
+    /* === MAIN/DASHBOARD === */
+    #dashboard {
+      padding: 1.1em 5px 3.8em 5px;
+      position: relative;
+      min-height: 85vh;
+      max-width: 640px;
+      margin: auto;
+      transition: background .4s;
+    }
+    .dash-grid {
+      display: grid;
+      grid-template-columns: repeat(2,1fr);
+      gap: 13px;
+      margin-top: 7px;
+      margin-bottom: 15px;
+    }
+    .dash-card {
+      background: var(--glass-bg);
+      border-radius: 17px;
+      box-shadow: 0 2px 12px #1bf2fb17;
+      margin: 0;
+      padding: 18px 11px 13px 11px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      transition:box-shadow .27s;
+    }
+    .dash-card .dash-stat {
+      font-size: 1.4em;
+      font-weight: 700;
+      color:var(--green);
+      text-shadow: 0 1px 27px #12fad9bb;
+      margin-bottom: 6px;
+    }
+    .dash-label {
+      font-size: .97em;
+      color: var(--subtext);
+      font-weight: 400;
+      letter-spacing: .04em;
+    }
+    /* Animated circular gauge */
+    .circle-bar { width:60px;height:60px; margin-bottom:.92em;}
+    .circle-svg {
+      transform: rotate(-90deg);
+    }
+    .circle-bg {
+      stroke: #244c5e44;
+      stroke-width:10;
+    }
+    .circle-fg {
+      stroke: var(--blue);
+      stroke-width: 10;
+      stroke-linecap: round;
+      filter: drop-shadow(0 1px 7px #07f195bb);
+      transition: stroke-dasharray .9s cubic-bezier(.6,-0.55,.21,1.9);
+    }
+    /* ==== STATUS INDICATORS ==== */
+    .stat-dot {
+      width: 13px; height: 13px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 7px;
+      margin-bottom:-1.2px;
+      transition: background .33s;
+    }
+    .stat-dot.green {background:var(--green);}
+    .stat-dot.red {background:var(--error);}
+    .stat-dot.yellow {background:var(--warning);}
+    .stat-dot.blue {background:var(--blue);}
+    /* ==== PROGRESS BAR ==== */
+    .stat-bar {
+      width:94px;height:10px;
+      background:var(--surface);
+      border-radius:8px;
+      margin-bottom:9px;
+      position:relative;
+    }
+    .stat-bar-inner {
+      height: 100%;
+      border-radius: 8px;
+      background: linear-gradient(90deg,var(--green),var(--blue) 90%);
+      transition: width 0.7s cubic-bezier(.61,.2,.45,1.63);
+    }
+    /* = QUICK ACTIONS = */
+    .quick-btns {
+      display: flex;
+      gap: 16px;
+      margin:13px 0 8px 0;
+      width: 100%;
+      justify-content: space-around;
+    }
+    .quick-btn {
+      flex: 1;
+      color: #fff;
+      background: var(--gradient-light);
+      border: none;
+      border-radius: 15px;
+      margin: 0 7px;
+      padding: 0.97em;
+      box-shadow: 0 3px 16px #36f7a632;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.97em;
+      position: relative;
+      overflow: hidden;
+      transition: filter .2s;
+      user-select: none;
+    }
+    .quick-btn:active {
+      filter: brightness(1.2);
+    }
+    .emergency-btn {
+      background: linear-gradient(137deg,#ff4955 30%,#fae100 120%);
+      color: #232D3A;
+      font-weight:800;
+      font-size:1.07em;
+      border: none;
+      padding: 0.97em 1.4em;
+      border-radius: 19px;
+      margin-top:0.4em;
+      box-shadow:0 5px 20px #ff49533b;
+      animation: vib 1.7s infinite alternate;
+    }
+    @keyframes vib {
+      from { box-shadow:0 3px 6px #ff495385;}
+      to { box-shadow:0 7px 18px #ff4953bb;}
+    }
+    .fab-action {
+      position: fixed;
+      right: 25px; bottom: 93px;
+      z-index: 19;
+      width: 56px; height: 56px;
+      border-radius: 99px;
+      background: var(--gradient-light);
+      box-shadow: 0 6px 20px #25ffc329;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.3em;
+      cursor: pointer;
+      border: none;
+      outline: none;
+      user-select: none;
+      transition: opacity .13s;
+      animation: fabpop .48s;
+    }
+    @keyframes fabpop {
+      from{opacity:0;}
+      to{opacity:1;}
+    }
+    .fab-action:active {
+      background: linear-gradient(130deg,#3bd6db,#2ec783 130%);
+      filter: brightness(1.18);
+    }
+
+    /* === PUMP / CONTROL SCREENS === */
+    #pump, #irrigation, #sensors, #weather,
+    #notifications, #history, #health,
+    #settings, #profile, #simulation {
+      padding:1.1em 11px 4.1em 11px;
+      max-width: 600px;
+      margin: auto;
+      position: relative;
+      min-height: 81vh;
+    }
+    .screen-title {
+      font-weight: 700;
+      font-size: 1.17em;
+      letter-spacing: 0.03em;
+      color: var(--text);
+      padding-bottom: 7px;
+    }
+    /* Animated Pump motor */
+    .pump-motor {
+      width:92px;height:92px;
+      border-radius:52px;
+      margin:15px auto 2px;
+      background:linear-gradient(130deg,var(--green),#1BF2FB 74%);
+      display: flex;align-items: center;justify-content: center;
+      box-shadow:0 8px 36px #1bf2fb2e,0 0 17px #36f7a633;
+      position:relative;
+      animation: pulse-motor 1.7s infinite alternate;
+    }
+    @keyframes pulse-motor {
+      from{box-shadow: 0 8px 36px #1bf2fb2e, 0 0 17px #36f7a600;}
+      to{box-shadow: 0 12px 60px #36f7a688, 0 0 25px #36f7a669;}
+    }
+    .motor-blade {
+      width: 38px;
+      height: 7px;
+      background: #fff;
+      border-radius: 8px;
+      position: absolute;
+      left: 27%;
+      top: 49%;
+      animation: motor-spin 0.9s linear infinite;
+      box-shadow: 0 1px 9px #07f19560;
+      opacity: .92;
+      transform-origin: right center;
+    }
+    @keyframes motor-spin {
+      0% {transform: rotate(0);}
+      100% {transform: rotate(360deg);}
+    }
+    .motor-blade:nth-child(2){
+      left:46%; top:17%;width:7px;height:38px;
+      border-radius:8px;
+    }
+    .motor-blade:nth-child(3){
+      left:16%;top:23%;width:25px;height:5px;
+      transform:rotate(39deg);
+    }
+    .motor-center {
+      width: 29px;height: 29px;border-radius: 99px;
+      background: #12243F;box-shadow: 0 0 12px #36f7a68d;
+      position: absolute;
+      left:31px;top:32px;
+    }
+    .pump-anim-water {
+      width:85px;height:8px;
+      background: linear-gradient(98deg,#1bf2fb,#33efa9 86%);
+      border-radius: 11px;
+      margin: 11px auto 8px auto;
+      box-shadow: 0 6px 14px #1bf2fb1f;
+      position:relative;
+      animation: waterflow 0.7s linear infinite;
+      opacity: .79;
+    }
+    @keyframes waterflow {
+      0%{left:0;}
+      100%{left:14px;}
+    }
+    .control-btns {
+      display:flex;
+      gap:17px;
+      margin:24px 0 12px 0;
+      flex-wrap: wrap;
+    }
+    .control-btn {
+      flex:1;
+      min-width:110px;
+      border-radius:14px;
+      background:var(--gradient-light);
+      color:#fff;
+      padding:1em .7em;
+      border:none;
+      font-weight:600;
+      font-size:1em;
+      box-shadow:0 2px 10px #36f7a644;
+      cursor:pointer;
+      transition:filter .2s;
+    }
+    .control-btn:active {filter:brightness(1.2);}
+    .runtime-counter {
+      color: var(--green-dark);
+      font-weight: 500;
+      margin-top: 10px;
+      margin-bottom:12px;
+      font-size:1.13em;
+    }
+    .safety-warning {
+      padding: 13px 11px;
+      border-radius: 14px;
+      background: #fffbf6;
+      color: #d33636;
+      font-size: 1em;
+      font-weight: 600;
+      border: 2px solid #ffa14f88;
+      margin-top: 9px;
+      box-shadow: 0 1px 10px #ff495322;
+      text-align: center;
+      animation: vib 1.2s infinite alternate;
+    }
+    /* === GAUGE/CHARTS === */
+    .gauge {
+      width: 83px;
+      height: 83px;
+      position: relative;
+      margin: 8px auto;
+    }
+    .gauge-ring {
+      width:100%;height:100%;
+      position:absolute;top:0;left:0;
+    }
+    .gauge-bar {
+      stroke-width: 12;
+      fill: none;
+      filter: drop-shadow(0 2px 16px #1BF2FB5f);
+    }
+    .gauge-bar-bg {
+      stroke: #1a468a3c;
+    }
+    .gauge-label {
+      position: absolute;
+      width: 100%;
+      top: 42%;
+      text-align: center;
+      font-weight: 700;
+      color: var(--green);
+      font-size:1.19em;
+      text-shadow:0 2px 6px #1bf2fb3a;
+    }
+
+    /* === SENSOR SIMULATION === */
+    .sim-section {
+      margin-bottom:21px;
+    }
+    .sensor-grid {
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:17px;
+    }
+    .sensor-card {
+      background:var(--glass-bg);
+      border-radius:15px;
+      box-shadow:0 2px 9px #33efa931;
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      position:relative;
+    }
+    .sensor-label {
+      font-size:.97em;
+      color:var(--subtext);
+    }
+
+    /* === WEATHER === */
+    .weather-now {
+      display: flex; align-items: center;justify-content: space-between;
+      margin-bottom:19px;
+    }
+    .weather-num {
+      font-size:2.56em;
+      font-weight:700;
+      color:var(--blue);
+      text-shadow:0 2px 25px #1bf2fb3d;
+    }
+    .weather-cond {
+      font-size:1.13em;
+      font-weight:600;
+      color:var(--text);
+      margin-bottom:7px;
+    }
+    .weather-anim {
+      min-width: 78px; min-height: 78px;
+      margin-top:4px;
+      display: flex;align-items: center;justify-content:center;
+      position: relative;
+    }
+    /* Day/night, clouds, rain etc. see later JS */
+    .forecast-cards {
+      display: flex; gap:13px;margin-top:17px;
+      overflow-x:auto;
+      scrollbar-width: none;
+    }
+    .forecast-card {
+      min-width:77px;
+      background:var(--card-bg);
+      padding:8px;
+      border-radius:14px;
+      text-align:center;
+      color:var(--text);
+      box-shadow:0px 2px 7px #33efa931;
+    }
+    .fc-day {
+      font-size:.99em; color:var(--text);font-weight:600;
+    }
+    .fc-icon {
+      font-size:1.8em; margin:6px 0 0 0;
+    }
+    .fc-temp {
+      font-size:1.04em;color:var(--blue);font-weight:600;
+    }
+
+    /* === NOTIFICATIONS === */
+    .notif-list {
+      margin-top:10px;
+    }
+    .notif-item {
+      background:var(--card-bg);
+      border-radius:13px;
+      padding:11px 13px;
+      margin-bottom:9px;
+      box-shadow:0 1px 4px #25ffc319;
+      display: flex;
+      align-items: flex-start;
+      gap:11px;
+      font-size:.95em;
+      position: relative;
+      transition:box-shadow .24s;
+    }
+    .notif-dot {
+      width:15px;height:15px;border-radius:99px;
+      margin-right:8px;margin-top:2px;
+    }
+    .notif-dot.green {background:var(--green);}
+    .notif-dot.red {background:var(--error);}
+    .notif-dot.yellow {background:var(--warning);}
+    .notif-dot.blue {background:var(--blue);}
+    .notif-time {
+      color:var(--subtext);font-size:.87em;
+      margin-left:auto;margin-top:2px;
+    }
+    .notif-badge {
+      display:inline-block;
+      text-align:center;
+      min-width:20px;
+      background:var(--blue);
+      color:#fff;
+      border-radius:9px;
+      font-size:.81em;
+      font-weight: 600;
+      margin-left:5px;
+      padding:0 6px;
+      opacity:.93;
+    }
+    .toast {
+      position: fixed;
+      bottom:88px;
+      left:50%;
+      transform:translateX(-50%);
+      background:var(--card-bg);
+      color:var(--text);
+      padding:13px 24px;
+      border-radius:16px;
+      box-shadow:0 2px 18px #1bf2fb29;
+      font-weight:600;
+      font-size:1.07em;
+      z-index:99;
+      opacity:0;
+      pointer-events: none;
+      transition:opacity .4s;
+    }
+    .toast.show {opacity:1; pointer-events:all;}
+
+    /* === HISTORY & ANALYTICS === */
+    .chart-wrap {
+      background:var(--glass-bg);
+      padding:17px 13px;
+      border-radius:15px;
+      margin-bottom:18px;
+      box-shadow:0 2px 14px #33efa931;
+    }
+    .hist-log {
+      background:var(--glass-bg);
+      border-radius:13px;
+      margin-bottom: 13px;
+      padding:11px 13px;
+      box-shadow: 0 1px 8px #36f7a614;
+      font-size:.96em;
+    }
+
+    /* === SYSTEM HEALTH === */
+    .health-list {
+      margin:19px 0 9px 0;
+      display: grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:15px;
+    }
+    .health-card {
+      background:var(--card-bg);
+      border-radius:15px;
+      padding:13px;
+      box-shadow:0 1px 4px #33efa919;
+      text-align:center;
+      font-size:1em;
+      font-weight:500;
+    }
+    .health-status.green {color:var(--success);}
+    .health-status.yellow {color:var(--warning);}
+    .health-status.red {color:var(--error);}
+    .uptime-ct {
+      color:var(--blue);
+      font-size:.98em;
+      font-weight:600;
+      margin-top:8px;
+    }
+
+    /* === SETTINGS === */
+    .settings-list {
+      margin:18px 0;
+    }
+    .settings-item {
+      display:flex;justify-content:space-between;
+      align-items:center;
+      background:var(--card-bg);
+      border-radius:14px;
+      padding:13px 17px;
+      margin-bottom:13px;
+      box-shadow: 0 1px 6px #1bf2fb19;
+    }
+    .settings-label {
+      font-size:1.01em;color:var(--text);
+      font-weight:500;
+    }
+    .settings-toggle {
+      width:44px;height:26px;background:#333;
+      border-radius:15px;position:relative;cursor:pointer;
+      transition:background .23s;
+      box-shadow:0 2px 7px #33efa912;
+      border:none;outline:none;
+    }
+    .settings-toggle.active {
+      background:var(--green);
+    }
+    .toggle-knob {
+      position:absolute;
+      left:2.5px; top:2.67px;
+      width:21px; height:21px;
+      background:#fff;
+      border-radius:15px;
+      transition:left .22s;
+      box-shadow:0 0px 4px #33efa929;
+    }
+    .settings-toggle.active .toggle-knob {
+      left:20px;
+      background: var(--blue);
+    }
+    .setting-select {
+      background:var(--surface);
+      border:none;outline:none;
+      border-radius:8px;
+      font-size:.99em;
+      color:var(--text);
+      padding:4px 11px;
+      margin-left:10px;
+    }
+    .settings-slider {
+      accent-color:var(--green-dark);
+      width:100px;
+      margin-left:8px;
+    }
+    .fake-wifi {
+      margin-top:11px;
+      background:var(--surface);
+      padding:10px 14px;
+      border-radius:10px;
+      box-shadow:0 2px 7px #1bf2fb19;
+      font-size:.98em;
+      font-weight:500;
+      color:var(--blue);
+      border-left:4px solid #1a468a3c;
+    }
+
+    /* === PROFILE === */
+    .profile-card {
+      background:var(--glass-bg);
+      border-radius:19px;
+      box-shadow:0 3px 16px #36f7a632;
+      padding:28px 14px 16px 14px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      margin-bottom:18px;
+    }
+    .profile-img {
+      width:79px;height:79px;
+      border-radius:60px;
+      margin-bottom:11px;
+      box-shadow:0 1px 16px #1bf2fb1c;
+    }
+    .profile-title {
+      font-weight:700;font-size:1.25em;
+      color:var(--green-dark);
+      text-shadow:0 1px 13px #1bf2fb4f;
+      margin-bottom:5px;
+    }
+    .profile-farm, .profile-devices, .profile-water {
+      font-size:1.04em;color:var(--subtext);
+    }
+    .profile-label {
+      font-weight: 600;
+      color: var(--text);
+      font-size:.97em;
+      margin-top:2px;
+    }
+
+    /* === SIMULATION PANEL === */
+    .sim-panel {
+      background:var(--glass-bg);
+      border-radius:18px;
+      padding:19px 18px;
+      margin-bottom:15px;
+      box-shadow:0 2px 14px #1bf2fb22;
+    }
+    .sim-buttons {
+      display:flex;
+      flex-wrap:wrap;
+      gap:15px;
+      margin-bottom:12px;
+    }
+    .sim-btn {
+      flex:1 1 40%;
+      min-width:120px;
+      background:var(--gradient);
+      color:#fff;
+      border:none;
+      border-radius:14px;
+      padding:1em .6em;
+      font-weight:700;
+      box-shadow:0 2px 9px #1bf2fb22;
+      cursor:pointer;
+      margin-bottom:7px;
+      margin-right:9px;
+      font-size:1em;
+      transition:filter .22s;
+    }
+    .sim-btn:active {filter:brightness(1.14);}
+    .sim-label {
+      margin-top:9px;
+      color:var(--subtext);
+      font-size:.97em;
+    }
+
+    /* === BOTTOM NAVIGATION === */
+    #nav-bar {
+      position: fixed;
+      bottom: 0;left:0;
+      width:100vw;
+      height: 67px;
+      max-width:640px;
+      background:var(--nav-bg);
+      z-index: 21;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      gap:11px;
+      box-shadow: 0 -2px 22px #36f7a629;
+      border-top: 1.5px solid rgba(44,66,95,0.1);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      font-size:1em;
+      transition:background .3s;
+    }
+    .nav-btn {
+      flex:1;display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      border:none;outline:none;
+      background:none;
+      color:var(--subtext);
+      padding:8px 0 0 0;
+      border-radius:12px;
+      position:relative;
+      transition:color .19s,background .18s;
+      font-size:1.14em;
+      font-weight:600;
+      user-select:none;
+      cursor: pointer;
+    }
+    .nav-btn.active {
+      color:var(--green);
+      background:var(--surface);
+      font-weight:700;
+    }
+    .nav-btn:active {background-color:var(--surface);color:var(--blue);}
+    .nav-label {
+      font-size:.81em;
+    }
+    .nav-badge {
+      position:absolute;
+      top:10px;right:19px;
+      width:17px;height:17px;
+      background:var(--error);
+      color:#fff;font-size:.87em;
+      display:flex;align-items:center;justify-content:center;
+      border-radius:12px;box-shadow:0 2px 10px #ff495255;
+      font-weight:700;
+    }
+
+    /* === DARK MODE SWITCH === */
+    .toggle-theme-btn {
+      background:var(--surface);
+      color:var(--blue);
+      border:none;outline:none;
+      border-radius:10px;
+      padding:8px 16px;
+      font-weight:600;font-size:1em;margin-top:15px;
+      margin-bottom:21px;
+      cursor:pointer;
+      box-shadow:0 1px 6px #1bf2fb19;
+      transition:background .21s;
+    }
+    .toggle-theme-btn:active{background:var(--gradient);color:#fff;}
+    /* === ANIMATIONS === */
+    .page-enter {
+      animation:fadein-main 0.55s;
+    }
+    @keyframes fadein-main {
+      from{transform:translateY(28px);opacity:0;}
+      to{transform:translateY(0);opacity:1;}
+    }
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.35;
+      pointer-events: none;
+      z-index:2;
+      background: var(--blue);
+      transform: scale(0);
+      animation: ripple-in .7s cubic-bezier(.42,.62,.08,.97);
+    }
+    @keyframes ripple-in {
+      to {
+        transform: scale(4.5);
+        opacity: 0;
+      }
+    }
+    /* === LOADING SKELETONS === */
+    .skeleton {
+      background:linear-gradient(100deg,#e3fdf491 40%,#0cebeb17 50%,#36f7a617 100%);
+      border-radius:12px;
+      min-height:22px;
+      margin-bottom:0.8em;
+      position:relative;
+      overflow:hidden;
+      animation:skeleton-blink 1.4s infinite linear;
+      filter:brightness(1.06);
+    }
+    @keyframes skeleton-blink {
+      0% {opacity:1;}
+      50% {opacity:.25;}
+      100% {opacity:1;}
+    }
+
+    /* === MEDIA QUERIES === */
+    @media only screen and (min-width: 640px){
+      #dashboard, #pump, #irrigation, #weather, #sensors,#notifications,#history,#health,#settings,#profile,#simulation {
+        border-radius: 24px 24px 0 0;
+        margin-top: 0.7em;
+        margin-bottom: 3vw;
+        max-width: 500px;
+        background: var(--glass-bg);
+      }
+      #nav-bar {
+        left:50%;
+        margin-left:-320px;
+        max-width:640px;
+        border-radius:0 0 24px 24px;
+      }
+    }
+    @media only screen and (max-width:430px) {
+      .dash-grid, .sensor-grid, .health-list {
+        grid-template-columns:1fr;
+      }
+      .forecast-cards{
+        flex-wrap:wrap;
+      }
+    }
+
+    /* === SCROLLBAR === */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<div id="fx-particles"></div>
+
+<!-- ====== SPLASH SCREEN ====== -->
+<div id="splash">
+  <div id="splash-logo">
+    <!-- Animated WaterWise SVG -->
+    <svg viewBox="0 0 110 110" fill="none"><defs>
+      <radialGradient id="g1" cx="0.5" cy="0.5" r="0.7" fx="0.6" fy="0.43">
+      <stop offset="0%" stop-color="#53fff06e"/>
+      <stop offset="98.92%" stop-color="#07F195"/>
+      </radialGradient>
+    </defs>
+      <ellipse cx="55" cy="55" rx="42" ry="42" fill="url(#g1)" opacity="0.11"/>
+      <path d="M55 87.5C70.1808 73.6901 78.3789 63.4935 81.396 54.5097C88.2824 34.401 75.3451 23.3402 61.0216 15.0295C57.8467 13.1621 53.6447 13.1621 50.4698 15.0295C36.1463 23.3402 23.209 34.401 30.0954 54.5097C33.1125 63.4935 41.3192 73.6901 55 87.5Z" fill="#07F195" stroke="#1BF2FB" stroke-width="3"/>
+      <ellipse cx="55" cy="39" rx="9" ry="15" fill="#1BF2FB" opacity=".21"/>
+      <ellipse cx="40" cy="40" rx="2" ry="4" fill="#fff" opacity="0.41"/>
+    </svg>
+  </div>
+  <div id="splash-loader">
+    <span class="water-dot"></span>
+    <span class="water-dot"></span>
+    <span class="water-dot"></span>
+  </div>
+  <div class="splash-seq" id="splash-seq"></div>
+</div>
+
+<!-- ====== ONBOARDING ====== -->
+<div id="onboarding">
+  <div class="onboard-wrap">
+    <div class="onboard-slides" id="onboardSlides">
+      <!-- JS inserts slides here -->
+    </div>
+    <div class="onboard-controls">
+      <button class="onboard-skip" onclick="skipOnboard()">Skip</button>
+      <div class="onboard-progress" id="onboardProgress"></div>
+      <button class="onboard-btn" onclick="nextOnboard()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- ====== LOGIN SCREEN ====== -->
+<div id="login">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <!-- Small logo SVG -->
+      <svg viewBox="0 0 40 40" fill="none">
+        <ellipse cx="20" cy="20" rx="15" ry="15" fill="#1BF2FB" opacity=".15"/>
+        <path d="M20 33.9C26.079 28.2034 29.2707 24.4374 30.5138 21.1053C33.0537 13.8814 27.3265 9.3892 22.2354 6.5926C21.1781 5.94048 19.6462 5.94048 18.5889 6.5926C13.4978 9.3892 7.77061 13.8814 10.3105 21.1053C11.5536 24.4374 14.751 28.2034 20 33.9Z" fill="#07F195" stroke="#1BF2FB" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <div class="login-title">Sign in to WaterWise</div>
+    <form class="login-form" id="loginForm" autocomplete="off">
+      <div class="login-field">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" class="login-input" placeholder="farmer@email.com" autocomplete="username" required>
+        <button type="button" tabindex="-1" class="login-fp" aria-label="Fingerprint login" title="Fingerprint (Demo only)"><span>🔒</span></button>
+      </div>
+      <div class="login-field">
+        <label for="loginPass">Password</label>
+        <input type="password" id="loginPass" class="login-input" placeholder="Password" autocomplete="current-password" required>
+        <button type="button" tabindex="-1" class="show-hide" onclick="togglePass()">
+          <span id="showPassIcon">👁️</span>
+        </button>
+      </div>
+      <button type="submit" class="login-btn">Login</button>
+    </form>
+  </div>
+</div>
+
+<!-- ====== MAIN APP (reactive screen content below) ====== -->
+<div id="app" style="display:none">
+  <!-- Header -->
+  <div id="header">
+    <div class="hdr-left">
+      <span class="hdr-logo" onclick="gotoScreen('dashboard')">
+        <svg viewBox="0 0 32 32" fill="none">
+          <ellipse cx="16" cy="16" rx="15" ry="15" fill="#1BF2FB" opacity="0.13"/>
+          <path d="M16 27.9C20.5816 23.5631 22.7527 20.85 23.4161 18.4297C25.3244 13.2008 21.3412 10.0411 17.6276 7.8562C17.0958 7.54 16.1639 7.54 15.6321 7.8562C11.9185 10.0411 7.93534 13.2008 9.84358 18.4297C10.507 20.85 12.6781 23.5631 16 27.9Z" fill="#07F195" stroke="#1BF2FB" stroke-width="1"/>
+        </svg>
+      </span>
+      <span class="hdr-title" id="header-title">Dashboard</span>
+    </div>
+    <div class="hdr-actions">
+      <button class="hdr-btn" id="darkModeToggle" title="Toggle Dark/Light Mode">
+        <span id="theme-ico">🌙</span>
+      </button>
+      <span class="hdr-profile" onclick="gotoScreen('profile')" title="Profile">
+        <img src="https://api.dicebear.com/7.x/shapes/svg?seed=farmer" alt="profile">
+      </span>
+    </div>
+  </div>
+  
+  <!-- All Screens -->
+  <div id="dashboard" class="app-screen active page-enter">
+    <!-- JS fills dashboard stat cards and actions -->
+  </div>
+  <div id="pump" class="app-screen">
+    <!-- JS fills pump control screen -->
+  </div>
+  <div id="irrigation" class="app-screen">
+    <!-- JS */}
+  </div>
+  <div id="sensors" class="app-screen">
+    <!-- JS */}
+  </div>
+  <div id="weather" class="app-screen">
+    <!-- JS */}
+  </div>
+  <div id="notifications" class="app-screen">
+    <!-- JS */}
+  </div>
+  <div id="history" class="app-screen">
+    <!-- JS */}
+  </div>
+  <div id="health" class="app-screen">
+    <!-- JS */}
+  </div>
+  <div id="settings" class="app-screen">
+    <!-- JS */}
+  </div>
+  <div id="profile" class="app-screen">
+    <!-- JS */}
+  </div>
+  <div id="simulation" class="app-screen">
+    <!-- JS */}
+  </div>
+  <!-- Floating action button -->
+  <button id="fab" class="fab-action" title="Demo Simulation" onclick="gotoScreen('simulation')">
+    <span>⚡</span>
+  </button>
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+  <!-- Bottom Nav -->
+  <nav id="nav-bar">
+    <button class="nav-btn active" onclick="gotoScreen('dashboard')" id="nav-dash">
+      <span>📊</span><span class="nav-label">Dashboard</span>
+    </button>
+    <button class="nav-btn" onclick="gotoScreen('weather')" id="nav-weather">
+      <span>🌦️</span><span class="nav-label">Weather</span>
+    </button>
+    <button class="nav-btn" onclick="gotoScreen('pump')" id="nav-control">
+      <span>💧</span><span class="nav-label">Control</span>
+    </button>
+    <button class="nav-btn" onclick="gotoScreen('history')" id="nav-analytics">
+      <span>📈</span><span class="nav-label">Analytics</span>
+    </button>
+    <button class="nav-btn" onclick="gotoScreen('settings')" id="nav-settings">
+      <span>⚙️</span><span class="nav-label">Settings</span>
+      <span class="nav-badge" id="notif-badge" style="display:none">1</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+/**
+ * WaterWise - Smart Farming Web App Demo
+ * 
+ * Everything is simulated - all data and device events are handled with in-browser JS logic below.
+ */
+
+/* ==== Utilities ==== */
+// Shortcuts for DOM elem
+const $ = sel => document.querySelector(sel);
+const $$ = sel => document.querySelectorAll(sel);
+
+function sleep(ms) {
+  return new Promise(res => setTimeout(res, ms));
+}
+
+// Show toast
+function showToast(msg, time=1900) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), time);
+}
+
+/* ==== Global State ====
+ * This app's logic and simulation is based on these state objects.
+ */
+const farmState = {
+  soil: { moisture: 43, desired: 60 },      // %
+  tank: { level: 65, capacity: 1400 },      // % (litres)
+  flow: 1.3,                                // L/min
+  temp: 20,                                 // °C
+  weather: {
+    temp: 19, rain: 8, condition: 'Cloudy', wind: 9, humidity: 62, night: false,
+    forecast: [], // see below
+  },
+  pump: { on: false, hours: 21, minutes: 12, started: null, failure: false },
+  valve: { open: false, failure: false },
+  battery: { level: 89, solar: true, charging: true, low: false },
+  internet: true,
+  health: {
+    device: 'good', sensors: 'good', wifi: 'good', battery: 'good', solar: 'good', uptime: 0,
+  },
+  alerts: [],
+  history: [],
+  profile: {
+    name: "Sarah Fielding",
+    farmName: "Emerald Acres",
+    location: "Ceres Valley",
+    devices: 7,
+    waterSaved: 31700, // litres
+  },
+  simulation: "",
+  demoEvents: {
+    rainstorm: false,
+    tankEmpty: false,
+    pipeLeak: false,
+    sensorFail: false,
+    pumpFail: false,
+    solarLoss: false,
+  },
+  settings: {
+    darkMode:true, notifications:true, autoIrri:true, language:"en", theme:"default", wifi:"WaterWiseNet_21", soilCal:60, tankCal:1400,flowCal:1.5,
+  },
+  bootTime: Date.now(),
+};
+
+let currentScreen = 'dashboard';
+let isLoading = false;
+
+/* ====== SPLASH/ONBOARD ====== */
+
+// Splash sequence text (animated typing)
+const SPLASH_SEQ = `> Booting WaterWise...
+> Initializing IoT sensors...
+> Solar charge detected.
+> Connecting Cloud AI...
+> Syncing farm devices...
+> All systems online!
+`;
+
+$('#splash-seq').textContent = SPLASH_SEQ.slice(0,0);
+
+async function splashAnim() {
+  // type in seq
+  for(let i=0; i<=SPLASH_SEQ.length;i++) {
+    if($('#splash-seq')) $('#splash-seq').textContent = SPLASH_SEQ.slice(0,i);
+    await sleep(18);
+  }
+  await sleep(760);
+  $('#splash').style.opacity="0";
+  document.body.style.background= "var(--background)";
+  await sleep(400); $('#splash').style.display='none';
+  $('#onboarding').style.display='flex';
+}
+window.addEventListener('DOMContentLoaded', splashAnim);
+
+/* ==== ONBOARDING ==== */
+// Slides
+const ONBOARD_SLIDES = [
+  {
+    icon: `<svg viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="15" ry="15" fill="#1BF2FB" opacity=".16"/><path d="M20 33.5C25 29 27.4 26 28.4 23C30.6 17 25.7 13.3 21.6 11C21.14 10.7 19.9 10.7 19.4 11C15.3 13.3 10.4 17 12.6 23C13.6 26 16 29 20 33.5Z" fill="#07F195" stroke="#1BF2FB"/></svg>`,
+    title: "Smart Irrigation",
+    desc: "Intelligent watering adapts to live soil moisture for optimal growth and water savings.",
+  },
+  {
+    icon: `<svg viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="15" ry="15" fill="#18e58a" opacity=".13"/><path d="M13 32c.3-10.18 4.6-12.5 8.8-13.4 4.2-.87 10.31 4.62 9.58 11.54 0 0-1.6-.47-3.07-1.41A12.77 12.77 0 0 1 25 23.48S20.3 17.83 13 32Z" fill="#1bf2fb" stroke="#07F195"/><circle cx="18" cy="23" r="4" fill="#fff" /></svg>`,
+    title: "Solar-Powered Farm",
+    desc: "Operate off-grid using advanced solar energy monitoring and intelligent charging.",
+  },
+  {
+    icon: `<svg viewBox="0 0 40 40"><g><ellipse cx="20" cy="20" rx="15" ry="15" fill="#1bf2fb" opacity=".11"/><rect x="13" y="13" width="14" height="14" rx="4" fill="#25396c" stroke="#30FFC9"/><ellipse cx="20" cy="20" rx="3" ry="3" fill="#fff"/><ellipse cx="27" cy="20" rx="2" ry="7" fill="#1bf2fb" opacity="0.19"/></g></svg>`,
+    title: "Water-Saving Innovation",
+    desc: "Reduce usage with smart automation, tank monitoring, and water flow analytics.",
+  },
+  {
+    icon: `<svg viewBox="0 0 40 40"><ellipse cx="20" cy="20" rx="15" ry="15" fill="#1BF2FB" opacity=".13"/><path d="M14 19c0-3 2.2-5.5 6-5 2 .3 4 2 4 5s-2 5-6 5-4-2-4-5z" fill="#1bf2fb" stroke="#07F195"/><ellipse cx="20" cy="15" rx="2" ry="2" fill="#1bf2fb" opacity=".25"/></svg>`,
+    title: "Real-Time Monitoring",
+    desc: "Live sensor data updates every second. Track moisture, weather, battery, pump, and devices.",
+  }
+];
+let onboardStep = 0;
+function renderOnboard() {
+  const $slides = $('#onboardSlides');
+  $slides.innerHTML = '';
+  ONBOARD_SLIDES.forEach((slide,i)=>{
+    $slides.innerHTML += `<div class="slide${i===onboardStep?' active':' inactive'}">
+      <div class="onboard-img">${slide.icon}</div>
+      <div class="onboard-title">${slide.title}</div>
+      <div class="onboard-desc">${slide.desc}</div>
+    </div>`;
+  });
+  // Progress dots
+  const $progress = $('#onboardProgress');
+  $progress.innerHTML = '';
+  for(let i=0;i<ONBOARD_SLIDES.length;i++) $progress.innerHTML += `<span class="onboard-progress-dot${i===onboardStep?' active':''}"></span>`;
+}
+function nextOnboard() {
+  if(onboardStep<ONBOARD_SLIDES.length-1) {onboardStep++; renderOnboard();}
+  else { $('#onboarding').style.display='none'; $('#login').style.display='flex'; }
+}
+function skipOnboard() {
+  $('#onboarding').style.display='none'; $('#login').style.display='flex';
+}
+window.addEventListener('DOMContentLoaded', ()=>{
+  renderOnboard();
+});
+
+/* === LOGIN HANDLING === */
+$('#loginForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  $('#login').style.display='none';
+  loadApp();
+});
+function togglePass() {
+  const $p = $('#loginPass'), $ico = $('#showPassIcon');
+  if($p.type==="password") { $p.type="text"; $ico.textContent='🙈';}
+  else { $p.type="password"; $ico.textContent='👁️'; }
+}
+
+function loadApp() {
+  $('#app').style.display = 'block';
+  renderScreen('dashboard');
+  setTimeout(()=>$('#dashboard').classList.add('page-enter'),200);
+  // Animate in particles (background)
+  initParticles();
+  setTimeout(()=>{ showToast("Welcome to WaterWise!"); }, 700);
+}
+
+/* === GO TO SCREENS === */
+function gotoScreen(s) {
+  if(isLoading) return;
+  $$('.app-screen').forEach(e=>{e.classList.remove('active');});
+  $('#fab').style.display = s==='dashboard'?'block':'none';
+  $(`#${s}`).classList.add('active','page-enter');
+  setTimeout(()=>{ $(`#${s}`).classList.remove('page-enter'); },500);
+  // Nav highlighting
+  $$('.nav-btn').forEach(btn=>btn.classList.remove('active'));
+  if(s==='dashboard') $('#nav-dash').classList.add('active');
+  else if(s==='weather') $('#nav-weather').classList.add('active');
+  else if(s==='pump') $('#nav-control').classList.add('active');
+  else if(s==='history') $('#nav-analytics').classList.add('active');
+  else if(s==='settings') $('#nav-settings').classList.add('active');
+  currentScreen = s;
+  // Title
+  const titles = {dashboard:"Dashboard",pump:"Pump Control",irrigation:"Irrigation Automation",sensors:"Sensor Monitoring",weather:"Weather",notifications:"Notifications",history:"History & Analytics",health:"System Health",settings:"Settings",profile:"Profile",simulation:"Demo Simulation"};
+  $('#header-title').textContent = titles[s]||"WaterWise";
+  // Badges
+  updateNotifBadge();
+  // Render section
+  renderScreen(s);
+}
+
+function renderScreen(s) {
+  // Render the DOM for the screen
+  switch(s) {
+    case 'dashboard': renderDashboard(); break;
+    case 'pump': renderPump(); break;
+    case 'irrigation': renderIrrigation(); break;
+    case 'sensors': renderSensors(); break;
+    case 'weather': renderWeather(); break;
+    case 'notifications': renderNotifications(); break;
+    case 'history': renderHistory(); break;
+    case 'health': renderHealth(); break;
+    case 'settings': renderSettings(); break;
+    case 'profile': renderProfile(); break;
+    case 'simulation': renderSimulation(); break;
+  }
+}
+
+/* ====== PARTICLES ====== */
+function initParticles() {
+  const $fx = $('#fx-particles');
+  for(let i=0;i<27;i++) {
+    let x = Math.random()*99, y = Math.random()*97, d=Math.random()*4;
+    const p = document.createElement('div');
+    p.className = 'fx-p';
+    p.style.left=`${x}vw`; p.style.top=`${y}vh`;
+    p.style.width = `${8+d*1.6}px`; p.style.height = `${8+d*1.6}px`;
+    p.style.opacity = (0.19+Math.random()*0.18).toFixed(2);
+    $fx.appendChild(p);
+  }
+}
+
+/* ====== RESPONSIVE DARK MODE ====== */
+function setTheme(dark) {
+  farmState.settings.darkMode = dark;
+  if(dark) { document.body.classList.remove('light'); $('#theme-ico').textContent='🌙'; }
+  else { document.body.classList.add('light'); $('#theme-ico').textContent='☀️'; }
+}
+$('#darkModeToggle').onclick = ()=>{
+  setTheme(!farmState.settings.darkMode);
+};
+
+/* ====== DASHBOARD ====== */
+function renderDashboard() {
+  // Main live dashboard
+  const s=farmState;
+  let html = `
+    <div style="margin-bottom:.2em">
+      <div class="screen-title">Smart Farm Dashboard</div>
+      <div class="dash-grid">
+        ${dashboardStatCard("Soil Moisture",s.soil.moisture+"%",s.soil.moisture,100,'🌱',"green","%")}
+        ${dashboardStatCard("Tank Level",s.tank.level+"%",s.tank.level,100,'🛢',s.tank.level<18?'red':'blue',"%")}
+        ${dashboardStatCard("Water Flow",s.flow+" L/min",s.flow*10,20,'💧',"blue")}
+        ${dashboardStatCard("Temperature",s.temp+"°C",(s.temp+10)*2,60,'🌡','yellow')}
+        ${dashboardStatCard("Pump",pumpStatusText(),s.pump.on?100:0,100,'🔄',s.pump.on?"green":"red")}
+        ${dashboardStatCard("Valve",s.valve.open?"Open":"Closed",s.valve.open?100:0,100,'🚰',s.valve.open?"green":"red")}
+        ${dashboardStatCard("Battery",s.battery.level+"%",s.battery.level,100,'🔋',s.battery.level>=60?"green":s.battery.level>=30?"yellow":"red", "%")}
+        ${dashboardStatCard("Solar",s.battery.charging?"Charging":"Idle",s.battery.charging?100:0,100,'🔆',s.battery.solar?"green":"yellow")}
+        ${dashboardStatCard("Internet",s.internet?"Online":"Offline",s.internet?100:0,100,'📡',s.internet?"blue":"red")}
+        ${dashboardStatCard("System",systemHealthText(),healthStatusVal(),100,'🛠',systemHealthDot())}
+      </div>
+    </div>
+    <div class="quick-btns">
+      <button class="quick-btn" onclick="gotoScreen('pump')">Pump Control</button>
+      <button class="quick-btn" onclick="gotoScreen('irrigation')">Automation</button>
+      <button class="quick-btn" onclick="gotoScreen('sensors')">Sensors</button>
+    </div>
+    <button class="emergency-btn" onclick="emergencyStop()">Emergency Stop</button>
+  `;
+  $('#dashboard').innerHTML = html;
+}
+// Dashboard stats card
+function dashboardStatCard(label,stat,value,max,icon,dot,colorUnit="") {
+  const pct = Math.max(0,Math.min(100,Math.round((value/max)*100)));
+  return `<div class="dash-card">
+      <div class="stat-dot ${dot}"></div>
+      <span style="font-size:1.4em;">${icon}</span>
+      <div class="dash-stat">${stat}</div>
+      <div class="stat-bar"><div class="stat-bar-inner" style="width:${pct}%"></div></div>
+      <div class="dash-label">${label}</div>
+    </div>`;
+}
+
+function pumpStatusText() {
+  if(farmState.pump.failure) return "Failed";
+  return farmState.pump.on?"ON":"OFF";
+}
+function systemHealthText() {
+  const h = farmState.health;
+  if(h.device==='good'&&h.sensors==='good'&&h.battery==='good'&&h.solar==='good') return "All OK";
+  if(h.battery==='bad'||h.solar==='bad') return "Power Issue";
+  if(h.device==='bad') return "Device Fault";
+  if(h.sensors==='bad') return "Sensor Degraded";
+  return "Checking...";
+}
+function healthStatusVal() {
+  const h = farmState.health;
+  let v = h.device==='good'?100:60;
+  if(h.battery!=='good') v = 45;
+  if(h.sensors!=='good') v = 55;
+  return v;
+}
+function systemHealthDot() {
+  const h = farmState.health;
+  if(h.device!=='good'||h.battery!=='good') return 'red';
+  if(h.sensors!=='good') return 'yellow';
+  return 'green';
+}
+
+function emergencyStop() {
+  farmState.pump.on=false;
+  farmState.valve.open=false;
+  showToast("EMERGENCY STOP – Irrigation HALTED!",2400);
+  addAlert("Pump stopped by emergency!",'danger');
+  renderScreen(currentScreen);
+}
+
+/* ====== IRRIGATION AUTOMATION ====== */
+function renderIrrigation() {
+  let status = "All systems ready";
+  let color="green";
+  if(farmState.pump.on) {status="Irrigation Active"; color="green";}
+  if(farmState.pump.failure) {status="Pump Failure!"; color="red";}
+  if(farmState.simulation==="rainstorm") {status="Rain Forecast Detected"; color="blue";}
+  if(farmState.tank.level<10) {status="Tank Low"; color="yellow";}
+  let html = `
+    <div class="screen-title">Irrigation Automation</div>
+    <div class="glass-card" style="margin-bottom:21px;">
+      <div style="display:flex;align-items:center;gap:11px">
+        <span class="stat-dot ${color}"></span>
+        <span style="font-weight:600;font-size:1.14em;">${status}</span>
+      </div>
+      <div style="margin-top:15px;margin-bottom:8px;">
+        <b>Soil:</b> ${farmState.soil.moisture}%<br>
+        <b>Tank:</b> ${farmState.tank.level}%<br>
+        <b>Weather:</b> ${farmState.weather.condition}
+      </div>
+      <div>
+        <b>Pump:</b> <span style="color:${farmState.pump.on?'#07F195':'#aaa'}">${farmState.pump.on?'ON':'OFF'}</span>
+        &nbsp;|&nbsp;<b>Valve:</b> <span style="color:${farmState.valve.open?'#1BF2FB':'#aaa'}">${farmState.valve.open?'Open':'Closed'}</span>
+      </div>
+    </div>
+    <div class="glass-card">
+      <div style="margin-bottom:13px;font-weight:600;">Automation Log:</div>
+      <div style="font-family:'IBM Plex Mono',monospace; font-size:.99em; color:var(--subtext); padding-left:3px;">
+        ${getAutomationLog()}
+      </div>
+    </div>
+  `;
+  $('#irrigation').innerHTML = html;
+}
+function getAutomationLog() {
+  const logs = farmState.history.slice(-6);
+  if(!logs.length) return `<span class="skeleton" style="height:13px;margin:0;width:80%;"></span>`;
+  return logs.map(a=>`[${a.time}] ${a.event}`).reverse().join('<br>');
+}
+
+/* ====== SENSORS ====== */
+function renderSensors() {
+  // List all sensor statuses live
+  let html = `
+    <div class="screen-title">Sensor Monitoring</div>
+    <div class="sensor-grid">
+      ${sensorCard("Soil Moisture",farmState.soil.moisture+"%",'🌱',"green")}
+      ${sensorCard("Tank Level",farmState.tank.level+"%",'🛢',farmState.tank.level<19?'red':'blue')}
+      ${sensorCard("Flow Rate",farmState.flow.toFixed(1)+" L/min",'💧','blue')}
+      ${sensorCard("Temperature",farmState.temp+"°C",'🌡','yellow')}
+      ${sensorCard("Valve",farmState.valve.open?"Open":"Closed",'🚰',farmState.valve.open?"green":"red")}
+      ${sensorCard("Pump",pumpStatusText(),'🔄',farmState.pump.on?"green":"red")}
+      ${sensorCard("Battery",farmState.battery.level+"%",'🔋',farmState.battery.level>60?"green":farmState.battery.level>30?"yellow":"red")}
+      ${sensorCard("Solar",farmState.battery.charging?"Charging":"Idle",'🔆',farmState.battery.solar?"green":"yellow")}
+      ${sensorCard("Signal",farmState.internet?"Online":"Offline",'📡',farmState.internet?"blue":"red")}
+    </div>
+    <div style="margin-top:19px;color:var(--subtext);font-size:1em;font-weight:500;">Sensors auto-update in real-time.</div>
+  `;
+  $('#sensors').innerHTML = html;
+}
+function sensorCard(label,stat,icon,color) {
+  return `<div class="sensor-card">
+    <span class="stat-dot ${color}" style="margin-right:6px;margin-bottom:0;"></span>
+    <span style="font-size:1.5em;">${icon}</span>
+    <div class="dash-stat">${stat}</div>
+    <div class="sensor-label">${label}</div>
+  </div>`;
+}
+
+/* ====== WEATHER ====== */
+function renderWeather() {
+  // Weather dashboard with animation
+  let w = farmState.weather;
+  let html = `
+    <div class="screen-title">Weather Dashboard</div>
+    <div class="weather-now">
+      <div>
+        <div class="weather-cond">${w.condition}</div>
+        <div class="weather-num">${w.temp}°C</div>
+        <div style="color:var(--subtext);font-size:.97em;font-weight:500;">
+          Rain: ${w.rain}%<br>
+          Humidity: ${w.humidity}%<br>
+          Wind: ${w.wind}km/h
+        </div>
+      </div>
+      <div class="weather-anim" id="weatherAnim">
+        ${weatherAnimSVG(w)}
+      </div>
+    </div>
+    <div class="forecast-cards">
+      ${forecastCards(w.forecast)}
+    </div>
+  `;
+  $('#weather').innerHTML = html;
+}
+function weatherAnimSVG(w) {
+  // Day/night + rain/clouds
+  if(w.condition==='Rainy')
+    return `<svg width="64" height="64"><ellipse cx="32" cy="35" rx="21" ry="13" fill="#1BF2FB" opacity="0.11"/><ellipse cx="20" cy="34" rx="11" ry="11" fill="#abe0ff" opacity="0.54"/><ellipse cx="43" cy="34" rx="13" ry="13" fill="#1bf2fb" opacity="0.21"/><ellipse cx="32" cy="37" rx="24" ry="12" fill="#79d7ff" opacity=".43"/><rect x="25" y="53" width="3" height="11" fill="#1bf2fb" opacity="0.63"/><rect x="35" y="53" width="3" height="11" fill="#1bf2fbb3"/></svg>`;
+  else if(w.condition==='Cloudy'||w.rain>14)
+    return `<svg width="68" height="68"><ellipse cx="34" cy="37" rx="13" ry="10" fill="#1bf2fb" opacity=".11"/><ellipse cx="25" cy="33" rx="9" ry="9" fill="#c0e8fa" opacity=".40"/><ellipse cx="43" cy="32" rx="9" ry="9" fill="#1bf2fb" opacity="0.13"/></svg>`;
+  else if(w.night)
+    return `<svg width="68" height="68"><circle cx="35" cy="31" r="20" fill="#03140D" /><circle cx="35" cy="37" r="18" fill="#1bf2fb" opacity=".11"/><ellipse cx="35" cy="22" rx="11" ry="10" fill="#e0e7d7" opacity="0.2"/><ellipse cx="32" cy="22" rx="2" ry="2" fill="#F3DD86"/></svg>`;
+  else
+    return `<svg width="68" height="68"><circle cx="34" cy="33" r="15" fill="#F3DD86"/><circle cx="34" cy="37" r="15" fill="#1bf2fb" opacity=".11"/></svg>`;
+}
+function forecastCards(forecast) {
+  if(!forecast.length) return '<div class="forecast-card skeleton" style="height:57px;"></div>'.repeat(4);
+  return forecast.map(f=>(
+    `<div class="forecast-card">
+      <div class="fc-day">${f.day}</div>
+      <div class="fc-icon">${f.icon}</div>
+      <div class="fc-temp">${f.temp}°C</div>
+      <div style="color:var(--subtext);font-size:.85em;">${f.rain}% ☔</div>
+    </div>`
+  )).join('');
+}
+
+/* ====== PUMP CONTROL ====== */
+function renderPump() {
+  let pump = farmState.pump;
+  let color = pump.failure?'red':(pump.on?'green':'blue');
+  let html = `
+    <div class="screen-title">Pump Control Panel</div>
+    <div class="pump-motor" style="margin-top:12px;">
+      <div class="motor-blade"></div>
+      <div class="motor-blade"></div>
+      <div class="motor-blade"></div>
+      <div class="motor-center"></div>
+    </div>
+    <div class="pump-anim-water"></div>
+    <div class="runtime-counter">
+      Runtime: ${pump.on?(getPumpRuntime()):"00:00"}
+    </div>
+    <div class="control-btns">
+      <button class="control-btn" onclick="pumpStart()"${pump.on||pump.failure?' disabled':''}>Start Pump</button>
+      <button class="control-btn" onclick="pumpStop()"${!pump.on?' disabled':''}>Stop Pump</button>
+      <button class="control-btn" onclick="valveOpen()">${farmState.valve.open?"Close":"Open"} Valve</button>
+    </div>
+    ${pump.failure?`<div class="safety-warning">Pump Failure Detected!<br>Please check the device and restart.</div>`:""}
+  `;
+  $('#pump').innerHTML = html;
+}
+
+function getPumpRuntime() {
+  if(!farmState.pump.started) return "00:00";
+  let s = Math.floor((Date.now()-farmState.pump.started)/1000);
+  let m = Math.floor(s/60), h = Math.floor(m/60);
+  s %= 60; m %= 60;
+  return (h<10?'0':'')+h+":"+(m<10?'0':'')+m+":"+(s<10?'0':'')+s;
+}
+
+function pumpStart() {
+  // Safety check
+  if(farmState.tank.level<8||farmState.pump.failure) {
+    showToast("Cannot start: Tank low or pump failed",1800); return;
+  }
+  farmState.pump.on=true;
+  farmState.pump.started = Date.now();
+  farmState.valve.open=true;
+  showToast("Pump started");
+  addAlert("Pump started",'good');
+  renderScreen(currentScreen);
+}
+function pumpStop() {
+  farmState.pump.on=false;
+  farmState.valve.open=false;
+  showToast("Pump stopped");
+  addAlert("Pump stopped",'info');
+  renderScreen(currentScreen);
+}
+function valveOpen() {
+  farmState.valve.open = !farmState.valve.open;
+  showToast(farmState.valve.open?"Valve opened":"Valve closed");
+  renderScreen(currentScreen);
+}
+
+/* ====== NOTIFICATIONS ====== */
+function renderNotifications() {
+  let alerts = farmState.alerts.slice(-12).reverse();
+  let html = `<div class="screen-title">Notifications Center</div>`;
+  if(alerts.length==0) html+=`<div class="skeleton" style="height:19px;width:70%"></div>`;
+  else html+= `<div class="notif-list">${alerts.map(notifCard).join('')}</div>`;
+  $('#notifications').innerHTML = html;
+}
+function notifCard(a) {
+  let dot = 'blue';
+  if(a.kind==='danger') dot='red';
+  if(a.kind==='good') dot='green';
+  if(a.kind==='warn') dot='yellow';
+  return `<div class="notif-item">
+    <span class="notif-dot ${dot}"></span>
+    <span>${a.event}</span>
+    <span class="notif-time">${a.time}</span>
+  </div>`;
+}
+function updateNotifBadge() {
+  let n = farmState.alerts.length;
+  if(n > 0) {
+    $('#notif-badge').style.display="block";
+    $('#notif-badge').textContent = n<10?n:"9+";
+  } else {
+    $('#notif-badge').style.display="none";
+  }
+}
+function addAlert(msg,kind='info') {
+  farmState.alerts.push({event:msg,kind,time:getTimeNow()});
+  playNotif(kind);
+  if($('#notif-badge')) updateNotifBadge();
+}
+
+function playNotif(kind) {
+  // Visual + vibrate for real app
+  if(kind==='danger') showToast("⚡ ALERT: "+farmState.alerts[farmState.alerts.length-1].event,2500);
+}
+
+/* ====== HISTORY & ANALYTICS ====== */
+function renderHistory() {
+  let html = `<div class="screen-title">Usage History & Analytics</div>
+    <div class="chart-wrap">
+      <canvas id="chart1" height="115"></canvas>
+      <span style="color:var(--subtext);font-size:.91em;">Water Usage (Last 7 days)</span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart2" height="115"></canvas>
+      <span style="color:var(--subtext);font-size:.91em;">Soil Moisture Trends</span>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="chart3" height="115"></canvas>
+      <span style="color:var(--subtext);font-size:.91em;">Temperature Trends</span>
+    </div>
+    <div class="hist-log">
+      <b>Pump Activity Logs:</b><br>
+      ${historyLog()}
+    </div>
+  `;
+  $('#history').innerHTML = html;
+  setTimeout(drawCharts,500);
+}
+
+function drawCharts() {
+  // Water usage (fake data)
+  let ctx1 = document.getElementById('chart1').getContext('2d');
+  new Chart(ctx1, {
+    type:'bar',
+    data: {labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets:[{label:'Litres',data:[210,180,156,193,180,166,152],
+      backgroundColor: "rgba(27,242,251,0.17)",
+      borderColor:"#07F195",borderWidth:3,
+      borderRadius:6, barPercentage:0.77}]},
+    options:{scales:{y:{beginAtZero:true,ticks:{color:'#25ffc3'}}},plugins:{legend:{display:false}},responsive:true}
+  });
+  // Soil moisture trend
+  let ctx2 = document.getElementById('chart2').getContext('2d');
+  new Chart(ctx2, {
+    type:'line',
+    data: {labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets:[{label:'Soil %',data:[47,44,68,56,61,54,58],
+      backgroundColor:'rgba(7,241,149,0.22)', borderColor:'#1BF2FB',borderWidth:2.5, pointRadius:5, tension:0.57}]},
+    options:{scales:{y:{beginAtZero:true,ticks:{color:'#1BF2FB'}}},plugins:{legend:{display:false}},responsive:true}
+  });
+  // Temperature trend
+  let ctx3 = document.getElementById('chart3').getContext('2d');
+  new Chart(ctx3, {
+    type:'line',
+    data: {labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+    datasets:[{label:'°C',data:[21,19,23,22,20,17,18],
+      backgroundColor:'rgba(27,242,251,0.11)', borderColor:'#07F195',borderWidth:2.5, pointRadius:4, tension:0.50}]},
+    options:{scales:{y:{beginAtZero:false,ticks:{color:'#07F195'}}},plugins:{legend:{display:false}},responsive:true}
+  });
+}
+function historyLog() {
+  if(!farmState.history.length)
+    return `<span class="skeleton" style="height:13px;margin:0;width:70%"></span>`;
+  let log = farmState.history.slice(-8).reverse().map(a=>`[${a.time}] ${a.event}`).join('<br>');
+  return log;
+}
+
+/* ====== SYSTEM HEALTH ====== */
+function renderHealth() {
+  let h=farmState.health;
+  let html = `<div class="screen-title">System Health & Status</div>
+    <div class="health-list">
+      ${healthCard("Device Health",h.device)}
+      ${healthCard("Sensor Health",h.sensors)}
+      ${healthCard("Wi-Fi Strength",h.wifi)}
+      ${healthCard("Battery Health",h.battery)}
+      ${healthCard("Solar Charge",h.solar)}
+      <div class="health-card" style="grid-column:span 2;"><div>Uptime</div><div class="uptime-ct">${getUptime()}</div></div>
+    </div>
+  `;
+  $('#health').innerHTML = html;
+}
+function healthCard(label,status) {
+  let color = status==='good'?'green':status==='ok'?'yellow':'red';
+  let msg = status==='good'?'✓ Ok':status==='ok'?'⚠ Check':'✗ Fault';
+  return `<div class="health-card">
+    ${label}<br>
+    <span class="health-status ${color}">${msg}</span>
+  </div>`;
+}
+function getUptime() {
+  let t = Math.floor((Date.now()-farmState.bootTime)/1000), d = Math.floor(t/86400);
+  let h = Math.floor((t%86400)/3600), m = Math.floor((t%3600)/60), s = t%60;
+  return `${d}d ${h}h ${m}m ${s}s`;
+}
+
+/* ====== SETTINGS ====== */
+function renderSettings() {
+  let sett = farmState.settings;
+  let html = `
+    <div class="screen-title">Settings & Controls</div>
+    <div class="settings-list">
+      <div class="settings-item">
+        <span class="settings-label">Dark Mode</span>
+        <button class="settings-toggle${sett.darkMode?' active':''}" onclick="toggleSetting('darkMode')">
+          <span class="toggle-knob"></span>
+        </button>
+      </div>
+      <div class="settings-item">
+        <span class="settings-label">Notifications</span>
+        <button class="settings-toggle${sett.notifications?' active':''}" onclick="toggleSetting('notifications')">
+          <span class="toggle-knob"></span>
+        </button>
+      </div>
+      <div class="settings-item">
+        <span class="settings-label">Auto Irrigation</span>
+        <button class="settings-toggle${sett.autoIrri?' active':''}" onclick="toggleSetting('autoIrri')">
+          <span class="toggle-knob"></span>
+        </button>
+      </div>
+      <div class="settings-item">
+        <span class="settings-label">Language</span>
+        <select class="setting-select" onchange="setLang(this.value)">
+          <option value="en">English</option>
+          <option value="af">Afrikaans</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+        </select>
+      </div>
+      <div class="settings-item">
+        <span class="settings-label">Theme</span>
+        <select class="setting-select" disabled>
+          <option value="default">Default</option>
+        </select>
+      </div>
+      <div class="settings-item">
+        <span class="settings-label">Fake Wi-Fi Setup</span>
+        <span class="fake-wifi">${sett.wifi} <button onclick="showToast('Connected');" style="margin-left:8px;">Connect</button></span>
+      </div>
+      <div class="settings-item">
+        <span class="settings-label">Soil Calibration</span>
+        <input type="range" class="settings-slider" min="25" max="80" step="1" value="${sett.soilCal}" onchange="farmState.settings.soilCal=this.value;">
+        <span>${sett.soilCal}%</span>
+      </div>
+      <div class="settings-item">
+        <span class="settings-label">Tank Calibration</span>
+        <input type="range" class="settings-slider" min="300" max="2000" step="10" value="${sett.tankCal}" onchange="farmState.settings.tankCal=this.value;">
+        <span>${sett.tankCal}L</span>
+      </div>
+    </div>
+    <button class="toggle-theme-btn" onclick="toggleSetting('darkMode')">Switch Theme</button>
+  `;
+  $('#settings').innerHTML = html;
+}
+
+function toggleSetting(s) {
+  farmState.settings[s]=!farmState.settings[s];
+  setTheme(farmState.settings.darkMode);
+  renderScreen('settings');
+}
+function setLang(l) {
+  farmState.settings.language = l;
+  showToast("Language set: "+l);
+}
+
+/* ====== PROFILE ====== */
+function renderProfile() {
+  let p = farmState.profile;
+  let html = `
+    <div class="screen-title">Profile</div>
+    <div class="profile-card">
+      <img src="https://api.dicebear.com/7.x/shapes/svg?seed=farmer" class="profile-img">
+      <div class="profile-title">${p.name}</div>
+      <div class="profile-farm">🌿 <span class="profile-label">${p.farmName}</span></div>
+      <div class="profile-farm">📍 <span class="profile-label">${p.location}</span></div>
+      <div class="profile-devices">🔗 Devices: <b>${p.devices}</b></div>
+      <div class="profile-water">💧 Water Saved: <b>${p.waterSaved.toLocaleString()} L</b></div>
+    </div>
+  `;
+  $('#profile').innerHTML = html;
+}
+
+/* ======= DEMO SIMULATION PANEL ====== */
+function renderSimulation() {
+  let s = farmState.demoEvents;
+  let html = `<div class="screen-title">Demo Simulation Panel</div>
+  <div class="sim-panel">
+    <div class="sim-label">Trigger simulated events for WaterWise:</div>
+    <div class="sim-buttons">
+      <button class="sim-btn" onclick="simEvent('rainstorm')">${s.rainstorm?'☔ Simulating...':'🌧️ Rainstorm'}</button>
+      <button class="sim-btn" onclick="simEvent('tankEmpty')">${s.tankEmpty?'🛢️ Simulating...':'🛢️ Tank Empty'}</button>
+      <button class="sim-btn" onclick="simEvent('pipeLeak')">${s.pipeLeak?'💦 Simulating...':'💦 Pipe Leak'}</button>
+      <button class="sim-btn" onclick="simEvent('sensorFail')">${s.sensorFail?'🚨 Simulating...':'🚨 Sensor Fail'}</button>
+      <button class="sim-btn" onclick="simEvent('pumpFail')">${s.pumpFail?'🚫 Simulating...':'🚫 Pump Fail'}</button>
+      <button class="sim-btn" onclick="simEvent('solarLoss')">${s.solarLoss?'🔋 Simulating...':'🔋 Solar Loss'}</button>
+    </div>
+    <div class="sim-label"><b>Status:</b> ${getSimulationEvent()}</div>
+  </div>
+  <div style="margin-top:30px;color:var(--subtext);font-size:1em;font-weight:500;">
+    The entire WaterWise app auto-reacts to event triggers.<br>
+    Try simulating rain or failures to see smart system behaviors.
+  </div>
+  `;
+  $('#simulation').innerHTML = html;
+}
+function simEvent(e) {
+  // Toggle event
+  for(let k in farmState.demoEvents) farmState.demoEvents[k]=false;
+  farmState.simulation = e;
+  farmState.demoEvents[e]=true;
+  addAlert(`${simEventName(e)} triggered [simulation]`,'warn');
+  reactToDemoEvent(e);
+  renderSimulation();
+}
+function simEventName(e) {
+  switch(e) {
+    case 'rainstorm': return "Rainstorm";
+    case 'tankEmpty': return "Tank Empty";
+    case 'pipeLeak': return "Pipe Leak";
+    case 'sensorFail': return "Sensor Failure";
+    case 'pumpFail': return "Pump Failure";
+    case 'solarLoss': return "Solar Charging Loss";
+    default: return "";
+  }
+}
+function getSimulationEvent() {
+  for(let k in farmState.demoEvents)
+    if(farmState.demoEvents[k]) return `${simEventName(k)} active!`;
+  return "None";
+}
+function reactToDemoEvent(e) {
+  switch(e) {
+    case 'rainstorm':
+      farmState.weather.rain=97;
+      farmState.weather.condition='Rainy';
+      if(farmState.pump.on) { pumpStop(); }
+      farmState.history.push({event:"Irrigation halted: rain detected",time:getTimeNow()});
+      break;
+    case 'tankEmpty':
+      farmState.tank.level=0;
+      if(farmState.pump.on) { pumpStop(); }
+      addAlert("Tank empty",'danger');
+      farmState.history.push({event:"Tank went empty (simulation)",time:getTimeNow()});
+      break;
+    case 'pipeLeak':
+      farmState.flow=3.8;
+      addAlert("Leak detected in main line",'danger');
+      break;
+    case 'sensorFail':
+      farmState.health.sensors='bad';
+      addAlert("Soil sensor disconnected",'danger');
+      break;
+    case 'pumpFail':
+      farmState.pump.failure=true;
+      if(farmState.pump.on) { pumpStop(); }
+      addAlert("Pump stopped: device error",'danger');
+      break;
+    case 'solarLoss':
+      farmState.battery.solar=false;farmState.battery.charging=false;
+      farmState.health.solar='bad';
+      addAlert("Solar charging lost",'warn');
+      break;
+    default:
+      // Reset simulation
+      break;
+  }
+}
+
+/* =============== LIVE SIMULATION ENGINE =============== */
+function getTimeNow() {
+  let d = new Date();
+  return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0')+':'+d.getSeconds().toString().padStart(2,'0');
+}
+function randomWeather() {
+  const conds=['Sunny',"Cloudy","Partly Cloudy","Rainy","Clear"];
+  let c = Math.floor(Math.random()*5), r = Math.random()<0.13?Math.floor(Math.random()*87):Math.floor(Math.random()*30);
+  let t = Math.floor(17+Math.random()*10), hum=Math.floor(53+Math.random()*35), w=Math.floor(8+Math.random()*11);
+  let night = (new Date()).getHours()<7||(new Date()).getHours()>17;
+  let fc = [];
+  for(let i=0; i<6;i++){
+    let c2 = conds[Math.floor(Math.random()*5)], t2=15+Math.floor(Math.random()*15), r2=Math.floor(Math.random()*55);
+    fc.push({day:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"][(new Date().getDay()+i)%7],icon:c2==="Sunny"?"☀️":c2==="Rainy"?"🌧️":c2==="Cloudy"?"☁️":"⛅",temp:t2,rain:r2});
+  }
+  return {condition:conds[c],rain:r,temp:t,humidity:hum,wind:w,forecast:fc,night};
+}
+
+setInterval(()=>{
+  // LIVE SENSOR SIMULATION
+  let s = farmState;
+  if(s.simulation==='') {
+    // Soil moisture - slow decay except when raining or irrigating
+    if(s.pump.on) s.soil.moisture = Math.min(100,s.soil.moisture+Math.random()*3.1);
+    else if(s.weather.rain>42) s.soil.moisture = Math.min(96,s.soil.moisture+Math.random()*1.3);
+    else s.soil.moisture = Math.max(10,s.soil.moisture-0.3-Math.random()*0.22);
+
+    // Tank slowly depletes but refills if solar is charging or reset
+    if(s.valve.open && s.pump.on && s.tank.level>3 && s.simulation!=='tankEmpty')
+      s.tank.level = Math.max(0,s.tank.level - (0.6+Math.random()*1.19));
+    else if(s.tank.level<99 && s.battery.charging && s.solar)
+      s.tank.level = Math.min(100,s.tank.level+0.32);
+
+    // Flow rate
+    if(s.simulation==='pipeLeak') s.flow=3.5+Math.random();
+    else if(s.valve.open&&s.pump.on) s.flow = 1.9+Math.random();
+    else s.flow = 0.6+Math.random()*0.9;
+
+    // Temperature
+    s.temp = Math.round(18+Math.sin(Date.now()/420000)*7+Math.random()*2);
+
+    // Weather
+    if(Math.random()<0.13 || !s.weather.forecast || !s.weather.forecast.length) {
+      Object.assign(s.weather, randomWeather());
+    }
+    s.weather.temp = s.temp+Math.round(Math.random()*3-1);
+
+    // Battery simulation
+    if(s.battery.solar&&s.battery.charging) s.battery.level=Math.min(100,s.battery.level+0.18);
+    else s.battery.level=Math.max(12,s.battery.level-0.13);
+    s.battery.low = s.battery.level<20;
+
+    // Internet: 1% chance of "offline" moment
+    if(Math.random()<0.01) s.internet=false;
+    else if(Math.random()<0.98) s.internet=true;
+
+    // Health randomly goes 'ok'
+    s.health.sensors = Math.random()<0.99 ? "good" : "ok";
+    s.health.battery = s.battery.low ? "ok": "good";
+    s.health.solar = s.battery.solar?"good":"bad";
+    s.health.device = Math.random()<0.995?"good":"ok";
+    s.health.uptime = Math.floor((Date.now()-s.bootTime)/1000);
+  }
+
+  // SMART IRRIGATION LOGIC
+  let notify=false;
+  // Auto-activate irrigation
+  if(s.soil.moisture<s.soil.desired
+    &&s.tank.level>14
+    &&!s.pump.on
+    &&!s.pump.failure
+    &&s.settings.autoIrri
+    &&s.weather.rain<30
+    &&!s.demoEvents.rainstorm
+    ) {
+      pumpStart();
+      s.history.push({event:"Irrigation auto-started",time:getTimeNow()});
+      notify=true;
+  } else if((s.soil.moisture>=s.soil.desired||s.weather.rain>80||s.tank.level<10||s.demoEvents.rainstorm)
+    &&s.pump.on) {
+      pumpStop();
+      s.history.push({event:"Irrigation stopped by automation",time:getTimeNow()});
+      notify=true;
+  }
+  // ALERTS
+  if(s.tank.level<10) addAlert("Water tank low",'warn');
+  if(s.flow>3.3) addAlert("Leak Warning",'warn');
+  if(s.battery.low) addAlert("Battery low",'warn');
+  if(!s.internet) addAlert("Sensor offline",'danger');
+  // Re-render current screen for live updates
+  if($('#app').style.display=='block') renderScreen(currentScreen);
+
+}, 1500);
+
+/* ====== INITIALIZE ====== */
+setTheme(farmState.settings.darkMode);
+
+</script>
+
+<!--
+  WaterWise - Smart Farming Single-file Web App
+  All code, styles, and UI are embedded in this file.
+  Designed for modern browsers (Chrome, Firefox, Edge, Safari)
+-->
+</body>
+</html>
