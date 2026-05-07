@@ -3,93 +3,193 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WaterWise • Smart Farming</title>
+  <title>WaterWise Smart Farming OS</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root{--bg:#070b16;--card:rgba(255,255,255,.08);--line:rgba(255,255,255,.18);--txt:#eaf3ff;--muted:#97a6c6;--ok:#2de38f;--warn:#ffb020;--bad:#ff4d67;--blue:#40c7ff;--violet:#9b7bff}
-    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:radial-gradient(circle at 10% 10%,#1d2d58,#070b16 60%);color:var(--txt);overflow:hidden}
-    .app{height:100vh;display:flex;flex-direction:column;position:relative}
-    .particles:before,.particles:after{content:"";position:absolute;inset:-20%;background:radial-gradient(circle,rgba(64,199,255,.15) 2px,transparent 3px);background-size:40px 40px;animation:drift 20s linear infinite;pointer-events:none}
-    .particles:after{animation-direction:reverse;opacity:.5}@keyframes drift{to{transform:translateY(-60px) translateX(30px)}}
-    .screen{position:absolute;inset:0;padding:18px 14px 90px;overflow:auto;opacity:0;transform:translateX(18px);pointer-events:none;transition:.45s}
-    .screen.active{opacity:1;transform:none;pointer-events:auto}
-    .card{background:var(--card);border:1px solid var(--line);backdrop-filter:blur(14px);border-radius:18px;padding:14px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
-    h1,h2,h3{margin:.2rem 0}.muted{color:var(--muted)} .row{display:flex;gap:10px}.row>*{flex:1}
-    .btn{border:0;border-radius:12px;padding:10px 12px;color:#fff;background:linear-gradient(135deg,var(--blue),var(--violet));font-weight:700;cursor:pointer}
-    .btn.alt{background:rgba(255,255,255,.09);border:1px solid var(--line)} .btn.danger{background:linear-gradient(135deg,#ff5d77,#ff8e4b)}
-    .top{display:flex;justify-content:space-between;align-items:center}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-    .metric{font-size:1.35rem;font-weight:800}.badge{padding:4px 10px;border-radius:999px;background:rgba(45,227,143,.15);border:1px solid rgba(45,227,143,.4);font-size:.75rem}
-    .progress{height:8px;background:rgba(255,255,255,.12);border-radius:999px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--ok));transition:.4s}
-    input,select{width:100%;padding:11px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#fff}
-    .nav{position:fixed;left:10px;right:10px;bottom:10px;display:grid;grid-template-columns:repeat(6,1fr);gap:8px;padding:8px;border-radius:16px;background:rgba(8,13,26,.9);border:1px solid var(--line)}
-    .nav button{background:none;border:0;color:#a7b8d5;font-size:11px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px;cursor:pointer}.nav button.active{color:#67dcff}
-    .fab{position:fixed;right:18px;bottom:88px;width:56px;height:56px;border-radius:50%;border:0;background:linear-gradient(135deg,#27e4a6,#45b2ff);font-size:28px;color:#041014}
-    .gauge{width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--blue) 0 var(--deg),#223 0);display:grid;place-items:center;margin:auto}.gauge>div{width:76px;height:76px;border-radius:50%;background:#0b1327;display:grid;place-items:center}
-    .splash{display:grid;place-items:center;text-align:center}.logo{font-size:2.2rem;font-weight:900;letter-spacing:1px;text-shadow:0 0 18px #40c7ff}
-    .hidden{display:none}.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#111d35;border:1px solid var(--line);padding:10px 14px;border-radius:10px;z-index:50}
-    .map{height:220px;border-radius:16px;background:linear-gradient(145deg,#1d4f2d,#1a2f2f);position:relative;overflow:hidden}.pin{position:absolute;width:14px;height:14px;border-radius:50%;background:#53e3ff;box-shadow:0 0 0 0 rgba(83,227,255,.8);animation:pulse 1.8s infinite}
-    @keyframes pulse{to{box-shadow:0 0 0 18px rgba(83,227,255,0)}}
-    .weatherfx{height:110px;border-radius:14px;background:linear-gradient(180deg,#4b7fff,#223066);position:relative;overflow:hidden}.cloud{position:absolute;background:#d8e6ff;border-radius:999px}
-    .cloud.c1{width:90px;height:30px;left:12px;top:26px;animation:float 6s infinite}.cloud.c2{width:120px;height:35px;right:8px;top:48px;animation:float 8s infinite}
-    @keyframes float{50%{transform:translateX(8px)}}
-    @media(min-width:900px){.screen{padding:22px 22vw 100px}}
+    :root { --bg:#111315; --panel:#1a1d21; --panel2:#20242a; --text:#e8eaed; --muted:#9ca3af; --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444; --line:#30343b; }
+    .light { --bg:#f3f4f6; --panel:#fff; --panel2:#f8fafc; --text:#111827; --muted:#6b7280; --line:#e5e7eb; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter,system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); }
+    .app { display:flex; min-height:100vh; }
+    .sidebar { width:230px; background:var(--panel); border-right:1px solid var(--line); padding:16px; position:sticky; top:0; height:100vh; overflow:auto; }
+    .brand { font-weight:700; margin-bottom:14px; }
+    .nav-btn { display:block; width:100%; padding:10px; margin-bottom:6px; border:1px solid var(--line); border-radius:8px; background:transparent; color:var(--text); text-align:left; cursor:pointer; }
+    .nav-btn.active,.nav-btn:hover{ background:var(--panel2); }
+    main { flex:1; padding:16px; }
+    .screen { display:none; animation:fade .2s ease; }
+    .screen.active { display:block; }
+    @keyframes fade { from{opacity:.6; transform:translateY(2px)} to{opacity:1; transform:none} }
+    .top { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:12px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px; }
+    .title { font-size:12px; color:var(--muted); margin-bottom:6px; }
+    .value { font-size:22px; font-weight:700; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; }
+    button, input, select { background:var(--panel2); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
+    button { cursor:pointer; }
+    .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)} .muted{color:var(--muted)}
+    .list{display:grid; gap:8px}
+    .item{display:flex; justify-content:space-between; align-items:center; border:1px solid var(--line); border-radius:8px; padding:8px; background:var(--panel2)}
+    .toast-wrap{position:fixed; right:14px; bottom:14px; display:grid; gap:8px; z-index:9999}
+    .toast{background:var(--panel); border:1px solid var(--line); padding:10px; border-left:4px solid var(--ok); border-radius:8px; min-width:220px}
+    .auth,.splash{display:grid; place-items:center; min-height:100vh}
+    .auth .card,.splash .card{max-width:360px;width:100%}
+    .hide{display:none!important}
+    canvas{max-height:260px}
   </style>
 </head>
 <body>
-<div class="app particles">
-  <section class="screen splash active" id="splash"><div><div class="logo">💧 WaterWise</div><p>Initializing Smart Irrigation System</p><div class="progress"><div class="bar" id="bootbar" style="width:0%"></div></div></div></section>
-  <section class="screen" id="onboarding"><h2>Welcome to WaterWise</h2><div class="card"><h3 id="slideT">Smart Irrigation</h3><p id="slideD" class="muted">Automated watering with live control.</p><div class="row"><button class="btn alt" onclick="skipOnboard()">Skip</button><button class="btn" onclick="nextSlide()">Continue</button></div></div></section>
-  <section class="screen" id="login"><h2>Sign in</h2><div class="card"><input placeholder="Email"/><br><br><div class="row"><input id="pwd" type="password" placeholder="Password"/><button class="btn alt" onclick="pwd.type=pwd.type==='password'?'text':'password'">👁</button></div><br><label><input type="checkbox" checked/> Remember me</label><br><br><div class="row"><button class="btn" onclick="enterApp()">Login</button><button class="btn alt">🔓 Fingerprint</button></div><br><button class="btn alt" style="width:100%">Google Login</button></div></section>
+  <section id="splash" class="splash"><div class="card"><h2>WaterWise</h2><p class="muted">Smart Farming OS booting...</p></div></section>
 
-  <section class="screen" id="home"><div class="top"><h2>Dashboard</h2><span class="badge" id="irrigBadge">Idle</span></div><div class="grid" id="homeGrid"></div><br><div class="row"><button class="btn" onclick="startPump()">Quick Start</button><button class="btn danger" onclick="stopAll()">Emergency Stop</button></div></section>
-  <section class="screen" id="control"><h2>Control Center</h2><div class="card"><div class="row"><button class="btn" onclick="startPump()">Start Pump</button><button class="btn alt" onclick="stopPump()">Stop Pump</button></div><br><div class="row"><button class="btn" onclick="state.valve=true;notify('Valve opened')">Open Valve</button><button class="btn alt" onclick="state.valve=false;notify('Valve closed')">Close Valve</button></div><br><button class="btn danger" style="width:100%" onclick="if(confirm('Emergency shutdown?'))stopAll()">Emergency Shutdown</button><p>Runtime: <b id="runtime">0m</b></p><div class="progress"><div class="bar" id="flowbar" style="width:0%"></div></div></div></section>
-  <section class="screen" id="sensors"><h2>Sensors</h2><div class="grid" id="sensorGrid"></div></section>
-  <section class="screen" id="weather"><h2>Weather Center</h2><div class="weatherfx"><div class="cloud c1"></div><div class="cloud c2"></div></div><div class="card"><div class="grid"><div>Temp <div class="metric" id="wTemp"></div></div><div>Humidity <div class="metric" id="wHum"></div></div><div>Wind <div class="metric" id="wWind"></div></div><div>Rain % <div class="metric" id="wRain"></div></div></div><p class="muted">7-day forecast: Sunny • Cloudy • Rain • Sunny • Windy • Cloudy • Rain</p></div></section>
-  <section class="screen" id="analytics"><h2>Analytics</h2><div class="card"><canvas id="chart1" height="110"></canvas><canvas id="chart2" height="110"></canvas><div class="row"><button class="btn alt">Weekly</button><button class="btn alt">Monthly</button><button class="btn">Export</button></div></div></section>
-  <section class="screen" id="notifications"><h2>Notifications</h2><div id="notifList"></div></section>
-  <section class="screen" id="health"><h2>System Health</h2><div class="grid" id="healthGrid"></div></section>
-  <section class="screen" id="settings"><h2>Settings</h2><div class="card"><label>Auto Irrigation <input type="checkbox" id="auto" checked></label><label>Notifications <input type="checkbox" checked></label><label>Simulation speed <input type="range" id="speed" min="1" max="4" value="1"></label><label>Theme<select><option>Neon Dark</option><option>Solar Gold</option></select></label><label>Language<select><option>English</option><option>Español</option></select></label></div></section>
-  <section class="screen" id="profile"><h2>Profile</h2><div class="card"><h3>Farmer Amina Khan</h3><p>Farm: Green Horizon • Arizona • 24 hectares</p><p>Devices: 12 • Water Saved: <b id="saved">0 L</b> • Energy Saved: 38 kWh</p></div></section>
-  <section class="screen" id="lab"><h2>Simulation Lab</h2><div class="grid"><button class="btn" onclick="sim('rain')">Rainstorm</button><button class="btn" onclick="sim('drought')">Drought</button><button class="btn" onclick="sim('empty')">Tank Empty</button><button class="btn" onclick="sim('leak')">Pipe Leak</button><button class="btn" onclick="sim('pumpfail')">Pump Failure</button><button class="btn" onclick="sim('sensorfail')">Sensor Failure</button><button class="btn" onclick="sim('lowbat')">Low Battery</button><button class="btn" onclick="sim('offline')">Internet Loss</button></div></section>
-  <section class="screen" id="map"><h2>Farm Map</h2><div class="map"><div class="pin" style="left:20%;top:35%"></div><div class="pin" style="left:40%;top:60%"></div><div class="pin" style="left:70%;top:40%"></div><div class="pin" style="left:55%;top:20%"></div></div></section>
-  <section class="screen" id="devices"><h2>Devices</h2><div id="devList"></div></section>
+  <section id="login" class="auth hide">
+    <div class="card">
+      <h2>Login</h2>
+      <div class="list">
+        <input id="user" placeholder="Farmer name" value="Ravi Patel" />
+        <input id="farm" placeholder="Farm name" value="GreenField Farm" />
+        <button id="loginBtn">Enter Dashboard</button>
+      </div>
+    </div>
+  </section>
 
-  <button class="fab" onclick="go('lab')">⚗</button>
-  <nav class="nav" id="nav"></nav>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <div id="app" class="app hide">
+    <aside class="sidebar">
+      <div class="brand">🌱 WaterWise</div>
+      <div id="nav"></div>
+    </aside>
+    <main>
+      <div id="dashboard" class="screen active"></div>
+      <div id="control" class="screen"></div>
+      <div id="sensors" class="screen"></div>
+      <div id="weather" class="screen"></div>
+      <div id="analytics" class="screen"></div>
+      <div id="notifications" class="screen"></div>
+      <div id="health" class="screen"></div>
+      <div id="settings" class="screen"></div>
+      <div id="profile" class="screen"></div>
+      <div id="lab" class="screen"></div>
+      <div id="devices" class="screen"></div>
+    </main>
+  </div>
+
+  <div id="toasts" class="toast-wrap"></div>
+
 <script>
-const state={soil:62,tank:84,temp:29,flow:0,battery:78,solar:55,pump:false,valve:false,rain:false,wind:8,humidity:51,uptime:0,saved:0,alerts:[],deviceOnline:true,pumpFail:false,sensorFail:false};
-const screens=['home','weather','control','analytics','notifications','settings','sensors','health','profile','lab','map','devices'];
-const navBase=['home','weather','control','analytics','notifications','settings'];
-nav.innerHTML=navBase.map(s=>`<button onclick="go('${s}')">${({home:'🏠',weather:'⛅',control:'🎛',analytics:'📊',notifications:'🔔',settings:'⚙'})[s]}<span>${s}</span></button>`).join('');
-function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');[...nav.children].forEach((b,i)=>b.classList.toggle('active',navBase[i]===id));}
-let slides=[['Smart irrigation','AI-inspired auto watering with thresholds.'],['Water-saving','Optimize tank use and avoid overwatering.'],['Solar-powered','Charge battery during daytime.'],['Monitoring','Live IoT sensors and alerts.'],['Automation','Rules react to rain, tank, faults.']];let si=0;
-function nextSlide(){si++;if(si>=slides.length)return go('login');slideT.textContent=slides[si][0];slideD.textContent=slides[si][1]}
-function skipOnboard(){go('login')} function enterApp(){go('home')}
-function notify(msg,type='info'){state.alerts.unshift({msg,t:new Date().toLocaleTimeString(),type});if(state.alerts.length>20)state.alerts.pop();let t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),1600);render();}
-function startPump(){if(state.pumpFail||state.tank<5)return notify('Cannot start pump','bad');state.pump=true;state.valve=true;notify('Irrigation started');}
-function stopPump(){state.pump=false;state.flow=0;notify('Pump stopped');}
-function stopAll(){state.pump=false;state.valve=false;state.flow=0;notify('Emergency stop engaged','bad');}
-function sim(x){({rain:()=>{state.rain=true;notify('Rain detected');},drought:()=>{state.soil=18;state.rain=false;notify('Drought mode');},empty:()=>{state.tank=2;notify('Tank empty','bad');},leak:()=>{state.flow+=25;notify('Leak detected','bad');},pumpfail:()=>{state.pumpFail=true;state.pump=false;notify('Pump failure','bad');},sensorfail:()=>{state.sensorFail=true;notify('Sensor failure','bad');},lowbat:()=>{state.battery=12;notify('Low battery','bad');},offline:()=>{state.deviceOnline=false;notify('Internet lost','bad');}}[x]||(()=>{}))();render();}
-function render(){
-  irrigBadge.textContent=state.pump?'Irrigating':'Idle';
-  const cards=[['Soil',state.soil+'%'],['Tank',state.tank+'%'],['Temp',state.temp.toFixed(1)+'°C'],['Flow',state.flow.toFixed(1)+' L/m'],['Battery',state.battery.toFixed(0)+'%'],['Solar',state.solar.toFixed(0)+'%'],['Pump',state.pump?'ON':'OFF'],['Valve',state.valve?'OPEN':'CLOSED'],['Internet',state.deviceOnline?'Online':'Offline'],['Weather',state.rain?'Rain':'Clear'],['Activity',state.pump?'Running':'Standby'],['Health',state.sensorFail?'Sensor Fault':'Good']];
-  homeGrid.innerHTML=cards.map(c=>`<div class='card'><div class='muted'>${c[0]}</div><div class='metric'>${c[1]}</div></div>`).join('');
-  sensorGrid.innerHTML=['Soil','Tank','Flow','Temperature','Battery V','Solar In'].map((n,i)=>`<div class='card'><div>${n}</div><div class='metric'>${[state.soil+'%',state.tank+'%',state.flow.toFixed(1),state.temp.toFixed(1)+'°C',(11+state.battery/20).toFixed(1)+'V',state.solar.toFixed(0)+'W'][i]}</div><div class='badge' style='background:${state.sensorFail?'rgba(255,77,103,.2)':'rgba(45,227,143,.15)'}'>${state.sensorFail?'Fault':'Healthy'}</div><input type='range' min='0' max='100' value='50'></div>`).join('');
-  wTemp.textContent=state.temp.toFixed(1)+'°'; wHum.textContent=state.humidity.toFixed(0)+'%'; wWind.textContent=state.wind.toFixed(0)+' km/h'; wRain.textContent=(state.rain?70:15)+'%';
-  runtime.textContent=Math.floor(state.uptime/60)+'m'; flowbar.style.width=Math.min(100,state.flow*3)+'%'; saved.textContent=Math.round(state.saved)+' L';
-  notifList.innerHTML=state.alerts.map(a=>`<div class='card'><b>${a.msg}</b><div class='muted'>${a.t}</div></div>`).join('')||"<p class='muted'>No alerts yet.</p>";
-  healthGrid.innerHTML=[['ESP32',state.deviceOnline?92:22],['WiFi',state.deviceOnline?88:10],['Battery',state.battery],['Solar',state.solar],['Sensors',state.sensorFail?25:90],['Pump',state.pumpFail?15:86]].map(([n,v])=>`<div class='card'><div>${n}</div><div class='progress'><div class='bar' style='width:${v}%;background:${v>70?'#2de38f':v>35?'#ffb020':'#ff4d67'}'></div></div><div class='muted'>${v.toFixed? v.toFixed(0):v}%</div></div>`).join('');
-  devList.innerHTML=['ESP32 Controller','Soil Sensor','Tank Sensor','Flow Sensor','Pump Relay','Valve Controller'].map((d,i)=>`<div class='card'><b>${d}</b><p>${state.deviceOnline?'Online':'Offline'} • Battery ${Math.max(20,state.battery-i*5)}% • FW v1.${i+2} • Sync ${new Date().toLocaleTimeString()}</p></div>`).join('');
+const screens=[['dashboard','Main Dashboard'],['control','Pump & Valve Control'],['sensors','Sensor Monitoring'],['weather','Weather'],['analytics','Analytics / History'],['notifications','Notifications Center'],['health','System Health'],['settings','Settings'],['profile','Profile'],['lab','Simulation Lab'],['devices','Device Manager']];
+const state={
+  logged:false, dark:true, notify:true, auto:true, speed:1,
+  weather:'Sunny', online:true, rain:false, storm:false,
+  soil:62, tank:78, temp:29, flow:0, battery:73, solarIn:31,
+  pump:false, valve:false, leak:false, pumpFail:false, sensorFail:false,
+  pumpRuntime:0, waterUsed:0, uptime:0, wifi:86,
+  history:{t:[],soil:[],temp:[],battery:[],water:[],runtime:[]}, notes:[],
+  profile:{farmer:'Ravi Patel',farm:'GreenField Farm',size:'12 acres'}
+};
+const devices=['ESP32 Controller','Soil Sensor','Tank Sensor','Flow Sensor','Pump Relay','Valve Controller'];
+let charts={};
+
+const addNote=(msg,type='ok')=>{const t=new Date().toLocaleTimeString(); state.notes.unshift({msg,t,type}); if(state.notify){const d=document.createElement('div'); d.className='toast'; d.style.borderLeftColor= type==='bad'?'var(--bad)':type==='warn'?'var(--warn)':'var(--ok)'; d.innerHTML=`<b>${msg}</b><div class='muted'>${t}</div>`;toasts.appendChild(d);setTimeout(()=>d.remove(),3800);} };
+const statusClass=v=>v?'ok':'bad';
+const pct=v=>Math.max(0,Math.min(100,v));
+
+function renderNav(){nav.innerHTML=screens.map(([id,n],i)=>`<button class='nav-btn ${i===0?'active':''}' data-id='${id}'>${n}</button>`).join('');
+nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));document.getElementById(b.dataset.id).classList.add('active');b.classList.add('active');if(b.dataset.id==='analytics'&&!charts.soil)buildCharts();render();});}
+
+function controlPump(on,reason='Manual'){ if(state.pumpFail && on){addNote('Pump failure: cannot start','bad');return;} state.pump=on; if(!on) state.flow=0; addNote(`Pump ${on?'started':'stopped'} (${reason})`,on?'ok':'warn'); }
+function controlValve(on){ state.valve=on; addNote(`Valve ${on?'opened':'closed'}`,on?'ok':'warn'); }
+function shutdown(){state.pump=false;state.valve=false;state.flow=0;addNote('Emergency shutdown activated','bad');}
+
+function autoLogic(){
+  const shouldIrrigate=state.auto && state.soil<38 && state.tank>18 && !state.rain && !state.leak && !state.pumpFail && state.online;
+  const mustStop=state.rain || state.tank<10 || state.pumpFail || state.leak || !state.online;
+  if(shouldIrrigate && (!state.pump || !state.valve)){ controlPump(true,'Auto'); controlValve(true); }
+  if(mustStop && (state.pump||state.valve)){ controlPump(false,'Auto safety'); controlValve(false); addNote('Auto safety stop triggered','bad'); }
 }
-function tick(){let sp=+speed?.value||1;state.uptime+=1*sp;state.temp+= (Math.random()-.5)*.25*sp;state.wind=Math.max(0,state.wind+(Math.random()-.5)*.8);if(state.pump){state.flow=Math.min(32,state.flow+1.5);state.tank=Math.max(0,state.tank-.18*sp);state.soil=Math.min(100,state.soil+.22*sp);state.battery=Math.max(0,state.battery-.07*sp);state.saved+=1.4*sp;}else{state.flow=Math.max(0,state.flow-.8);state.soil=Math.max(0,state.soil-.08*sp)}
-if(!state.rain&&state.soil<35&&state.tank>10&&!state.pumpFail&&auto?.checked)startPump(); if(state.rain||state.tank<8||state.pumpFail) state.pump=false;
- if(state.battery<15)notify('Battery low','bad'); state.solar=Math.max(0,Math.min(100,state.solar+(Math.random()-.4)*3)); state.battery=Math.min(100,state.battery+state.solar/250);
- render();}
-let b=0;let boot=setInterval(()=>{b+=8;bootbar.style.width=b+'%';if(b>=100){clearInterval(boot);go('onboarding');}},120);
-setInterval(tick,1000);
-setTimeout(()=>{if(window.Chart){new Chart(chart1,{type:'line',data:{labels:['M','T','W','T','F','S','S'],datasets:[{data:[62,58,55,61,64,59,57],borderColor:'#43c8ff'}]}});new Chart(chart2,{type:'bar',data:{labels:['W1','W2','W3','W4'],datasets:[{data:[130,110,95,80],backgroundColor:'#9b7bff'}]}})}},600);
-render();
+
+function simulate(){
+  const k=state.speed;
+  state.uptime+=1*k;
+  if(state.weather==='Rain'){ state.rain=true; state.soil+=0.9*k; }
+  else if(state.weather==='Storm'){ state.rain=true; state.storm=true; state.soil+=1.4*k; }
+  else { state.rain=false; state.storm=false; state.soil-=0.22*k; }
+  if(state.weather==='Sunny') state.temp+= (Math.random()-.35)*0.5*k; else state.temp+= (Math.random()-.55)*0.4*k;
+  if(state.pump && state.valve){ state.flow=12+Math.random()*4; state.tank-=0.45*k; state.soil+=0.55*k; state.pumpRuntime+=1*k; state.waterUsed+=state.flow/60; }
+  else state.flow=Math.max(0,state.flow-3*k);
+  let solarBase=state.weather==='Sunny'?35:state.weather==='Cloudy'?19:8;
+  state.solarIn=solarBase+Math.random()*6;
+  state.battery += (state.solarIn/140 - (state.pump?0.34:0.1))*k;
+  state.soil=pct(state.soil); state.tank=pct(state.tank); state.battery=pct(state.battery); state.temp=Math.max(10,Math.min(50,state.temp));
+  if(state.leak){ state.tank-=0.8*k; state.flow+=6; }
+  if(state.tank<15) addNote('Low tank level','warn');
+  if(state.battery<20) addNote('Battery low','warn');
+  autoLogic();
+  randomEvents();
+  pushHistory();
+  render();
+}
+
+function randomEvents(){
+  if(Math.random()<0.003){ state.weather=['Sunny','Cloudy','Rain','Storm'][Math.floor(Math.random()*4)]; if(state.weather.includes('Rain')||state.weather==='Storm') addNote('Rain detected','warn'); }
+}
+
+function pushHistory(){
+  const t=new Date().toLocaleTimeString();
+  ['t','soil','temp','battery','water','runtime'].forEach((k,i)=>{if(i===0) state.history.t.push(t);});
+  state.history.soil.push(state.soil); state.history.temp.push(state.temp); state.history.battery.push(state.battery); state.history.water.push(state.waterUsed); state.history.runtime.push(state.pumpRuntime);
+  if(state.history.t.length>40){Object.keys(state.history).forEach(k=>state.history[k].shift());}
+  if(charts.soil){ ['soil','temp','battery','water','runtime'].forEach(k=>{charts[k].data.labels=state.history.t; charts[k].data.datasets[0].data=state.history[k]; charts[k].update('none');}); }
+}
+
+function buildCharts(){
+  ['soil','water','runtime','temp','battery'].forEach(id=>{
+    const ctx=document.getElementById(id+'Chart').getContext('2d');
+    charts[id]=new Chart(ctx,{type:'line',data:{labels:state.history.t,datasets:[{data:state.history[id],borderColor:'#22c55e',pointRadius:0,tension:.25}]},options:{plugins:{legend:{display:false}},scales:{x:{display:false},y:{ticks:{color:'#9ca3af'},grid:{color:'#30343b'}}}}});
+  });
+}
+
+function render(){
+  document.body.classList.toggle('light',!state.dark);
+  dashboard.innerHTML=`<div class='top'><h2>Main Dashboard</h2><div class='muted'>System ${state.online?'Online':'Offline'} | ${state.weather}</div></div><div class='grid'>
+  ${card('Soil Moisture',state.soil.toFixed(1)+'%')}${card('Tank Level',state.tank.toFixed(1)+'%')}${card('Water Flow',state.flow.toFixed(1)+' L/min')}${card('Temperature',state.temp.toFixed(1)+'°C')}${card('Battery',state.battery.toFixed(1)+'%')}${card('Solar Input',state.solarIn.toFixed(1)+' W')}
+  ${card('Pump Status',state.pump?'<span class=ok>Running</span>':'<span class=bad>Stopped</span>')}${card('Valve Status',state.valve?'<span class=ok>Open</span>':'<span class=bad>Closed</span>')}${card('Internet',state.online?'<span class=ok>Connected</span>':'<span class=bad>Disconnected</span>')}${card('System Status',healthStatus())}</div>`;
+
+  control.innerHTML=`<div class='top'><h2>Control Center</h2></div><div class='row'>
+  <button onclick="controlPump(true)">Start Pump</button><button onclick="controlPump(false)">Stop Pump</button><button onclick="controlValve(true)">Open Valve</button><button onclick="controlValve(false)">Close Valve</button><button onclick="state.auto=true;addNote('Auto mode enabled')">Enable Auto Mode</button><button onclick="state.auto=false;addNote('Auto mode disabled','warn')">Disable Auto Mode</button><button onclick="shutdown()">Emergency Shutdown</button></div>`;
+
+  sensors.innerHTML=`<div class='top'><h2>Sensor Monitoring</h2></div><div class='grid'>
+  ${sensor('Soil Sensor',!state.sensorFail,state.soil.toFixed(1)+'%')}${sensor('Tank Sensor',true,state.tank.toFixed(1)+'%')}${sensor('Flow Sensor',true,state.flow.toFixed(1)+' L/min')}${sensor('Temperature Sensor',!state.sensorFail,state.temp.toFixed(1)+'°C')}${sensor('Battery Voltage',true,(11+(state.battery/100)*1.6).toFixed(2)+'V')}${sensor('Solar Power Input',true,state.solarIn.toFixed(1)+'W')}</div>`;
+
+  weather.innerHTML=`<div class='top'><h2>Weather</h2></div><div class='row'><button onclick="setWeather('Sunny')">Sunny</button><button onclick="setWeather('Cloudy')">Cloudy</button><button onclick="setWeather('Rain')">Rain</button><button onclick="setWeather('Storm')">Storm</button></div><p class='muted'>Weather affects moisture, solar charging, and irrigation safety logic.</p>`;
+
+  analytics.innerHTML=`<div class='top'><h2>Analytics / History</h2></div><div class='grid'>
+  <div class='card'><div class='title'>Soil Moisture</div><canvas id='soilChart'></canvas></div>
+  <div class='card'><div class='title'>Water Usage</div><canvas id='waterChart'></canvas></div>
+  <div class='card'><div class='title'>Pump Runtime</div><canvas id='runtimeChart'></canvas></div>
+  <div class='card'><div class='title'>Temperature</div><canvas id='tempChart'></canvas></div>
+  <div class='card'><div class='title'>Battery</div><canvas id='batteryChart'></canvas></div></div>`;
+
+  notifications.innerHTML=`<div class='top'><h2>Notifications Center</h2><button onclick="state.notes=[];render()">Clear</button></div><div class='list'>${state.notes.slice(0,80).map(n=>`<div class='item'><span>${n.msg}</span><span class='muted'>${n.t}</span></div>`).join('')||'<div class=muted>No notifications yet.</div>'}</div>`;
+  health.innerHTML=`<div class='top'><h2>System Health</h2></div><div class='grid'>${card('ESP32 Status',state.online?'<span class=ok>Healthy</span>':'<span class=bad>Offline</span>')}${card('WiFi Signal',state.wifi+'%')}${card('Battery Health',state.battery>25?'<span class=ok>Good</span>':'<span class=warn>Low</span>')}${card('Sensor Health',!state.sensorFail?'<span class=ok>Nominal</span>':'<span class=bad>Failure</span>')}${card('Pump Health',!state.pumpFail?'<span class=ok>Good</span>':'<span class=bad>Failure</span>')}${card('Solar Charging',state.solarIn>12?'<span class=ok>Active</span>':'<span class=warn>Weak</span>')}${card('Device Uptime',Math.floor(state.uptime)+' s')}</div>`;
+  settings.innerHTML=`<div class='top'><h2>Settings</h2></div><div class='list'>
+  <label class='item'>Dark mode <input type='checkbox' ${state.dark?'checked':''} onchange='state.dark=this.checked;render()'></label>
+  <label class='item'>Auto irrigation <input type='checkbox' ${state.auto?'checked':''} onchange='state.auto=this.checked'></label>
+  <label class='item'>Notifications <input type='checkbox' ${state.notify?'checked':''} onchange='state.notify=this.checked'></label>
+  <label class='item'>Simulation speed <input type='range' min='0.5' max='4' step='0.5' value='${state.speed}' onchange='state.speed=parseFloat(this.value)'></label>
+  <button onclick='resetSystem()'>Reset system</button></div>`;
+  profile.innerHTML=`<div class='top'><h2>Profile</h2></div><div class='grid'>${card('Farmer',state.profile.farmer)}${card('Farm',state.profile.farm)}${card('Farm Size',state.profile.size)}${card('Water Saved',(state.waterUsed*0.18).toFixed(1)+' m³')}${card('Irrigation Runtime',Math.floor(state.pumpRuntime)+' s')}${card('Device Count',devices.length)}</div>`;
+  lab.innerHTML=`<div class='top'><h2>Simulation Lab</h2></div><div class='row'>
+  <button onclick="setWeather('Storm')">Rainstorm</button><button onclick="state.soil=10;addNote('Drought simulated','warn')">Drought</button><button onclick="state.tank=2;addNote('Tank empty simulated','bad')">Tank empty</button><button onclick="state.leak=!state.leak;addNote('Pipe leak '+(state.leak?'enabled':'cleared'),state.leak?'bad':'ok')">Pipe leak</button><button onclick="state.pumpFail=!state.pumpFail;addNote('Pump failure '+(state.pumpFail?'detected':'cleared'),state.pumpFail?'bad':'ok')">Pump failure</button><button onclick="state.sensorFail=!state.sensorFail;addNote('Sensor failure '+(state.sensorFail?'detected':'cleared'),state.sensorFail?'bad':'ok')">Sensor failure</button><button onclick="state.battery=8;addNote('Low battery simulated','warn')">Low battery</button><button onclick="state.online=!state.online;addNote('Internet '+(state.online?'restored':'lost'),state.online?'ok':'bad')">Internet loss</button></div>`;
+  devices.innerHTML=`<div class='top'><h2>Device Manager</h2></div><div class='list'>${devices.map(d=>`<div class='item'><div><b>${d}</b><div class='muted'>Last sync: ${new Date().toLocaleTimeString()}</div></div><div class='${state.online?'ok':'bad'}'>${state.online?'Online':'Offline'}</div></div>`).join('')}</div>`;
+}
+
+function card(t,v){return `<div class='card'><div class='title'>${t}</div><div class='value'>${v}</div></div>`}
+function sensor(name,on,val){return `<div class='card'><div class='title'>${name}</div><div class='value'>${val}</div><div class='${statusClass(on)}'>${on?'Online':'Offline / Fault'}</div></div>`}
+function setWeather(w){state.weather=w; if(w==='Rain'||w==='Storm') addNote('Rain detected','warn'); render();}
+function healthStatus(){ if(!state.online||state.pumpFail||state.leak) return '<span class=bad>Critical</span>'; if(state.battery<20||state.tank<15) return '<span class=warn>Warning</span>'; return '<span class=ok>Healthy</span>'; }
+function resetSystem(){ Object.assign(state,{weather:'Sunny',online:true,rain:false,storm:false,soil:62,tank:78,temp:29,flow:0,battery:73,solarIn:31,pump:false,valve:false,leak:false,pumpFail:false,sensorFail:false,pumpRuntime:0,waterUsed:0,uptime:0,wifi:86,notes:[],history:{t:[],soil:[],temp:[],battery:[],water:[],runtime:[]}}); charts={}; addNote('System reset complete'); render(); }
+
+setTimeout(()=>{splash.classList.add('hide'); login.classList.remove('hide');},1400);
+loginBtn.onclick=()=>{state.profile.farmer=user.value||state.profile.farmer; state.profile.farm=farm.value||state.profile.farm; login.classList.add('hide'); app.classList.remove('hide'); renderNav(); render(); addNote('Welcome to WaterWise'); setInterval(simulate,1000); };
 </script>
 </body>
 </html>
