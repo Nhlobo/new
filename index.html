@@ -305,14 +305,14 @@
         <span class="brand">WaterWise Smart Farm</span>
         <span class="status-pill">System Healthy</span>
       </div>
-      <h1 id="greeting">Welcome back, Sarah 👋</h1>
-      <p class="subtitle" id="device-summary">Automation active across connected field devices.</p>
+      <h1 id="greeting">Welcome back 👋</h1>
+      <p class="subtitle" id="device-summary">Automation active across your connected field devices.</p>
     </header>
 
     <section class="content">
       <article class="card weather-hero span-2">
         <h2 class="card-title">Today at Emerald Acres</h2>
-        <p class="card-subtitle" id="weather-summary">Partly cloudy • Light wind • Next irrigation cycle planned</p>
+        <p class="card-subtitle" id="weather-summary">Weather is updating • Next irrigation cycle syncing</p>
         <div class="metrics">
           <div class="metric"><div class="metric-label">Temperature</div><div class="metric-value">24°C</div></div>
           <div class="metric"><div class="metric-label">Humidity</div><div class="metric-value">61%</div></div>
@@ -351,7 +351,9 @@
       <article class="card span-2">
         <h2 class="card-title">Alerts & Schedule</h2>
         <p class="card-subtitle">Prioritized events for the next 24 hours.</p>
-        <ul class="list" id="schedule-list"></ul>
+        <ul class="list" id="schedule-list">
+          <li><span>Loading schedule…</span><span class="tag ok">Syncing</span></li>
+        </ul>
       </article>
     </section>
 
@@ -383,6 +385,7 @@
     };
 
     const formatRelativeTime = (minutesFromNow) => {
+      if (minutesFromNow <= 0) return 'now';
       if (minutesFromNow < 60) return `in ${minutesFromNow} min`;
       const hours = Math.floor(minutesFromNow / 60);
       const minutes = minutesFromNow % 60;
