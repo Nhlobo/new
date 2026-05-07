@@ -2,6 +2,8 @@ const STORAGE_KEY = 'waterwise-v9-demo-state';
 const TICK_INTERVAL_MS = 3000;
 const TICK_INTERVAL_SECONDS = TICK_INTERVAL_MS / 1000;
 const MAX_HISTORY_POINTS = 7 * 24 * 20;
+const SENSOR_ERROR_PROBABILITY = 0.015;
+const TEMPERATURE_CHANGE_PROBABILITY = 0.05;
 const ROUTES = ['dashboard', 'control', 'history', 'faults', 'users', 'weather', 'settings'];
 const routeTitles = {
   dashboard: 'Dashboard',
@@ -74,7 +76,7 @@ const toastWrap = document.getElementById('toastWrap');
 init();
 
 function init() {
-  if (!location.hash || !ROUTES.includes(location.hash.replace(/^#\/?/, ''))) {
+  if (!location.hash || !ROUTES.includes(parseHashRoute(location.hash))) {
     history.replaceState({}, '', '#/dashboard');
   }
   state.route = getRouteFromHash();
@@ -94,7 +96,7 @@ function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) return structuredClone(defaultState);
-    const merged = deepMerge(structuredClone(defaultState), JSON.parse(saved));
+    const merged = mergeSavedState(JSON.parse(saved));
     merged.connectivity = merged.offline ? 'Offline' : 'Online';
     return merged;
   } catch {
@@ -102,17 +104,100 @@ function loadState() {
   }
 }
 
-function deepMerge(base, incoming) {
-  const blockedKeys = new Set(['__proto__', 'prototype', 'constructor']);
-  Object.keys(incoming || {}).forEach((key) => {
-    if (blockedKeys.has(key)) return;
-    if (incoming[key] && typeof incoming[key] === 'object' && !Array.isArray(incoming[key])) {
-      base[key] = deepMerge(base[key] || {}, incoming[key]);
-    } else {
-      base[key] = incoming[key];
+function mergeSavedState(saved) {
+  if (!saved || typeof saved !== 'object' || Array.isArray(saved)) {
+    return structuredClone(defaultState);
+  }
+
+  const next = structuredClone(defaultState);
+
+  if (ROUTES.includes(saved.route)) next.route = saved.route;
+  if (Number.isFinite(saved.lastUpdated)) next.lastUpdated = saved.lastUpdated;
+  if (Number.isFinite(saved.startedAt)) next.startedAt = saved.startedAt;
+  if (saved.mode === 'auto' || saved.mode === 'manual') next.mode = saved.mode;
+  next.offline = Boolean(saved.offline);
+  next.leakSim = Boolean(saved.leakSim);
+  next.noFlowSim = Boolean(saved.noFlowSim);
+  next.pumpOn = Boolean(saved.pumpOn);
+  next.valveOpen = Boolean(saved.valveOpen);
+  if (Number.isFinite(saved.soilMoisture)) next.soilMoisture = clamp(saved.soilMoisture, 0, 100);
+  if (Number.isFinite(saved.tankLevel)) next.tankLevel = clamp(saved.tankLevel, 0, 100);
+  if (Number.isFinite(saved.flowRate)) next.flowRate = clamp(saved.flowRate, 0, 14);
+  if (Number.isFinite(saved.temperature)) next.temperature = clamp(saved.temperature, 15, 40);
+  if (Number.isFinite(saved.batteryVoltage)) next.batteryVoltage = clamp(saved.batteryVoltage, 11, 13.1);
+  if (Number.isFinite(saved.solarCharging)) next.solarCharging = clamp(saved.solarCharging, 0, 100);
+  if (saved.historyFilter === '1h' || saved.historyFilter === '24h' || saved.historyFilter === '7d') {
+    next.historyFilter = saved.historyFilter;
+  }
+  if (Number.isFinite(saved.noFlowTicks)) next.noFlowTicks = Math.max(0, saved.noFlowTicks);
+
+  if (saved.settings && typeof saved.settings === 'object' && !Array.isArray(saved.settings)) {
+    if (Number.isFinite(saved.settings.soilTarget)) next.settings.soilTarget = clamp(saved.settings.soilTarget, 20, 85);
+    if (Number.isFinite(saved.settings.minTankLevel)) next.settings.minTankLevel = clamp(saved.settings.minTankLevel, 5, 50);
+    if (Number.isFinite(saved.settings.flowTimeoutMinutes)) next.settings.flowTimeoutMinutes = clamp(saved.settings.flowTimeoutMinutes, 1, 20);
+    next.settings.alertsEnabled = saved.settings.alertsEnabled !== false;
+    if (typeof saved.settings.farmName === 'string' && saved.settings.farmName.trim()) next.settings.farmName = saved.settings.farmName.trim();
+    if (typeof saved.settings.deviceId === 'string' && saved.settings.deviceId.trim()) next.settings.deviceId = saved.settings.deviceId.trim();
+    if (typeof saved.settings.appVersion === 'string' && saved.settings.appVersion.trim()) next.settings.appVersion = saved.settings.appVersion.trim();
+  }
+
+  if (Array.isArray(saved.faults)) {
+    next.faults = saved.faults
+      .filter((f) => f && typeof f === 'object')
+      .map((f) => ({
+        id: typeof f.id === 'string' ? f.id : crypto.randomUUID(),
+        type: typeof f.type === 'string' ? f.type : 'unknown',
+        severity: ['critical', 'high', 'medium', 'low'].includes(f.severity) ? f.severity : 'medium',
+        time: Number.isFinite(f.time) ? f.time : Date.now(),
+        status: f.status === 'resolved' ? 'resolved' : 'active',
+        description: typeof f.description === 'string' ? f.description : 'Simulated system fault.'
+      }));
+  }
+
+  if (Array.isArray(saved.users)) {
+    next.users = saved.users
+      .filter((u) => u && typeof u === 'object' && typeof u.name === 'string' && ['owner', 'worker', 'admin'].includes(u.role))
+      .map((u) => ({
+        id: typeof u.id === 'string' ? u.id : crypto.randomUUID(),
+        name: u.name.trim() || 'Demo User',
+        role: u.role
+      }));
+    if (!next.users.length) next.users = structuredClone(defaultState.users);
+  }
+
+  if (saved.weather && typeof saved.weather === 'object' && !Array.isArray(saved.weather)) {
+    if (typeof saved.weather.current === 'string') next.weather.current = saved.weather.current;
+    next.weather.rainExpected = Boolean(saved.weather.rainExpected);
+    if (Array.isArray(saved.weather.forecast)) {
+      next.weather.forecast = saved.weather.forecast
+        .filter((item) => item && typeof item === 'object')
+        .slice(0, 3)
+        .map((item, index) => ({
+          day: typeof item.day === 'string' ? item.day : ['Today', 'Tomorrow', `Day ${index + 1}`][index],
+          condition: typeof item.condition === 'string' ? item.condition : 'Sunny',
+          rain: Number.isFinite(item.rain) ? clamp(item.rain, 0, 100) : 10,
+          high: Number.isFinite(item.high) ? clamp(item.high, -10, 50) : 28,
+          low: Number.isFinite(item.low) ? clamp(item.low, -15, 45) : 18
+        }));
+      if (!next.weather.forecast.length) next.weather.forecast = structuredClone(defaultState.weather.forecast);
     }
-  });
-  return base;
+  }
+
+  if (Array.isArray(saved.history)) {
+    next.history = saved.history
+      .filter((entry) => entry && typeof entry === 'object')
+      .map((entry) => ({
+        ts: Number.isFinite(entry.ts) ? entry.ts : Date.now(),
+        soil: Number.isFinite(entry.soil) ? clamp(entry.soil, 0, 100) : 0,
+        tank: Number.isFinite(entry.tank) ? clamp(entry.tank, 0, 100) : 0,
+        flow: Number.isFinite(entry.flow) ? clamp(entry.flow, 0, 14) : 0,
+        temp: Number.isFinite(entry.temp) ? clamp(entry.temp, 15, 40) : 20,
+        battery: Number.isFinite(entry.battery) ? clamp(entry.battery, 11, 13.1) : 12
+      }))
+      .slice(-MAX_HISTORY_POINTS);
+  }
+
+  return next;
 }
 
 function saveState() {
@@ -121,8 +206,12 @@ function saveState() {
 }
 
 function getRouteFromHash() {
-  const route = location.hash.replace(/^#\/?/, '');
+  const route = parseHashRoute(location.hash);
   return ROUTES.includes(route) ? route : 'dashboard';
+}
+
+function parseHashRoute(hashValue) {
+  return String(hashValue || '').replace(/^#\/?/, '');
 }
 
 function renderNav() {
@@ -668,7 +757,7 @@ function simulateTick() {
     resolveFaultByType('tank low');
   }
 
-  if (Math.random() < 0.05) {
+  if (Math.random() < TEMPERATURE_CHANGE_PROBABILITY) {
     state.temperature = clamp(state.temperature + randomBetween(-0.4, 0.8), 15, 40);
   }
 
@@ -700,7 +789,7 @@ function applyWeatherEffects() {
 }
 
 function maybeInjectSensorError() {
-  if (Math.random() < 0.015) {
+  if (Math.random() < SENSOR_ERROR_PROBABILITY) {
     addFault('sensor error', 'medium', 'Intermittent simulated sensor calibration anomaly.');
   }
 }
