@@ -3,962 +3,892 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>WaterWise - Smart Irrigation System</title>
+  <title>WaterWise — Futuristic Smart Irrigation OS</title>
+  <!-- Three.js & GSAP CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.153.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@barba/core"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    /* ---- Theme Variables ---- */
+    /* --- FOUNDATIONAL CSS VARIABLES FOR FUTURISTIC SYSTEM --- */
     :root {
-      --primary: #09fcb4;
-      --primary-bright: #3cffef;
-      --primary-dark: #00966e;
-      --accent: #397bfe;
-      --accent-bright: #1de3fc;
-      --glass: rgba(36, 58, 96, 0.2);
-      --glass-light: rgba(255,255,255,0.6);
-      --glass-border: rgba(85,255,222,0.2);
-      --text-primary: #e8f7ff;
-      --text-secondary: #97aecd;
-      --bg-gradient: linear-gradient(135deg, #111217 0%, #233048 100%);
-      --card-gradient: linear-gradient(120deg, rgba(9,252,180,0.10) 0%, rgba(57,123,254,0.13) 100%);
-      --shadow: 0 4px 24px 0 rgba(0,0,0,0.20), 0 1.5px 6px 0 rgba(9,252,180, 0.12);
-      --shadow-hover: 0 8px 34px 0 rgba(0,0,0,0.27), 0 1.5px 10px 0 rgba(57,123,254, 0.14);
-    }
-    [data-theme="light"] {
-      --primary: #07bc77;
-      --accent: #4869e6;
-      --glass: rgba(250,252,253,0.7);
-      --glass-border: rgba(92,214,176,0.22);
-      --text-primary: #181748;
-      --text-secondary: #475379;
-      --bg-gradient: linear-gradient(120deg, #e3f9fb 0%, #e4eafc 100%);
-      --card-gradient: linear-gradient(120deg, #edfff5 0%, #d9eafe 100%);
-      --shadow: 0 4px 15px #abcfc96c, 0 1.5px 6px 0 #4869e619;
-      --shadow-hover: 0 10px 24px #abcfc980;
+      --primary: #00ffe0;
+      --accent: #4670ff;
+      --danger: #f90080;
+      --info: #1ff5f9;
+      --bg-dark: #0c1020;
+      --bg-gradient: linear-gradient(135deg, #151B2B 0%, #091020 100%);
+      --glass-deep: rgba(16,40,45,0.66);
+      --glass: rgba(32,56,68,0.33);
+      --glass-bright: rgba(170,255,244,0.13);
+      --ui-glow: 0 0 18px #1ff5f9, 0 0 56px #4367ff80;
+      --scanline: repeating-linear-gradient(
+        to bottom,
+        #95f8ff09 0px,
+        #95f8ff0A 1.6px,
+        transparent 2.4px,
+        transparent 6px
+      );
+      --glass-gradient: linear-gradient(110deg, #41eaff16 0%, #0fffd82e 90%);
+      --button-ripple: radial-gradient(circle, #27ffe045 28%, transparent 70%);
+      --mesh-1: linear-gradient(150deg,#00ffe011 0%,#4670ff13 100%);
+      --mesh-2: conic-gradient(from 63deg at 50% 110%,#71faff1f 0,#004cf034 100%);
+      --badge-gradient: linear-gradient(90deg,#09fcb4 27%,#1de3fc 86%);
     }
 
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: 'Inter', system-ui, sans-serif;
+    body,html {
+      width:100vw; height:100vh; margin:0; padding:0;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
       background: var(--bg-gradient);
-      color: var(--text-primary);
-      transition: background 0.6s cubic-bezier(.77,0,.18,1), color 0.4s;
+      color: #eafffe;
+      overflow: hidden;
     }
     body {
       min-height: 100vh;
-      width: 100vw;
-      overflow-x: hidden;
-      overscroll-behavior-x: none;
+      background: var(--bg-gradient);
       position: relative;
+      box-shadow:0 0 1px #00ffe0;
+      /* Animated mesh gradients overlays */
+      z-index: 1;
     }
-
-    /* --- Splash Screen --- */
-    #splash {
+    #bg-3d-canvas {
       position: fixed;
-      z-index: 1000;
-      inset: 0;
-      background: linear-gradient(120deg, var(--primary), var(--accent));
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.5s;
-      animation: fadeInSplash 1.2s;
+      inset:0;
+      width:100vw; height:100vh;
+      z-index: 1;
+      pointer-events:none;
+      mix-blend-mode: screen;
+      filter:saturate(1.2) contrast(1.08) brightness(1.06);
+      will-change:transform,opacity;
     }
-    .splash-logo {
-      font-size: 2.8rem;
-      font-weight: bold;
-      letter-spacing: -2px;
-      margin-bottom: .6rem;
-      color: #fff;
-      position: relative;
-      animation: float 3s ease-in-out infinite;
-      text-shadow: 0 0 15px #00ffe7, 0 0 6px #44fffd;
-      user-select: none;
+    #ui-effects-overlay {
+      position:fixed;inset:0;z-index:4;pointer-events:none;
+      width:100vw;height:100vh;
+      background:var(--scanline),transparent;
+      mix-blend-mode: lighten;
+      opacity:.16;
     }
-    .splash-logo i {
-      background: linear-gradient(90deg, var(--primary-bright) 0%, #fff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-right: .5rem;
+    .neon-glow {
+      filter:drop-shadow(0 0 18px var(--primary)) blur(0.8px);
+    }
+    .holo-blur {
+      backdrop-filter: blur(34px) saturate(190%);
+      -webkit-backdrop-filter: blur(34px) saturate(190%);
+    }
+    /* ================= SPLASH EXPERIENCE ================= */
+    #splash {
+      position:fixed;inset:0;
+      z-index:100;
+      background:radial-gradient(ellipse 90% 60% at 48% 59%, #061c33 70%, #060912 100%);
+      display: flex; flex-direction:column; gap:3vh;
+      align-items: center; justify-content: center;
+      transition: opacity 1.1s;
+      overflow: hidden;
+      will-change: opacity;
+      animation: fadeInSplash 1.9s;
+    }
+    .splash-logo-3d {
+      display:flex;flex-direction:row;align-items:center;gap: 1.3vw;
+      font-size: clamp(2rem,8vw,5.3rem);
+      font-weight:700;
+      color:#fff;
+      letter-spacing:-.055em;
+      user-select:none;
+      text-shadow:
+        0 0 42px #16efdbdd,
+        0 0 100px #1312fd30,
+        0 0 18px #15508ac2
+        ;
+      perspective: 700px;
+      transform-style: preserve-3d;
+    }
+    .splash-logo-3d .logo-water {
+      display: inline-block;
+      filter: drop-shadow(0 0 12px #00ffe2b5) blur(0.60px);
+      text-shadow:0 0 40px #1ff5f944; 
+      will-change:filter,transform;
+      animation:logoFloat 2.8s ease-in-out infinite;
+      transform-origin:50% 100%;
+    }
+    @keyframes logoFloat {
+      0%,100%{transform:translateY(0) scale(1);}
+      50%{transform:translateY(-16px) scale(1.17);}
     }
     .splash-slogan {
-      font-size: 1.2rem;
-      color: #f0ffee;
-      opacity: 0.98;
-      margin-bottom: 2.4rem;
-      letter-spacing: .02em;
-      text-shadow: 0 2px 12px #2229;
+      font-size:clamp(1.13rem,2vw,1.7rem);
+      color:#14f8ea;
+      font-weight:600;
+      font-family:'Segoe UI', 'Inter',sans-serif;
+      letter-spacing: .07em;
+      text-shadow:0 2px 15px #00ffe07d;
+      background: var(--badge-gradient);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      filter:drop-shadow(0 3px 3px #2088e94d);
+      margin-top:0.5em;
     }
     .splash-loader {
-      width: 80px; height: 12px;
-      background: rgba(255,255,255,0.12);
-      border-radius: 6px;
+      width: 94px; height: 13px;
+      margin-top: 1.3em;
+      background: #23ffde13;
       overflow: hidden;
-      position: relative;
-      box-shadow: 0 2px 12px #00f9c676;
-      margin: 0 auto;
+      border-radius: 8px;
+      border:1.3px solid #13fefa26;
+      box-shadow: 0 2px 34px #05fff144;
+      position:relative;
+      will-change:transform;
     }
     .splash-loader .bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, var(--primary-bright) 0%, var(--accent-bright) 80%);
-      border-radius: 6px;
-      animation: loaderBar 1.7s 0.33s cubic-bezier(.77,0,.18,1) forwards;
+      height:100%;
+      background: linear-gradient(
+        85deg,#21ffe56b 0,#14baff 86%,#7453ff91 100%
+      );
+      border-radius:6px;
+      box-shadow:0 0 19px #05fff1a4;
+      width:0;
+      animation: loaderBar 1.6s 0.44s cubic-bezier(.77,0,.18,1) forwards;
     }
-    @keyframes loaderBar { to { width: 100%; } }
-    @keyframes float { 0%,100% { transform: translateY(0);} 50%{transform: translateY(-13px);} }
-    @keyframes fadeInSplash { 0%{opacity:0;}100%{opacity:1;} }
-
-    /* --- Onboarding --- */
-    #onboarding {
-      position: fixed;
-      z-index: 100;
-      inset: 0;
-      background: var(--bg-gradient);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-end;
-      padding-bottom: 8vh;
+    @keyframes loaderBar { to{width:100%;} }
+    .splash-explosion {
+      display: none;
+      position: absolute;
+      left: 50%; top: 51%;
+      width: 320px; height: 320px;
       pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.5s;
+      transform:translate(-50%,-50%) scale(1);
+      z-index:110;
     }
-    #onboarding.active {
-      pointer-events: auto;
-      opacity: 1;
-      animation: fadeIn .5s;
+    @keyframes fadeInSplash {
+      0%{opacity:0;}
+      100%{opacity:1;}
+    }
+
+    /* ================= ONBOARDING SLIDES ================= */
+    #onboarding {
+      position:fixed;inset:0;
+      z-index:90;
+      display:flex;flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      background:linear-gradient(120deg,#17223aee 70%,#091520f7 100%);
+      opacity:0;
+      pointer-events: none;
+      transition:.89s;
+    }
+    #onboarding.active { opacity:1; pointer-events:auto; animation:fadeInUp .8s;}
+    .onboarding-bg-3d {
+      position:absolute;inset:0;z-index:1;
+      pointer-events:none; opacity:.21;
+    }
+    .onboarding-slides-ctr {
+      position:relative; z-index:2; width:98vw; max-width:422px;
+      min-height:340px; display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+      padding-bottom:7vh;
+      margin-top:4vh;
     }
     .onboarding-slide {
-      width: 92vw; max-width: 410px;
-      min-height: 320px;
-      background: var(--glass);
-      border: 1.5px solid var(--glass-border);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-      display: none;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 3.5rem 2rem 1rem 2rem;
-      position: absolute;
-      top: 12vh; left: 0; right: 0; margin: 0 auto;
-      animation: fadeInUp 0.6s;
-      text-align: center;
-      backdrop-filter: blur(28px);
+      background:var(--glass-gradient),var(--glass);
+      border-radius:28px;
+      border:2.2px solid #0fffd811;
+      box-shadow:0 7px 44px #00ffe022;
+      padding:2.6em 1.8em 2.6em 1.8em;
+      min-height:330px; width:100%; max-width:440px;
+      margin-bottom:2.2em;
+      display:none;flex-direction:column;align-items:center;text-align:center;
+      backdrop-filter:blur(28px) brightness(1.02);
+      -webkit-backdrop-filter:blur(28px) brightness(1.02);
+      animation:fadeInUp .8s;
+      will-change:transform,opacity,filter;
     }
-    .onboarding-slide.active { display: flex; position: relative; z-index: 3; }
-    .onboarding-slide h2 {
-      font-size: 1.5rem; margin-bottom: 1.1rem;
-      font-weight: 800;
-      background: linear-gradient(90deg, var(--primary), var(--accent) 95%);
+    .onboarding-slide.active {display:flex;}
+    .onboarding-slide .slide-art {
+      width:110px;height:110px;background:var(--mesh-2);
+      box-shadow:0 0 77px #38ffe512;
+      margin:0 auto 0.91em auto;
+      border-radius: 32px;
+      overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+      font-size: 3.7em; color: var(--primary);
+      filter:drop-shadow(0 0 24px #2fdafe42);
+      position:relative;
+    }
+    .onboarding-slide h2{
+      font-size:1.44em;font-weight:800;letter-spacing:-.01em;
+      color:#33fff4;
+      background:var(--badge-gradient);
       -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -.02em;
+      -webkit-text-fill-color:transparent;
+      margin-bottom:.6em;text-shadow:0 5px 18px #00ffe069;
     }
-    .onboarding-slide .slide-icon {
-      font-size: 3.3rem;
-      margin-bottom: .7rem;
-      margin-top: .15rem;
-      color: var(--primary);
-      text-shadow: 0 2px 32px var(--primary-bright);
-    }
-    .onboarding-slide p {
-      color: var(--text-secondary);
-      margin-bottom: 1.1rem;
-      font-size: 1rem;
+    .onboarding-slide .slide-desc {
+      color:#b8e9f2dd;
+      font-size:1.05em;font-weight:500;
+      margin-bottom:.44em;font-family:'Segoe UI', 'Inter',sans-serif;
+      text-shadow:0 1px 8px #2a8eeca7;
     }
     .onboarding-indicator {
-      display: flex; justify-content: center; align-items: center; gap: 10px;
+      margin-top:-0.7em;
+      width:100%;display:flex;justify-content:center;gap:14px;
     }
     .indicator-dot {
-      width: 11px; height: 11px;
-      border-radius: 50%;
-      background: var(--glass-border);
-      box-shadow: 0 1.5px 7px #4ff4e561;
-      transition: background .3s, transform .3s;
+      width:13px;height:13px;
+      border-radius:33px;
+      background:rgba(2,255,226,0.13);
+      border:1.6px solid #26eff7cc;
+      transition:background .33s,transform .33s;
+      filter:blur(0.35px);
     }
     .indicator-dot.active {
-      background: linear-gradient(90deg, var(--primary-bright), var(--accent-bright));
-      box-shadow: 0 2px 15px var(--primary-bright);
-      transform: scale(1.16);
+      background:linear-gradient(90deg,#09fcb4 30%,#4185fe 89%);
+      box-shadow:0 0 22px #00ffe059;
+      transform:scale(1.08);
+      border:2.2px solid #fff;
     }
     .onboarding-nav {
-      display: flex;
-      width: 92vw; max-width: 410px;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 2.2rem;
-      user-select: none;
-      z-index: 2;
+      display:flex;justify-content:space-between;align-items:center;
+      width:100%;margin-top:1.6em;z-index:2;gap:17px;
     }
     .onboarding-btn {
-      font-weight: 700;
-      font-size: 1.05rem;
-      border: none;
-      padding: 0.7em 1.6em;
-      border-radius: 14px;
-      color: #fff;
-      background: linear-gradient(90deg, var(--accent), var(--primary));
-      box-shadow: 0 2px 6px #1cddd237;
-      margin: 0 2px;
-      cursor: pointer;
-      transition: background .23s, transform .12s;
+      font-size:1.09em;font-weight:700;
+      border:none;padding:.95em 2.1em;
+      border-radius:12px;
+      color:#fff;background:var(--badge-gradient);
+      box-shadow:0 2px 12px #00ffe013;
+      cursor:pointer;
+      transition:background .23s,filter .17s;
+      border:2.2px solid #12f3ff41;
+      will-change:transform;
     }
     .onboarding-btn.secondary {
-      background: var(--glass);
-      color: var(--primary);
-      border: 1px solid var(--glass-border);
-      font-weight: 500;
+      background:var(--glass-bright);
+      color:var(--primary);
+      border:2.1px solid #27ffe04a;
+      font-weight:500;
     }
-    .onboarding-btn:active { transform: scale(0.97);}
-    @keyframes fadeIn {from{opacity:0}to{opacity:1}}
-    @keyframes fadeInUp {
-      from{opacity:0;transform:translateY(24px);}
-      to{opacity:1;transform:translateY(0);}
-    }
+    .onboarding-btn:active {filter:brightness(1.17);}
+    @keyframes fadeInUp {from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
 
-    /* --- Login Screen --- */
+    /* ================== LOGIN ========================== */
     #login {
-      position: fixed;
-      z-index: 50;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg-gradient);
-      transition: opacity .5s;
-      opacity: 0; pointer-events: none;
-      animation: fadeIn .6s;
+      position:fixed;inset:0;z-index:70;
+      display:flex;
+      align-items:center;justify-content:center;
+      background:var(--bg-gradient);
+      opacity:0;pointer-events:none;transition:opacity .9s;
     }
-    #login.active { opacity: 1; pointer-events: auto;}
+    #login.active {opacity:1;pointer-events:auto; animation:fadeInUp .9s;}
     .login-card {
-      min-width: 320px; max-width: 370px;
-      width: 90vw;
-      background: var(--glass);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(25px) saturate(150%);
-      border-radius: 24px;
-      border: 1.5px solid var(--glass-border);
-      padding: 3rem 2.4rem 2.2rem 2.4rem;
-      position: relative;
-      display: flex; flex-direction: column; align-items: center;
-      overflow: hidden;
-      margin: 1rem 0;
+      width:97vw;max-width:380px;min-width:320px;
+      background:var(--glass);
+      border-radius:24px;
+      border:2.5px solid #00ffe022;
+      padding:3.2em 2.35em 1.7em 2.35em;
+      box-shadow:0 12px 60px #36f6fb16;
+      display:flex;flex-direction:column;align-items:center;
+      position:relative;overflow:hidden;
+      backdrop-filter:blur(28px) saturate(135%);
+      -webkit-backdrop-filter:blur(28px) saturate(135%);
+      z-index:2;
+      margin:2vh 0;
     }
     .login-card::before {
-      content: "";
-      position: absolute;
-      inset: -50% -50% 0 -50%;
-      z-index: -2;
-      height: 200%;
-      background: repeating-linear-gradient(-45deg, #44fff9aa, #6364ea16 160px,#00e8c388 240px);
-      filter: blur(55px) brightness(1.15);
-      opacity: 0.5;
-      animation: animated-bg 16s infinite linear;
+      content:'';
+      position:absolute;inset:-28% -16% 0 -16%;
+      z-index:-2;height:190%;
+      background:var(--mesh-2);
+      filter:blur(80px) brightness(1.17);
+      opacity:.73;
+      animation: animated-bg 13s infinite linear;
     }
     @keyframes animated-bg {
-      0% {background-position:0 0;}
-      100% {background-position:225px 422px;}
+      0%{background-position:0 0;}
+      100%{background-position:189px 352px;}
     }
     .login-title {
-      font-size: 1.6rem;
-      font-weight: 700;
-      background: linear-gradient(90deg, var(--primary), var(--accent));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      margin-bottom: 1.4rem;
-      text-align: center;
+      font-size:2rem; font-weight:700;
+      color:#1ff5f9;
+      background:var(--badge-gradient);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      margin-bottom:1.2em;
+      letter-spacing:0.03em;
+      text-shadow:0 3px 16px #0fffd832;
     }
-    .form-group {
-      width: 100%; position: relative; margin-bottom: 1.2rem;
+    .holo-input-group {
+      width:100%;position: relative; margin-bottom:1.45em;
     }
-    .form-group input {
-      width: 100%; padding: .88em 1.05em .88em 2.3em;
-      border-radius: 10px;
-      border: none;
-      background: rgba(255,255,255,0.13);
-      color: var(--text-primary);
-      font-size: 1.02rem;
-      outline: none;
-      border: 1.2px solid transparent;
-      transition: border-color .25s;
-      margin-bottom: 2px;
-      font-weight: 500;
-      box-shadow: 0 1.2px 2.4px #06fcf312;
-      backdrop-filter: blur(7px);
+    .holo-input {
+      width:100%;padding:.94em 1em .94em 2.7em;
+      font-size:1.13em;font-weight:600;
+      border:none;
+      background:rgba(21,255,253,0.10);
+      border-radius:10px;
+      color:#eaffff;
+      box-shadow:0 0 28px #0fffd81c;
+      outline:none;
+      border:2px solid #1ff5f926;
+      transition:.2s;
+      backdrop-filter: blur(5px);
     }
-    .form-group input:focus {
-      background: rgba(255,255,255,0.19); border-color: var(--primary);}
-    .form-group i {
-      position: absolute; left: 10px; top: 50%;
-      transform: translateY(-50%);
-      color: var(--accent);
-      font-size: 1.1em;
-      opacity: 0.78;
+    .holo-input:focus {
+      background:rgba(40,248,255,0.14);
+      border:2.3px solid var(--primary);
+      filter:drop-shadow(0 0 15px #0f8fffba);
     }
-    .login-options {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: .93em;
-      color: var(--text-secondary);
-      margin-bottom: .2rem;
-    }
-    .login-remember {
-      display: flex; gap: 7px;
-      align-items: center;
-      user-select: none;
-      letter-spacing: 0.01em;
+    .holo-input-group i {
+      position:absolute; left:13px;top:50%;transform:translateY(-50%);
+      color:var(--primary);opacity:.74;font-size:1.2em;
+      pointer-events:none;
+      filter:drop-shadow(0 0 7px #0fffd859);
     }
     .faceid-btn {
-      background: var(--glass-light);
-      border: none;
-      outline: none;
-      color: var(--primary);
-      padding: .45em .95em;
-      border-radius: 60px;
-      font-size: 1.4em;
-      margin-left: 7px;
-      display: flex; align-items: center;
-      box-shadow: 0 1px 4px #3cffef11;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: background .2s;
+      background:transparent;
+      border:none;outline:none;
+      color:var(--primary);padding:.42em .68em;
+      border-radius:100%;
+      font-size:2.1em;
+      margin-left:8px;
+      cursor:pointer;
+      position:relative;overflow:hidden;
+      filter:blur(.01px);
     }
-    .faceid-btn.animated i {
-      animation: faceidPulse 1s;
+    .faceid-btn .fa-fingerprint {
+      filter:drop-shadow(0 0 8px #1ff5f9bd);
+      will-change:filter;
+    }
+    .faceid-btn.animated .fa-fingerprint {
+      animation:faceidPulse .9s;
     }
     @keyframes faceidPulse {
       0% {color:var(--primary);}
-      45% {color:var(--accent-bright); transform:scale(1.19);}
-      60% {color:#fff; transform:scale(1.22);}
+      35% {color:#fff; font-weight:900; filter: drop-shadow(0 0 36px #07bcfa11);}
+      70% {color:var(--accent); font-weight:700; filter: drop-shadow(0 0 28px #1ff5f978);}
       100% {color:var(--primary);}
     }
     .login-action-btn {
-      margin-top: 1.3rem;
-      width: 100%;
-      padding: .8em 0;
-      border-radius: 13px;
-      border: none;
-      background: linear-gradient(90deg, var(--primary), var(--accent));
-      color: #fff;
-      font-weight: bold;
-      box-shadow: 0 4px 16px #44ffd411;
-      font-size: 1.1em;
-      transition: background .24s, filter .13s, transform .11s;
-      cursor: pointer;
+      width:100%;margin-top:1.7em;
+      border-radius:14px;
+      padding:.97em 0;
+      font-size:1.13em;font-weight:700;
+      color:#fff;
+      border:none;
+      background:var(--badge-gradient);
+      box-shadow:0 0 17px #1ff5f915;
+      cursor:pointer;
+      transition:filter .22s,transform .13s;
+      overflow:hidden;
+      position:relative;
+      will-change:transform;
     }
-    .login-action-btn:active { filter:brightness(1.12); transform:scale(.98);}
-    .login-demo-creds {
-      text-align: center; color: var(--text-secondary); font-size: .92em;
-      margin-top: 1.7em;
-      letter-spacing: .02em;
-      user-select: all;
-    }
-    /* Animated farming icons BG (bottom) */
-    .login-bg-icons {
-      position: absolute;
-      z-index: 0;
-      left: 0; right: 0;
-      bottom: -4vh;
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      pointer-events: none;
-      opacity: .18;
-      animation: fadeIn .8s;
-    }
-    .login-bg-icons i {
-      font-size:3.3em; animation: farmMove 7s infinite cubic-bezier(.9,-0.1,.2,1.2) alternate;
-    }
-    .login-bg-icons i:nth-child(2) { animation-delay:1.2s; color:var(--accent); }
-    .login-bg-icons i:nth-child(3) { animation-delay:0.7s; color:var(--primary-bright);}
-    @keyframes farmMove {
-      0%{transform:translateY(0);}
-      100%{transform:translateY(-14px) scale(1.09);}
-    }
-
-    /* --- Main App Structure --- */
-    .app-container {
-      display: none;
-      width: 100vw;
-      min-height: 100vh;
-      min-height: 100dvh;
-      flex-direction: row;
-    }
-    .app-container.active {display: flex;}
-    /* Sidebar */
-    .sidebar {
-      width: 71px;
-      background: var(--glass);
-      border-right: 1.5px solid var(--glass-border);
-      transition: width .34s, box-shadow .25s;
-      box-shadow: 2px 0 22px #1de3fc04;
+    .login-action-btn:active {filter:brightness(1.13);transform:scale(.97);}
+    .btn-ripple {
+      position:absolute;top:50%;left:50%;
+      width:6px;height:6px;background:var(--button-ripple);
+      border-radius:100px;pointer-events:none;
+      transform:translate(-50%,-50%) scale(.01);
+      animation: btnRipple 0.60s cubic-bezier(.02,.64,.19,1.24);
       z-index: 3;
-      position: relative;
-      display: flex; flex-direction: column; align-items: center;
-      padding-top: 20px;
+      opacity:.52;
     }
-    .sidebar.expanded {width: 200px;}
-    .sidebar .logo {
-      color: var(--primary);
-      font-size: 2.1em;
-      font-weight: bold;
-      display: flex; align-items: center;
-      margin-bottom: 2.3em; gap: 0.2em;
-      user-select: none;
-      letter-spacing: -2px;
+    @keyframes btnRipple {
+      0% {opacity:.52;transform:translate(-50%,-50%) scale(.01);}
+      65% {opacity:1;transform:translate(-50%,-50%) scale(2.7);}
+      100% {opacity:.01;transform:translate(-50%,-50%) scale(2.7);}
     }
-    .sidebar.expanded .logo span {display: inline;}
-    .sidebar .logo span {display: none;}
-    .nav-links {
-      flex: 1 1;
-      width: 100%; padding: 0;
-      display: flex; flex-direction: column; gap: 3px;
-    }
-    .nav-link {
-      width: 100%;
-      display: flex; align-items: center;
-      padding: 14px 0 14px 0;
-      justify-content: center;
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 1.18em;
-      cursor: pointer;
-      border-left: 3px solid transparent;
-      transition: background .19s, color .19s, border-left .19s;
-      border-radius: 14px 0 0 14px;
-      gap: 13px;
-      user-select: none;
-    }
-    .sidebar.expanded .nav-link{
-      justify-content: flex-start;
-      padding-left: 23px;
-    }
-    .nav-link.active, .nav-link:hover {
-      background: var(--card-gradient);
-      color: var(--primary);
-      border-left: 3px solid var(--accent);
-    }
-    .nav-link span {
-      opacity: 0;
-      margin-left: 2px;
-      font-size: 1.07em;
-      transition: opacity .21s;
-    }
-    .sidebar.expanded .nav-link span {opacity:1;}
-
-    .sidebar-toggle {
-      width: 35px; height: 35px;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--glass);
-      position: absolute; top: 23px; right: -17px;
-      border-radius: 14px;
-      border: 1px solid var(--glass-border);
-      color: var(--primary);
-      font-size: 1.27em;
-      box-shadow: 0 1.5px 7px #1de3fc18;
-      cursor: pointer;
-      z-index: 5;
-    }
-
-    /* --- Main Content --- */
-    .main-content {
-      flex: 1 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      background: none;
-      overflow-x: hidden;
-      padding-bottom: 75px;
-    }
-
-    /* Top Navigation */
-    .topbar {
-      display: flex;
-      align-items: center;
-      padding: 1.2em 2.2em 0.3em 2.2em;
-      justify-content: space-between;
-      background: none;
-    }
-    .topbar-left {display: flex; align-items: center; gap: 8px;}
-    .topbar-title {
-      font-size: 1.2em; font-weight: bold; color: var(--primary);
-      letter-spacing: 0.02em;
-      margin-right: 7px;
-      user-select: none;
-    }
-    .topbar-icons {display: flex; align-items: center; gap: 1.5em;}
-    .bell-ctr {
-      position: relative;
-      color: var(--accent);
-      cursor: pointer;
-      font-size: 1.2em;
-      transition: color .2s;
-    }
-    .bell-badge {
-      position: absolute;
-      top: -7px; right: -8px;
-      background: linear-gradient(90deg,var(--primary),var(--accent));
-      color: #fff;font-size:9px;
-      padding: 1px 6px;
-      border-radius: 12px;
+    .login-hint {
+      text-align:center;color:#9beaffb5;font-size:.98em;margin-top:2.1em;
       font-weight:600;
-      box-shadow: 0 1px 5px #69efe7a0;
-      letter-spacing:.03em;
-      pointer-events: none;
+      letter-spacing:.01em;
+      text-shadow:0 1.5px 10px #104b6d4a;
+      user-select:all;
     }
-    .live-clock {
-      font-size: 1.05em;
-      margin-left: 7px;
-      color: var(--text-primary);
-      background: var(--glass);
-      padding: .4em 1em;
-      border-radius: 12px;
-      font-weight: 500;
-      min-width: 79px;text-align:center;
-      box-shadow: 0 0 0 2px #3cffef03;
+    /* ============ CINEMATIC MAIN UI SCHEMA PLACEHOLDER ============== */
+    #main-app {
+      position:fixed;inset:0;z-index:50;
+      display:none;
+      width:100vw;height:100vh;
     }
-    .profile {
-      margin-left: 1.7em;
-      display: flex; align-items: center; gap: 8px;
-      background: var(--glass);
-      border-radius: 14px;
-      padding: .2em .92em .25em .40em;
-      box-shadow: 0 1px 6px #00e8c388;
-      cursor: pointer;
-      font-weight: 500;
-      font-size: 1.04em;
-      color: var(--text-primary);
+    #main-app.active {display:block;}
+    .os-ui-container {
+      position:absolute;top:0;left:0;width:100vw;height:100vh;z-index:20;
+      display:flex;flex-direction:column;
+      pointer-events:none;
     }
-    .profile-img {
-      width: 29px;height:29px;
-      border-radius: 50%;
-      object-fit:cover;
-      margin-right:2px;
-      box-shadow:0 0 0 2px var(--primary);
-      border: 1px solid var(--glass-border);
+    /* Placeholder: Example Sci-fi floating sidebar nav */
+    .sidebar-holo {
+      position:absolute;top:3.8vh;left:2vw;
+      width:84px;min-height:54vh;
+      background:var(--glass-gradient),var(--glass);
+      border-radius:18px;
+      box-shadow:0 18px 64px #13f2f911;
+      border:2.2px solid #38fff1b6;
+      display:flex;flex-direction:column;align-items:center;gap:23px;
+      padding:17px 0;
+      pointer-events:auto;
+      opacity:0.98;backdrop-filter:blur(12px);
     }
-
+    .sidebar-holo .icon {
+      margin:13px 0;font-size:2.11em;
+      color:var(--primary); background:#0ffff523;
+      border-radius:13px;
+      box-shadow:0 0 11px #1ff5f95c;transition:.17s;
+      cursor:pointer;
+      aspect-ratio:1/1;width:47px;display:flex;align-items:center;justify-content:center;
+      mix-blend-mode: screen;
+    }
+    .sidebar-holo .icon:hover {
+      filter:brightness(1.2) drop-shadow(0 0 22px #36eaff);
+    }
+    .os-dashboard-glass {
+      flex:1;
+      margin:0 0 3.7vh 110px;
+      display:flex;flex-direction:column;
+      gap:29px; pointer-events:auto;
+      justify-content:end; align-items:end;
+    }
+    .os-dashboard-glass .glass-card {
+      width:480px;max-width:95vw;min-height:220px;
+      border-radius:32px;
+      background:var(--glass-gradient),var(--glass);
+      box-shadow:0 6px 44px #16daf32a;
+      border:2px solid #0fffd81f;
+      margin-bottom:2vh;
+      color:#c3f7f9;font-weight:600;
+      font-size:1.31em;backdrop-filter:blur(21.4px);
+      display:flex;align-items:center;justify-content:center;text-align:center;
+      position:relative;overflow:hidden;isolation:isolate;
+      text-shadow:0 0 12px #1ff5f9a8;
+    }
     /* Floating action button */
     .fab {
-      position: fixed;
-      z-index: 10;
-      bottom: 30px; right: 27px;
-      width: 60px; height: 60px;
+      position:fixed;
+      z-index:30;
+      bottom:4.1vh; right:4vw;
+      width:66px; height:66px;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--accent) 60%, var(--primary) 120%);
-      color: #fff; font-size: 2.05em;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 7px 28px var(--accent-bright), 0 2px 18px #09fcb444;
+      color: #fff; font-size: 2.09em;
+      box-shadow: 0 10px 48px #1ff5f950, 0 2px 18px #09fcb43a;
       cursor: pointer;
       border: none;
-      transition: filter .2s, box-shadow .2s, background .17s;
-      filter: brightness(0.94);
-      animation: float 4s ease-in-out infinite;
-      box-shadow: 0 6px 26px #69ecfc40;
+      filter:saturate(1.3) brightness(0.95);
+      animation: floatFAB 3.6s ease-in-out infinite;
+      will-change:transform,filter;
     }
-    .fab:active {filter:brightness(1.10);}
-    .fab i {pointer-events: none;}
-
-    /* Responsive Bottom nav */
-    .bottom-nav {
-      display: none;
+    @keyframes floatFAB {
+      0%,100%{box-shadow: 0 12px 44px #1ff5f950;}
+      57%{box-shadow:0 36px 92px #4693ffa9;}
     }
-    /* ------ PAGE CONTENT ------ */
-    .pages {
-      flex: 1 1;
-      width: 100%; min-height: 0;
-      padding: 0 0.5em;
-      margin-top: 1.1em;
-      z-index: 2;
-      position: relative;
+    /* OS Status bar */
+    .ai-status-bar {
+      position:fixed;top:0;right:0;left:0;z-index:30;
+      min-height:33px;
+      display:flex;align-items:center;justify-content:flex-end;
+      pointer-events:none;
+      background:var(--glass-gradient),var(--glass);
+      box-shadow:0 2px 24px #34b8ec2a;
+      border-bottom:1.7px solid #78fff4a1;
     }
-    .page {
-      display: none;
-      width: 100%;
-      max-width: 1020px;
-      margin: 0 auto;
-      background: var(--card-gradient);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-      min-height: 420px;
-      padding: 2.2em 1.7em 2.2em 2em;
-      position: relative;
-      margin-bottom: 1.5em;
-      animation: fadeInUp .68s;
-      text-align: left;
-      font-size: 1.14em;
-      font-weight: 500;
-      color: var(--text-primary);
+    .ai-status-bar .status-bubble {
+      display:flex;gap:7px;align-items:center;background:rgba(21,255,253,0.16);
+      padding:.16em .97em;
+      color:var(--primary);
+      border-radius:13px;
+      margin-right:2.8em;
+      font-weight:600;
+      text-shadow:0 2px 16px #27eff7b7;
     }
-    .page.active {display: block;}
-    .page-title {font-size:2rem;margin-bottom:.3em;font-weight:700;color:var(--primary);}
-    /* -------------------------- */
-
-    /* --- Responsive styling --- */
-    @media (min-width: 900px) { .main-content {padding-left:0;} }
-    @media (max-width: 800px) {
-      .main-content {padding-left:0;}
+    /* UI atmosphere overlays */
+    .animated-noise {
+      position:fixed;inset:0;pointer-events:none;z-index:7;opacity:.04;
+      background: url("https://grainy-gradients.vercel.app/noise.svg");
+      mix-blend-mode:screen;
+      animation:noise 13s linear infinite;
     }
-    @media (max-width: 700px) {
-      .sidebar { display: none;}
-      .main-content {padding-left:0;}
-      .fab {right: 15px; bottom: 74px;}
+    @keyframes noise {
+      0%{background-position:0 0;}
+      100%{background-position:276px 160px;}
     }
-    @media (max-width:580px) {
-      .topbar {padding: 0.8em 1em;}
-      .login-card {max-width:98vw;padding:2.1em 1em 2em 1em;}
-      .onboarding-slide {padding:2rem 1em;}
-    }
-    @media (max-width:650px) {
-      .bottom-nav {
-        display: flex;
-        position: fixed;
-        z-index: 20;
-        bottom: 0; left: 0; width: 100vw;
-        background: var(--glass);
-        justify-content: space-around;
-        border-top: 1.5px solid var(--glass-border);
-        box-shadow: 0 -2px 16px #1de3fc0c;
-        padding: 0.09em 0;
-        height: 60px;
-        align-items: stretch;
+    @media (max-width:700px) {
+      .os-dashboard-glass .glass-card {
+        width:97vw;min-width:0;
+        font-size:1.0em;
       }
-      .bottom-link {
-        flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-        font-size: 1.28em; color: var(--text-secondary); cursor: pointer;transition:.16s;
-        border-radius:10px 10px 0 0;
-        text-decoration: none;
-        font-weight:500;
-        gap:3px;
-      }
-      .bottom-link.active, .bottom-link:active { color: var(--primary); background: var(--glass); }
+      .sidebar-holo{left:2vw;width:63px;min-width:43px;}
     }
-    /* Dark/light mode switch button */
-    .theme-switch {
-      background: var(--glass);
-      border: 1.5px solid var(--glass-border);
-      padding: 0.43em 0.8em;
-      border-radius: 15px;
-      margin-left: 11px;
-      color: var(--primary);
-      font-size: 1.15em;
-      cursor: pointer;
-      transition:background .19s;
-    }
-    .theme-switch:active{background: var(--glass-light);}
   </style>
 </head>
 <body>
-<!-- ================= Splash Screen =================== -->
+<!-- ================== 3D BACKGROUND CANVAS =================== -->
+<canvas id="bg-3d-canvas"></canvas>
+<div id="ui-effects-overlay"></div>
+<div class="animated-noise"></div>
+
+<!-- ============== SPLASH SCREEN ============== -->
 <div id="splash">
-  <div class="splash-logo">
-    <i class="fas fa-droplet"></i> WaterWise
+  <div class="splash-logo-3d">
+    <span class="logo-water"><i class="fas fa-droplet"></i></span>
+    <span>WATERWISE</span>
   </div>
-  <div class="splash-slogan">Smart Farming. Smarter Water.</div>
+  <div class="splash-slogan holo-blur">
+    Smart Farming. Smarter Water.
+  </div>
   <div class="splash-loader"><div class="bar"></div></div>
 </div>
 
-<!-- ================ Onboarding Slides ================= -->
+<!-- ============== SPLASH EXPLOSION PARTICLE EFFECT ============= -->
+<canvas id="explosion-canvas" class="splash-explosion"></canvas>
+
+<!-- ============== CINEMATIC ONBOARDING SLIDES ================ -->
 <div id="onboarding">
-  <!-- Slides injected by JS -->
-  <div class="onboarding-indicator" id="onboarding-indicator"></div>
-  <div class="onboarding-nav" id="onboarding-nav">
-    <button class="onboarding-btn secondary" id="onboard-skip">Skip</button>
-    <button class="onboarding-btn" id="onboard-next">Next</button>
+  <div class="onboarding-bg-3d"></div>
+  <div class="onboarding-slides-ctr">
+    <!-- Slides filled by JS -->
+    <div class="onboarding-indicator" id="onboarding-indicator"></div>
+    <div class="onboarding-nav">
+      <button class="onboarding-btn secondary" id="onboard-skip">Skip</button>
+      <button class="onboarding-btn" id="onboard-next">Next</button>
+    </div>
   </div>
 </div>
 
-<!-- ================ Login Screen ==================== -->
+<!-- ============== ULTRA-MODERN LOGIN PANEL ================== -->
 <div id="login">
   <form class="login-card" autocomplete="off" onsubmit="return false;">
-    <div class="login-title">Sign in to WaterWise</div>
-    <div class="form-group">
+    <div class="login-title">WATERWISE OS SIGN IN</div>
+    <div class="holo-input-group">
       <i class="fas fa-envelope"></i>
-      <input type="email" required placeholder="Email" id="login-email" autocomplete="username" value="demo@waterwise.com">
+      <input class="holo-input" type="email" required placeholder="Email" id="login-email" autocomplete="username" value="demo@waterwise.com">
     </div>
-    <div class="form-group">
+    <div class="holo-input-group">
       <i class="fas fa-lock"></i>
-      <input type="password" required placeholder="Password" id="login-pass" autocomplete="current-password" value="demo123">
+      <input class="holo-input" type="password" required placeholder="Password" id="login-pass" autocomplete="current-password" value="demo123">
     </div>
-    <div class="login-options">
-      <label class="login-remember">
-        <input type="checkbox" id="remember-me" checked style="accent-color: var(--primary);"> Remember me
+    <div style="width:100%;display:flex;justify-content:space-between;align-items:center;">
+      <label style="display:flex;align-items:center;gap:7px;user-select:none;">
+        <input type="checkbox" id="remember-me" checked style="accent-color:var(--primary);"> Remember
       </label>
-      <button type="button" class="faceid-btn" id="faceid-btn" title="Face ID" aria-label="Face ID">
+      <button type="button" class="faceid-btn" id="faceid-btn" title="Fingerprint/FaceID" aria-label="FaceID">
         <i class="fas fa-fingerprint"></i>
       </button>
     </div>
-    <button class="login-action-btn" id="demo-login" style="margin-top:1.4em;">
+    <button class="login-action-btn" id="demo-login" style="margin-top:.99em;position:relative;">
       <i class="fas fa-sign-in-alt"></i> Enter Demo
     </button>
-    <div class="login-demo-creds">demo@waterwise.com / demo123</div>
-    <div class="login-bg-icons">
-      <i class="fas fa-tractor"></i>
-      <i class="fas fa-seedling"></i>
-      <i class="fas fa-cloud-sun"></i>
-    </div>
+    <div class="login-hint">demo@waterwise.com<br>demo123</div>
   </form>
 </div>
 
-<!-- ================= Main App UI ================= -->
-<div class="app-container" id="app">
-  <!-- Sidebar nav -->
-  <nav class="sidebar expanded" id="sidebar">
-    <div class="logo">
-      <i class="fas fa-droplet"></i>
-      <span>WaterWise</span>
-    </div>
-    <div class="nav-links" id="side-links"></div>
-    <div class="sidebar-toggle" id="sidebar-toggle"><i class="fas fa-angle-double-left"></i></div>
+<!-- =============== CINEMATIC MAIN APP FOUNDATION AREA =============== -->
+<div id="main-app">
+  <!-- Glass sidebar -->
+  <nav class="sidebar-holo">
+    <div class="icon" title="Dashboard"><i class="fas fa-tachometer-alt"></i></div>
+    <div class="icon" title="Irrigation Control"><i class="fas fa-tint"></i></div>
+    <div class="icon" title="Sensors"><i class="fas fa-microchip"></i></div>
+    <div class="icon" title="Weather"><i class="fas fa-cloud-sun"></i></div>
+    <div class="icon" title="Analytics"><i class="fas fa-chart-line"></i></div>
+    <div class="icon" title="Automation"><i class="fas fa-magic"></i></div>
   </nav>
-  <!-- Main Content -->
-  <div class="main-content">
-    <div class="topbar">
-      <div class="topbar-left">
-        <span class="topbar-title" id="topbar-title">Dashboard</span>
-      </div>
-      <div class="topbar-icons">
-        <span class="bell-ctr" title="Notifications">
-          <i class="fas fa-bell"></i>
-          <span class="bell-badge" id="bell-badge">3</span>
-        </span>
-        <span class="live-clock" id="clock"></span>
-        <button class="theme-switch" id="theme-switch" title="Toggle dark/light mode"><i class="fas fa-moon"></i></button>
-        <span class="profile"><img class="profile-img" src="https://randomuser.me/api/portraits/men/85.jpg" alt="Profile"> Alex</span>
-      </div>
+  <div class="os-ui-container">
+    <!-- Cinematic OS Status Bar -->
+    <div class="ai-status-bar">
+      <div class="status-bubble"><i class="fas fa-brain"></i> WaterWise AI ACTIVE</div>
     </div>
-    <div class="pages" id="pages">
-      <!-- Page containers injected by JS -->
+    <!-- Sci-fi Glass Card (Placeholder) -->
+    <div class="os-dashboard-glass">
+      <div class="glass-card neon-glow">
+        <i class="fas fa-seedling"></i>&nbsp; Welcome to the WaterWise Cinematic OS — The future of farming UI starts here.
+      </div>
     </div>
   </div>
-  <!-- Floating action button -->
-  <button class="fab" id="fab"><i class="fas fa-plus"></i></button>
-</div>
-
-<!-- ============== Mobile Bottom Nav ============= -->
-<div class="bottom-nav" id="bottom-nav">
-  <!-- Nav links filled by JS -->
+  <button class="fab"><i class="fas fa-plus"></i></button>
 </div>
 
 <script>
-const pagesData = [
-  {id:"dashboard",icon:"fa-tachometer-alt", name:"Dashboard"},
-  {id:"irrigation", icon:"fa-tint", name:"Irrigation Control"},
-  {id:"sensors", icon:"fa-microchip", name:"Sensors"},
-  {id:"weather", icon:"fa-cloud-sun", name:"Weather"},
-  {id:"analytics", icon:"fa-chart-line", name:"Analytics"},
-  {id:"faults", icon:"fa-exclamation-triangle", name:"Fault Detection"},
-  {id:"water-usage", icon:"fa-droplet", name:"Water Usage"},
-  {id:"solar", icon:"fa-solar-panel", name:"Solar & Battery"},
-  {id:"automation", icon:"fa-magic", name:"Automation Rules"},
-  {id:"zones", icon:"fa-map", name:"Farm Zones"},
-  {id:"notifications", icon:"fa-bell", name:"Notifications"},
-  {id:"reports", icon:"fa-file-alt", name:"Reports"},
-  {id:"settings", icon:"fa-cog", name:"Settings"},
-  {id:"help", icon:"fa-question-circle", name:"Help"},
-];
+/* ============== 3D BACKGROUND SYSTEM — THREE.JS ============= */
+let camera,scene,renderer,particles,waveMesh,clock,gridLines,holoIcons=[];
+let width=window.innerWidth, height=window.innerHeight;
 
-// ONBOARDING SLIDES DATA
-const slides = [
-  {title:"Smart Irrigation",icon:"fa-droplet",desc:"Automated, zone-based watering system that adapts in real time to soil and weather."},
-  {title:"Solar Powered Farming",icon:"fa-solar-panel",desc:"100% solar powered operation with battery backup for seamless automation."},
-  {title:"AI Water Monitoring",icon:"fa-brain",desc:"AI monitors trends, moisture & tank levels for precision and cost savings."},
-  {title:"Leak Detection",icon:"fa-shield-alt",desc:"Advanced leak detection for instant alerts, auto shutoff to protect your crops."},
-  {title:"Remote Farm Control",icon:"fa-mobile-alt",desc:"Monitor and adjust your irrigation from anywhere, anytime. Total control in your hand."},
-];
+function create3DBg() {
+  scene=new THREE.Scene();
+  camera=new THREE.PerspectiveCamera(52,width/height,0.3,1000);
+  camera.position.set(0,16,49);
+  scene.fog=new THREE.Fog("#1a2041",66,350);
 
-// ========== Splash Auto-Transition ==========
-setTimeout(() => {
-  document.getElementById("splash").style.opacity=0;
+  renderer=new THREE.WebGLRenderer({canvas:document.getElementById('bg-3d-canvas'),alpha:true,antialias:true});
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setClearColor(0x051020,1);
+  renderer.setSize(width,height);
+
+  clock=new THREE.Clock();
+  // 1. FLOATING PARTICLES SYSTEM
+  const particleGeo=new THREE.BufferGeometry(),max=3500;
+  let positions=new Float32Array(max*3),colors=new Float32Array(max*3);
+  for(let i=0;i<max;i++){
+    let theta=Math.random()*Math.PI*2,phi=Math.random()*Math.PI,rad=42+35*Math.random();
+    positions[3*i]=Math.sin(phi)*Math.cos(theta)*rad;
+    positions[3*i+1]=(Math.random()-0.5)*32;
+    positions[3*i+2]=Math.sin(phi)*Math.sin(theta)*rad;
+    let c=new THREE.Color('#00ffe7');
+    c.lerp(new THREE.Color('#0070fc'),Math.random()*0.54+0.3);
+    colors[3*i]=c.r; colors[3*i+1]=c.g; colors[3*i+2]=c.b;
+  }
+  particleGeo.setAttribute('position',new THREE.BufferAttribute(positions,3));
+  particleGeo.setAttribute('color',new THREE.BufferAttribute(colors,3));
+  let particleMat=new THREE.PointsMaterial({size:2.7,vertexColors:true,opacity:0.82,transparent:true,
+    blending:THREE.AdditiveBlending,map:null,depthWrite:false});
+  particles=new THREE.Points(particleGeo,particleMat);particles.frustumCulled=false;
+  scene.add(particles);
+
+  // 2. GLOWING HOLOGRAPHIC GRID SYSTEM
+  let gridGeo=new THREE.PlaneGeometry(170,170,40,40);
+  let gridMat=new THREE.MeshBasicMaterial({color:0x02ffe6,transparent:true,opacity:.11,wireframe:true});
+  gridLines=new THREE.Mesh(gridGeo,gridMat);
+  gridLines.position.y=-21;gridLines.rotation.x=-Math.PI/2;
+  scene.add(gridLines);
+
+  // 3. WAVY WATER-LIKE SURFACE MESH
+  let waveGeo=new THREE.PlaneGeometry(90,90,54,54);
+  let waveMat=new THREE.MeshPhongMaterial({
+    color:0x0ceeff,shininess:98,transparent:true,opacity:0.36,emissive:0x1ff5f9,emissiveIntensity:0.18,
+    side:THREE.DoubleSide,flatShading:true
+  });
+  waveMesh=new THREE.Mesh(waveGeo,waveMat);
+  waveMesh.position.y=-10;waveMesh.rotation.x=-Math.PI/2;
+  scene.add(waveMesh);
+
+  // 4. DIGITAL FARMING ICONS FLOATING IN 3D
+  let iconGeo=new THREE.SphereGeometry(2,22,22);
+  let iconMat=new THREE.MeshStandardMaterial({color:0x46f5ff,emissive:0x27effb,opacity:.62,transparent:true});
+  for(let i=0;i<6;i++){
+    let mesh=new THREE.Mesh(iconGeo,iconMat.clone());
+    mesh.position.x=Math.cos(i/6*Math.PI*2)*32+Math.random()*5;
+    mesh.position.y=4+Math.random()*25;
+    mesh.position.z=Math.sin(i/6*Math.PI*2)*32+Math.random()*5;
+    mesh.material.color.setHSL(Math.random()*0.12+0.47,1,0.55); 
+    mesh.material.emissive.setHSL(0.42+Math.random()*0.1,1,0.56);
+    holoIcons.push(mesh);
+    scene.add(mesh);
+  }
+
+  // 5. LIGHTING ENGINES 
+  let ambient=new THREE.AmbientLight(0x1ff3ef,1.15),dirLight=new THREE.PointLight(0x43a2f7,0.33);
+  dirLight.position.set(2,29,38);
+  scene.add(ambient);scene.add(dirLight);
+
+  window.addEventListener("resize",()=>{
+    width=window.innerWidth;height=window.innerHeight;
+    camera.aspect=width/height;camera.updateProjectionMatrix();
+    renderer.setSize(width,height);
+  });
+}
+create3DBg();
+
+let mouse={x:0,y:0},target={x:0,y:0};
+document.addEventListener("mousemove",e=>{
+  target.x=(e.clientX/width-0.5)*2;
+  target.y=(e.clientY/height-0.5)*2;
+});
+
+// ====== ANIMATION LOOP ==========
+function animate() {
+  let t=clock.getElapsedTime();
+  if(camera){
+    // Parallax & camera moves
+    camera.position.x=target.x*8+Math.sin(t*0.09)*3;
+    camera.position.y=16+target.y*9+Math.sin(t*0.14)*2.8;
+    camera.position.z=49+Math.cos(t*0.11)*2;
+    camera.lookAt(0,7,0);
+  }
+  // Animate particles around, glow
+  if(particles){
+    let pos=particles.geometry.attributes.position,array=pos.array;
+    for(let i=0;i<array.length;i+=3){
+      array[i+1]+=Math.sin(t*0.97+i)*0.011+Math.cos(t*0.046+i)*0.0073;
+    }
+    pos.needsUpdate=true;
+  }
+  // Animate wavy mesh
+  if(waveMesh){
+    let pos=waveMesh.geometry.attributes.position;
+    for(let i=0;i<pos.count;i++){
+      let px=pos.getX(i),pz=pos.getY(i);
+      let v=Math.sin(px*0.36+t)*0.7+Math.cos(pz*0.43+t*1.2)*0.83;
+      pos.setZ(i,v*0.56+Math.sin(i+t*0.36)*0.4);
+    }
+    pos.needsUpdate=true;
+    waveMesh.material.opacity=0.28+Math.sin(t*0.76)*0.13;
+  }
+  // Animate floating icons
+  for(let i=0;i<holoIcons.length;i++){
+    let mesh=holoIcons[i];
+    mesh.position.y=8+Math.sin(t*0.72+i*2)*2.5+Math.cos(t*0.28+i)*2.5;
+    mesh.position.x+=Math.sin(t*0.38+i*1.2)*.01;
+    mesh.material.opacity=0.31+Math.sin(t*1.1+i)*0.12;
+    mesh.rotation.x=Math.sin(t*0.29+i);
+    mesh.rotation.y=Math.cos(t*0.37+i);
+  }
+  // Subtle moving grid
+  gridLines.material.opacity=0.11+Math.sin(t*0.47)*0.08;
+  renderer.render(scene,camera);
+  requestAnimationFrame(animate);
+}
+animate();
+/* ============= END 3D ENGINE ============ */
+
+/* ===== SPLASH BOOTUP/EXPLOSION/TRANSITION ========== */
+setTimeout(()=>{
+  // Animate out splash (after loader), explosion, show onboarding.
+  const splash=document.getElementById('splash');
+  splash.style.opacity=0; 
   setTimeout(()=>{
-    document.getElementById("splash").style.display="none";
-    onboardingShow();
-  },480);
-}, 2200);
+    splash.style.display='none';
+    showOnboarding();
+  },1230);
+},2650);
 
-// ========== ONBOARDING ==========
-function onboardingShow() {
-  const onbd = document.getElementById("onboarding");
-  onbd.style.display="flex";
-  onbd.classList.add("active");
+/* ========== CINEMATIC SPLASH EXPLOSION CANVAS ========== */
+function explosionEffect() {
+  const c=document.getElementById('explosion-canvas');
+  c.width=320;c.height=320;
+  c.style.display='block';
+  let ctx=c.getContext('2d');
+  let particles=[];
+  for(let i=0;i<77;i++){
+    particles.push({
+      x:160,y:160,
+      r:Math.random()*17+7,
+      a:Math.random()*Math.PI*2,
+      s:Math.random()*0.07+0.34,
+      c:`hsl(${185+Math.random()*90},98%,${65+Math.random()*25}%)`,
+    });
+  }
+  let frame=0;
+  function loop(){
+    ctx.clearRect(0,0,320,320);
+    for(let p of particles){
+      let px=p.x+Math.cos(p.a)*p.r*frame*p.s;
+      let py=p.y+Math.sin(p.a)*p.r*frame*p.s;
+      ctx.globalAlpha=1-frame/19;
+      ctx.beginPath();ctx.arc(px,py,5+Math.max(0,13-frame),0,Math.PI*2);
+      ctx.fillStyle=p.c;ctx.fill();
+    }
+    frame++;
+    if(frame<19)requestAnimationFrame(loop);
+    else c.style.display='none';
+  }
+  loop();
+}
+setTimeout(()=>explosionEffect(),2600);
+
+/* ==== ONBOARDING DATA AND FLUID ANIMATION SYSTEM ==== */
+const slides=[
+  {title:"AI Irrigation",icon:"fa-brain",desc:"Next-gen AI learns your land, crops & weather for 3x smarter irrigation."},
+  {title:"Smart Water Monitoring",icon:"fa-tint",desc:"Real-time sensors & visualizations for water tanks, soil & moisture."},
+  {title:"Solar Automation",icon:"fa-solar-panel",desc:"The entire system is off-grid. AI charges & powers with sunlight."},
+  {title:"Leak Detection",icon:"fa-shield-alt",desc:"Get instant alerts & auto-shutoff for leaks, faults & pressure drops."},
+  {title:"Remote Farm Intelligence",icon:"fa-mobile-alt",desc:"Monitor, control & automate from any device, anywhere in the world."},
+];
+function showOnboarding(){
+  const ctr=document.getElementById('onboarding');
+  ctr.style.display='flex';
+  ctr.classList.add('active');
   setOnboardingSlide(0);
 }
-let obSlide = 0;
-function setOnboardingSlide(idx) {
-  const ctr = document.getElementById("onboarding");
-  ctr.querySelectorAll(".onboarding-slide").forEach(e=>e.remove());
-  // insert slide
-  const slideData = slides[idx];
-  const slide = document.createElement("div");
-  slide.className = "onboarding-slide active";
-  slide.innerHTML = `
-    <div class="slide-icon"><i class="fas ${slideData.icon}"></i></div>
-    <h2>${slideData.title}</h2>
-    <p>${slideData.desc}</p>
+let obSlide=0;
+function setOnboardingSlide(idx){
+  const ctr=document.querySelector('.onboarding-slides-ctr');
+  ctr.querySelectorAll('.onboarding-slide').forEach(e=>e.remove());
+  const data=slides[idx];
+  // Slide structure
+  let slide=document.createElement('div');
+  slide.className='onboarding-slide active';
+  slide.innerHTML=`
+    <div class="slide-art"><i class="fas ${data.icon}"></i></div>
+    <h2>${data.title}</h2>
+    <div class="slide-desc">${data.desc}</div>
   `;
-  ctr.insertBefore(slide, ctr.querySelector(".onboarding-indicator"));
-  // Update dots
-  let dots = '';
+  ctr.insertBefore(slide,ctr.querySelector('.onboarding-indicator'));
+  // Dots
+  let dots='';
   for(let i=0;i<slides.length;i++)
     dots+=`<span class="indicator-dot${i===idx?' active':''}"></span>`;
-  document.getElementById("onboarding-indicator").innerHTML = dots;
-  // Update buttons
-  const nextBtn = document.getElementById("onboard-next");
-  nextBtn.innerText = idx===slides.length-1 ? "Get Started" : "Next";
+  document.getElementById("onboarding-indicator").innerHTML=dots;
+  // Next/Skip
+  const nextBtn=document.getElementById('onboard-next');
+  nextBtn.innerText=idx===slides.length-1?'Get Started':'Next';
 }
-
-document.getElementById("onboard-next").onclick = ()=>{
-  if(obSlide<slides.length-1){ obSlide++; setOnboardingSlide(obSlide);}
-  else{ // Get Started
-    document.getElementById("onboarding").classList.remove("active");
-    setTimeout(()=>{document.getElementById("onboarding").style.display="none";loginShow();},340);
+document.getElementById('onboard-next').onclick=()=>{
+  if(obSlide<slides.length-1){obSlide++;setOnboardingSlide(obSlide);}
+  else{
+    document.getElementById('onboarding').classList.remove('active');
+    setTimeout(()=>{document.getElementById('onboarding').style.display='none';showLogin();},430);
   }
-}
-document.getElementById("onboard-skip").onclick = ()=>{
-  document.getElementById("onboarding").classList.remove("active");
-  setTimeout(()=>{document.getElementById("onboarding").style.display="none";loginShow();},340);
-}
-
-// Allow left/right swipe (touch)
-let obTouchX = null;
+};
+document.getElementById('onboard-skip').onclick=()=>{
+  document.getElementById('onboarding').classList.remove('active');
+  setTimeout(()=>{document.getElementById('onboarding').style.display='none';showLogin();},430);
+};
+// Swipe support
+let obTouchX=null;
 document.getElementById("onboarding").addEventListener("touchstart",e=>{
-  obTouchX = e.touches[0].clientX;
-})
+  obTouchX=e.touches[0].clientX;
+});
 document.getElementById("onboarding").addEventListener("touchend",e=>{
   if(obTouchX==null)return;
-  let dx = e.changedTouches[0].clientX-obTouchX;
-  if(Math.abs(dx)>44){
+  let dx=e.changedTouches[0].clientX-obTouchX;
+  if(Math.abs(dx)>39){
     if(dx>0 && obSlide>0) { obSlide--; setOnboardingSlide(obSlide);}
     if(dx<0 && obSlide<slides.length-1) { obSlide++; setOnboardingSlide(obSlide);}
   }
   obTouchX=null;
 });
 
-// ======== LOGIN SCREEN =========
-function loginShow() {
-  const log = document.getElementById("login");
-  log.classList.add("active");
-  setTimeout(()=>log.querySelector('input[type=email]').focus(),270);
+/* ==== LOGIN EXPERIENCE ==== */
+function showLogin(){
+  const log=document.getElementById('login');
+  log.classList.add('active');
+  setTimeout(()=>log.querySelector('.holo-input').focus(),410);
 }
-function loginHide() {
-  document.getElementById("login").classList.remove("active");
+function hideLogin(){
+  document.getElementById('login').classList.remove('active');
 }
-document.getElementById("demo-login").onclick = ()=>{
-  loginHide();
-  setTimeout(appShow,340);
-}
-// Biometric click
-document.getElementById("faceid-btn").onclick = function(){
+document.getElementById('demo-login').onclick=e=>{
+  // Add button ripple
+  let btn=e.currentTarget;
+  let ripple=document.createElement('div');ripple.className='btn-ripple';
+  btn.appendChild(ripple);
+  setTimeout(()=>{ripple.remove();},480);
+  hideLogin();
+  setTimeout(launchMainOS,540);
+};
+// Biometric effect
+document.getElementById("faceid-btn").onclick=function(){
   this.classList.add('animated');
   setTimeout(()=>this.classList.remove('animated'),900);
 };
-// Enter on password field will submit
 document.getElementById("login-pass").addEventListener("keydown",function(e){
-  if(e.key==="Enter") document.getElementById("demo-login").click();
+  if(e.key==="Enter")document.getElementById("demo-login").click();
 });
 
-// ============ MAIN APP AND NAVIGATION ============
-function appShow(){
-  document.getElementById("app").classList.add("active");
-  createNavs();
-  createPages();
-  setPage("dashboard");
+/* ==== MAIN OS UI LAUNCH ==== */
+function launchMainOS(){
+  document.getElementById('main-app').classList.add('active');
+  // Animate in dashboard card (GSAP)
+  setTimeout(()=>{
+    gsap.fromTo('.glass-card',{y:48,opacity:0,scale:0.92},{y:0,opacity:1,scale:1,duration:1.2,ease:'power4.out'});
+    gsap.fromTo('.sidebar-holo',{x:-90,opacity:0},{x:0,opacity:1,duration:1.05,delay:.25,ease:'power4.out'});
+    gsap.fromTo('.fab',{scale:0.19,opacity:0},{scale:1,opacity:1,duration:1.08,delay:.7,ease:'back.out(1.7)'});
+    gsap.fromTo('.ai-status-bar',{y:-33,opacity:0},{y:0,opacity:1,duration:.92,delay:.38,ease:'expo.out'});
+  },120);
 }
-// Sidebar nav links creation
-function createNavs(){
-  const side = document.getElementById("side-links");
-  side.innerHTML = pagesData.map((p,i)=>
-    `<a class="nav-link${i===0?' active':''}" data-page="${p.id}" title="${p.name}"><i class="fas ${p.icon}"></i><span>${p.name}</span></a>`
-  ).join('');
-  side.querySelectorAll(".nav-link").forEach(el=>{
-    el.onclick = function(){
-      side.querySelectorAll(".nav-link").forEach(t=>t.classList.remove('active'));
-      this.classList.add("active");
-      setPage(this.getAttribute("data-page"));
-    }
-  });
-  // Mobile nav
-  const bot = document.getElementById("bottom-nav");
-  bot.innerHTML = pagesData.slice(0,5).map((p,i)=>
-    `<a class="bottom-link${i===0?' active':''}" data-page="${p.id}" title="${p.name}"><i class="fas ${p.icon}"></i><span style="font-size:.7em">${p.name.split(" ")[0]}</span></a>`
-  ).join('');
-  bot.querySelectorAll('.bottom-link').forEach(el=>{
-    el.onclick=function(){
-      bot.querySelectorAll(".bottom-link").forEach(t=>t.classList.remove('active'));
-      this.classList.add('active');
-      setPage(this.getAttribute("data-page"));
-      // sync sidebar (if open)
-      document.querySelectorAll('.sidebar .nav-link').forEach(t=>{
-        if(t.getAttribute("data-page")==this.getAttribute("data-page")) t.classList.add('active');
-        else t.classList.remove('active');
-      });
-    }
-  });
-}
-// Pages creation
-function createPages(){
-  const container = document.getElementById("pages");
-  container.innerHTML = pagesData.map((p,i)=>
-    `<section class="page${i===0?' active':''}" id="page-${p.id}">
-      <div class="page-title">${p.name}</div>
-      <div class="page-content"> <!-- Add your content here --> </div>
-    </section>`
-  ).join('');
-}
-function setPage(id){
-  // Title
-  document.getElementById("topbar-title").innerText = pagesData.find(p=>p.id==id).name;
-  // Show page
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove('active'));
-  let el = document.getElementById("page-"+id);
-  if(el) el.classList.add("active");
-}
+/* FLOATING ACTION BUTTON DEMO */
+document.querySelector('.fab').onclick=()=>alert("Futuristic Floating Action Button!");
 
-// Sidebar expand/collapse
-const sidebar = document.getElementById("sidebar");
-document.getElementById("sidebar-toggle").onclick = function(){
-  if(sidebar.classList.contains("expanded")){
-    sidebar.classList.remove("expanded");
-    this.querySelector("i").className = "fas fa-angle-double-right";
-  } else {
-    sidebar.classList.add("expanded");
-    this.querySelector("i").className = "fas fa-angle-double-left";
-  }
-}
-
-// FAB button demo
-document.getElementById("fab").onclick = ()=>alert("Floating Action Button");
-
-// =========== LIVE CLOCK ============
-function updateClock(){
-  const el = document.getElementById("clock");
-  const d = new Date();
-  el.innerText = d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"});
-}
-setInterval(updateClock,1000); updateClock();
-
-// =========== THEME SWITCHER ==========
-const themeSwitch = document.getElementById("theme-switch");
-themeSwitch.onclick = ()=>{
-  const html = document.documentElement;
-  const dark = html.getAttribute("data-theme")!=="dark";
-  html.setAttribute("data-theme", dark?"dark":"light");
-  localStorage.setItem("ww-theme",dark?"dark":"light");
-  themeSwitch.innerHTML = `<i class="fas fa-${dark?"moon":"sun"}"></i>`;
-};
-// On load, apply theme from storage
-window.addEventListener('DOMContentLoaded',()=>{
-  let pref = localStorage.getItem("ww-theme");
-  if(pref) document.documentElement.setAttribute("data-theme",pref);
-  themeSwitch.innerHTML = `<i class="fas fa-${pref==="dark"?"moon":"sun"}"></i>`;
-});
 </script>
 </body>
 </html>
