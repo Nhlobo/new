@@ -97,10 +97,10 @@
 
 <script>
 // Demo/local mode: run without backend API/auth so opening this HTML directly always works.
-// TODO: Set DEMO_LOCAL_MODE to false and restore real API/auth calls when backend integration is ready.
-const DEMO_LOCAL_MODE = true;
-const DEMO_USER = { id: 'demo-user-001', name: 'Demo Farmer', email: 'demo@waterwise.local' };
-const DEMO_STATIC_DATA = {
+// TODO: Set demoLocalMode to false and restore real API/auth calls when backend integration is ready.
+const demoLocalMode = true;
+const demoUser = { id: 'demo-user-001', name: 'Demo Farmer', email: 'demo@waterwise.local' };
+const demoStaticData = {
   metrics: { soil:52,tank:50,flow:18,temp:27,humidity:64,pump:0,solar:84,battery:78,wifi:96,health:93,valve:0 },
   usageByDay: [320,290,350,280,410,260,300],
   notifications: ['Welcome to WaterWise demo mode', 'Backend API disabled for local demo use'],
@@ -120,15 +120,15 @@ pts=new THREE.Points(new THREE.BufferGeometry().setAttribute('position',new THRE
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 (function animate(){requestAnimationFrame(animate);globe.rotation.y+=.003;pts.rotation.y+=.0008;renderer.render(scene,camera)})();}else{document.getElementById('three-bg').style.background='radial-gradient(circle at 50% 30%, rgba(0,217,255,.14), transparent 55%)'}
 function showDashboard(){login.classList.add('hidden');app.classList.remove('hidden');if(typeof gsap!=='undefined'){gsap.from('.card',{opacity:0,y:30,stagger:.04,duration:.6,ease:'power2.out'})}}
-setTimeout(()=>{splash.classList.add('hidden');if(DEMO_LOCAL_MODE){email.value=DEMO_USER.email;pass.value='demo';showDashboard();DEMO_STATIC_DATA.notifications.forEach(m=>notify(m));}else{login.classList.remove('hidden')}},2800);
-loginBtn.onclick=()=>{if(!DEMO_LOCAL_MODE&&(!email.value||!pass.value))return toast('Please enter credentials');showDashboard();};
-const metricsData={...DEMO_STATIC_DATA.metrics};
+setTimeout(()=>{splash.classList.add('hidden');if(demoLocalMode){email.value=demoUser.email;showDashboard();demoStaticData.notifications.forEach(m=>notify(m));}else{login.classList.remove('hidden')}},2800);
+loginBtn.onclick=()=>{if(!demoLocalMode&&(!email.value||!pass.value))return toast('Please enter credentials');showDashboard();};
+const metricsData={...demoStaticData.metrics};
 const metricKeys=[['soil','Soil Moisture','fa-seedling'],['tank','Tank Level','fa-water'],['flow','Water Flow','fa-gauge-high'],['temp','Temperature','fa-temperature-three-quarters'],['humidity','Humidity','fa-droplet'],['pump','Pump Status','fa-fan'],['solar','Solar','fa-solar-panel'],['battery','Battery','fa-battery-three-quarters'],['wifi','Wi-Fi','fa-wifi'],['health','System Health','fa-heart-pulse']];
 metrics.innerHTML=metricKeys.map(([k,t,i])=>`<div class='card glass metric'><div class='metric-wrap'><div><div class='muted'><i class='fa-solid ${i}'></i> ${t}</div><div class='value' id='v_${k}'></div></div><div class='ring' id='r_${k}' style='--p:0'></div></div></div>`).join('');
 let chart=null,usage=null;
 if(typeof Chart!=='undefined'){
 chart=new Chart(sensorChart,{type:'line',data:{labels:[...Array(12)].map((_,i)=>i),datasets:[{label:'Soil %',borderColor:'#26f7a2',data:[],tension:.4},{label:'Tank %',borderColor:'#00d9ff',data:[],tension:.4},{label:'Flow L/m',borderColor:'#ffc857',data:[],tension:.4},{label:'Temp °C',borderColor:'#ff6f91',data:[],tension:.4}]},options:{plugins:{legend:{labels:{color:'#cde'}}},scales:{x:{ticks:{color:'#8eb'}},y:{ticks:{color:'#8eb'}}}}});
-usage=new Chart(usageChart,{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{label:'Liters',data:DEMO_STATIC_DATA.usageByDay,backgroundColor:'#00d9ff88',borderColor:'#00d9ff'}]},options:{plugins:{legend:{labels:{color:'#cde'}}},scales:{x:{ticks:{color:'#8eb'}},y:{ticks:{color:'#8eb'}}}}});
+usage=new Chart(usageChart,{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{label:'Liters',data:demoStaticData.usageByDay,backgroundColor:'#00d9ff88',borderColor:'#00d9ff'}]},options:{plugins:{legend:{labels:{color:'#cde'}}},scales:{x:{ticks:{color:'#8eb'}},y:{ticks:{color:'#8eb'}}}}});
 }
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 function update(){metricsData.soil=clamp(metricsData.soil+(Math.random()*6-3)-(metricsData.pump?1.8:0),20,85);metricsData.tank=clamp(metricsData.tank+(metricsData.pump?-1.2:Math.random()*1.3),8,99);metricsData.flow=clamp((metricsData.pump?14:2)+Math.random()*8,0,30);metricsData.temp=clamp(metricsData.temp+(Math.random()*1.5-.7),20,39);metricsData.humidity=clamp(metricsData.humidity+(Math.random()*4-2),35,90);metricsData.battery=clamp(metricsData.battery+(metricsData.solar>35?.2:-.3),11,100);metricsData.wifi=clamp(metricsData.wifi+(Math.random()*4-2),70,100);metricsData.health=clamp((metricsData.battery+metricsData.wifi+metricsData.soil)/3,45,100);
@@ -143,7 +143,7 @@ function setValve(on){metricsData.valve=on?1:0;toast('Valve '+(on?'opened':'clos
 function emergency(){metricsData.pump=0;metricsData.valve=0;notify('Emergency shutdown engaged','danger');pumpStatus.textContent='System in safe mode';}
 function notify(msg,type='info'){if(!notifToggle.checked)return;const el=document.createElement('div');el.className='item';el.innerHTML=`<b>${new Date().toLocaleTimeString()}</b> - ${msg}`;notif.prepend(el);while(notif.children.length>20)notif.lastChild.remove();if(type!=='info')toast(msg)}
 function toast(msg){const t=document.createElement('div');t.className='glass';t.style.cssText='position:fixed;top:16px;right:16px;padding:10px 14px;z-index:12';t.textContent=msg;document.body.appendChild(t);if(typeof gsap!=='undefined'){gsap.fromTo(t,{opacity:0,y:-12},{opacity:1,y:0,duration:.3});setTimeout(()=>gsap.to(t,{opacity:0,y:-10,duration:.3,onComplete:()=>t.remove()}),2200)}else{setTimeout(()=>t.remove(),2200)}}
-const aiTips=DEMO_STATIC_DATA.aiTips;setInterval(()=>{const m=document.createElement('div');m.className='ai-msg';m.textContent=aiTips[Math.floor(Math.random()*aiTips.length)];aiFeed.prepend(m);while(aiFeed.children.length>6)aiFeed.lastChild.remove();},5000);
+const aiTips=demoStaticData.aiTips;setInterval(()=>{const m=document.createElement('div');m.className='ai-msg';m.textContent=aiTips[Math.floor(Math.random()*aiTips.length)];aiFeed.prepend(m);while(aiFeed.children.length>6)aiFeed.lastChild.remove();},5000);
 setInterval(update,2500);update();setInterval(()=>clock.textContent=new Date().toLocaleString(),1000);
 threshold.oninput=()=>thv.textContent=threshold.value+'%';theme.onchange=()=>document.documentElement.classList.toggle('light',theme.checked);
 </script>
