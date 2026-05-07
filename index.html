@@ -96,27 +96,45 @@
 <button class="fab" onclick="toast('Voice command module coming soon')"><i class="fa-solid fa-microphone"></i></button>
 
 <script>
+// Demo/local mode: run without backend API/auth so opening this HTML directly always works.
+// TODO: Set DEMO_LOCAL_MODE to false and restore real API/auth calls when backend integration is ready.
+const DEMO_LOCAL_MODE = true;
+const DEMO_USER = { id: 'demo-user-001', name: 'Demo Farmer', email: 'demo@waterwise.local' };
+const DEMO_STATIC_DATA = {
+  metrics: { soil:52,tank:50,flow:18,temp:27,humidity:64,pump:0,solar:84,battery:78,wifi:96,health:93,valve:0 },
+  usageByDay: [320,290,350,280,410,260,300],
+  notifications: ['Welcome to WaterWise demo mode', 'Backend API disabled for local demo use'],
+  aiTips: ['Rain expected soon. Irrigation paused.','Soil moisture low in Zone A.','Battery operating normally.','Leak probability rising near valve cluster.','Solar harvest optimal for daytime pumping.']
+};
+// API calls intentionally disabled for demo/local mode:
+// Example (disabled): fetch('/api/dashboard').then(r => r.json()).then(applyDashboardData);
+
 const navItems=[['dash','fa-chart-pie'],['monitor','fa-wave-square'],['control','fa-sliders'],['analytics','fa-chart-line'],['weather','fa-cloud'],['notify','fa-bell'],['settings','fa-gear'],['ai','fa-robot']];
 const nav=document.getElementById('nav'); navItems.forEach(([id,ic],i)=>{const b=document.createElement('button');b.className='nav-btn'+(i===0?' active':'');b.innerHTML=`<i class="fa-solid ${ic}"></i>`;b.onclick=()=>switchView(id,b);nav.appendChild(b)});
 function switchView(id,b){document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');}
-particlesJS('particles-js',{particles:{number:{value:70},color:{value:'#41ffe1'},size:{value:2},line_linked:{enable:true,color:'#00d9ff33'},move:{speed:1.2}},interactivity:{events:{onhover:{enable:true,mode:'repulse'}}}});
-const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1000);camera.position.z=16;const renderer=new THREE.WebGLRenderer({alpha:true});renderer.setSize(innerWidth,innerHeight);document.getElementById('three-bg').appendChild(renderer.domElement);
-const geo=new THREE.IcosahedronGeometry(4,1),mat=new THREE.MeshBasicMaterial({color:0x00d9ff,wireframe:true,transparent:true,opacity:.2});const globe=new THREE.Mesh(geo,mat);scene.add(globe);
-const pts=new THREE.Points(new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(Array.from({length:600},()=> (Math.random()-.5)*80),3)),new THREE.PointsMaterial({size:.08,color:0x26f7a2}));scene.add(pts);
+if(typeof particlesJS==='function'){particlesJS('particles-js',{particles:{number:{value:70},color:{value:'#41ffe1'},size:{value:2},line_linked:{enable:true,color:'#00d9ff33'},move:{speed:1.2}},interactivity:{events:{onhover:{enable:true,mode:'repulse'}}}});}
+let scene,camera,renderer,globe,pts;
+if(typeof THREE!=='undefined'){scene=new THREE.Scene();camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1000);camera.position.z=16;renderer=new THREE.WebGLRenderer({alpha:true});renderer.setSize(innerWidth,innerHeight);document.getElementById('three-bg').appendChild(renderer.domElement);
+const geo=new THREE.IcosahedronGeometry(4,1),mat=new THREE.MeshBasicMaterial({color:0x00d9ff,wireframe:true,transparent:true,opacity:.2});globe=new THREE.Mesh(geo,mat);scene.add(globe);
+pts=new THREE.Points(new THREE.BufferGeometry().setAttribute('position',new THREE.Float32BufferAttribute(Array.from({length:600},()=> (Math.random()-.5)*80),3)),new THREE.PointsMaterial({size:.08,color:0x26f7a2}));scene.add(pts);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-(function animate(){requestAnimationFrame(animate);globe.rotation.y+=.003;pts.rotation.y+=.0008;renderer.render(scene,camera)})();
-setTimeout(()=>{splash.classList.add('hidden');login.classList.remove('hidden')},2800);
-loginBtn.onclick=()=>{if(!email.value||!pass.value)return toast('Please enter credentials');login.classList.add('hidden');app.classList.remove('hidden');gsap.from('.card',{opacity:0,y:30,stagger:.04,duration:.6,ease:'power2.out'})};
-const metricsData={soil:52,tank:50,flow:18,temp:27,humidity:64,pump:0,solar:84,battery:78,wifi:96,health:93,valve:0};
+(function animate(){requestAnimationFrame(animate);globe.rotation.y+=.003;pts.rotation.y+=.0008;renderer.render(scene,camera)})();}else{document.getElementById('three-bg').style.background='radial-gradient(circle at 50% 30%, rgba(0,217,255,.14), transparent 55%)'}
+function showDashboard(){login.classList.add('hidden');app.classList.remove('hidden');if(typeof gsap!=='undefined'){gsap.from('.card',{opacity:0,y:30,stagger:.04,duration:.6,ease:'power2.out'})}}
+setTimeout(()=>{splash.classList.add('hidden');if(DEMO_LOCAL_MODE){email.value=DEMO_USER.email;pass.value='demo';showDashboard();DEMO_STATIC_DATA.notifications.forEach(m=>notify(m));}else{login.classList.remove('hidden')}},2800);
+loginBtn.onclick=()=>{if(!DEMO_LOCAL_MODE&&(!email.value||!pass.value))return toast('Please enter credentials');showDashboard();};
+const metricsData={...DEMO_STATIC_DATA.metrics};
 const metricKeys=[['soil','Soil Moisture','fa-seedling'],['tank','Tank Level','fa-water'],['flow','Water Flow','fa-gauge-high'],['temp','Temperature','fa-temperature-three-quarters'],['humidity','Humidity','fa-droplet'],['pump','Pump Status','fa-fan'],['solar','Solar','fa-solar-panel'],['battery','Battery','fa-battery-three-quarters'],['wifi','Wi-Fi','fa-wifi'],['health','System Health','fa-heart-pulse']];
 metrics.innerHTML=metricKeys.map(([k,t,i])=>`<div class='card glass metric'><div class='metric-wrap'><div><div class='muted'><i class='fa-solid ${i}'></i> ${t}</div><div class='value' id='v_${k}'></div></div><div class='ring' id='r_${k}' style='--p:0'></div></div></div>`).join('');
-const chart=new Chart(sensorChart,{type:'line',data:{labels:[...Array(12)].map((_,i)=>i),datasets:[{label:'Soil %',borderColor:'#26f7a2',data:[],tension:.4},{label:'Tank %',borderColor:'#00d9ff',data:[],tension:.4},{label:'Flow L/m',borderColor:'#ffc857',data:[],tension:.4},{label:'Temp °C',borderColor:'#ff6f91',data:[],tension:.4}]},options:{plugins:{legend:{labels:{color:'#cde'}}},scales:{x:{ticks:{color:'#8eb'}},y:{ticks:{color:'#8eb'}}}}});
-const usage=new Chart(usageChart,{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{label:'Liters',data:[320,290,350,280,410,260,300],backgroundColor:'#00d9ff88',borderColor:'#00d9ff'}]},options:{plugins:{legend:{labels:{color:'#cde'}}},scales:{x:{ticks:{color:'#8eb'}},y:{ticks:{color:'#8eb'}}}}});
+let chart=null,usage=null;
+if(typeof Chart!=='undefined'){
+chart=new Chart(sensorChart,{type:'line',data:{labels:[...Array(12)].map((_,i)=>i),datasets:[{label:'Soil %',borderColor:'#26f7a2',data:[],tension:.4},{label:'Tank %',borderColor:'#00d9ff',data:[],tension:.4},{label:'Flow L/m',borderColor:'#ffc857',data:[],tension:.4},{label:'Temp °C',borderColor:'#ff6f91',data:[],tension:.4}]},options:{plugins:{legend:{labels:{color:'#cde'}}},scales:{x:{ticks:{color:'#8eb'}},y:{ticks:{color:'#8eb'}}}}});
+usage=new Chart(usageChart,{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{label:'Liters',data:DEMO_STATIC_DATA.usageByDay,backgroundColor:'#00d9ff88',borderColor:'#00d9ff'}]},options:{plugins:{legend:{labels:{color:'#cde'}}},scales:{x:{ticks:{color:'#8eb'}},y:{ticks:{color:'#8eb'}}}}});
+}
 function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 function update(){metricsData.soil=clamp(metricsData.soil+(Math.random()*6-3)-(metricsData.pump?1.8:0),20,85);metricsData.tank=clamp(metricsData.tank+(metricsData.pump?-1.2:Math.random()*1.3),8,99);metricsData.flow=clamp((metricsData.pump?14:2)+Math.random()*8,0,30);metricsData.temp=clamp(metricsData.temp+(Math.random()*1.5-.7),20,39);metricsData.humidity=clamp(metricsData.humidity+(Math.random()*4-2),35,90);metricsData.battery=clamp(metricsData.battery+(metricsData.solar>35?.2:-.3),11,100);metricsData.wifi=clamp(metricsData.wifi+(Math.random()*4-2),70,100);metricsData.health=clamp((metricsData.battery+metricsData.wifi+metricsData.soil)/3,45,100);
 metricKeys.forEach(([k])=>{const v=metricsData[k];const pct=k==='temp'?v*2.2:(k==='flow'?v*3.2:v);document.getElementById('v_'+k).textContent=(k==='pump'?(metricsData.pump?'ON':'OFF'):Math.round(v)+(k==='flow'?' L/m':k==='temp'?'°C':'%'));document.getElementById('r_'+k).style.setProperty('--p',clamp(pct,0,100));});
 water.style.height=metricsData.tank+'%';tankPct.textContent=Math.round(metricsData.tank)+'%';if(metricsData.tank<20)notify('Low tank warning','warn');if(metricsData.battery<25)notify('Low battery detected','warn');
-chart.data.datasets[0].data.push(metricsData.soil);chart.data.datasets[1].data.push(metricsData.tank);chart.data.datasets[2].data.push(metricsData.flow);chart.data.datasets[3].data.push(metricsData.temp);if(chart.data.datasets[0].data.length>12)chart.data.datasets.forEach(d=>d.data.shift());chart.update();
+if(chart){chart.data.datasets[0].data.push(metricsData.soil);chart.data.datasets[1].data.push(metricsData.tank);chart.data.datasets[2].data.push(metricsData.flow);chart.data.datasets[3].data.push(metricsData.temp);if(chart.data.datasets[0].data.length>12)chart.data.datasets.forEach(d=>d.data.shift());chart.update();}
 daily.textContent=Math.round((100-metricsData.tank)*9)+' L';weekly.textContent=Math.round((100-metricsData.tank)*48)+' L';
 wTemp.textContent=Math.round(metricsData.temp)+'°C';wMeta.textContent=`Humidity ${Math.round(metricsData.humidity)}% • Rain ${Math.round(100-metricsData.temp*2)}% • Wind ${Math.round(metricsData.flow)} km/h`;
 }
@@ -124,8 +142,8 @@ function setPump(on){metricsData.pump=on?1:0;pumpStatus.textContent='Pump '+(on?
 function setValve(on){metricsData.valve=on?1:0;toast('Valve '+(on?'opened':'closed'))}
 function emergency(){metricsData.pump=0;metricsData.valve=0;notify('Emergency shutdown engaged','danger');pumpStatus.textContent='System in safe mode';}
 function notify(msg,type='info'){if(!notifToggle.checked)return;const el=document.createElement('div');el.className='item';el.innerHTML=`<b>${new Date().toLocaleTimeString()}</b> - ${msg}`;notif.prepend(el);while(notif.children.length>20)notif.lastChild.remove();if(type!=='info')toast(msg)}
-function toast(msg){const t=document.createElement('div');t.className='glass';t.style.cssText='position:fixed;top:16px;right:16px;padding:10px 14px;z-index:12';t.textContent=msg;document.body.appendChild(t);gsap.fromTo(t,{opacity:0,y:-12},{opacity:1,y:0,duration:.3});setTimeout(()=>gsap.to(t,{opacity:0,y:-10,duration:.3,onComplete:()=>t.remove()}),2200)}
-const aiTips=['Rain expected soon. Irrigation paused.','Soil moisture low in Zone A.','Battery operating normally.','Leak probability rising near valve cluster.','Solar harvest optimal for daytime pumping.'];setInterval(()=>{const m=document.createElement('div');m.className='ai-msg';m.textContent=aiTips[Math.floor(Math.random()*aiTips.length)];aiFeed.prepend(m);while(aiFeed.children.length>6)aiFeed.lastChild.remove();},5000);
+function toast(msg){const t=document.createElement('div');t.className='glass';t.style.cssText='position:fixed;top:16px;right:16px;padding:10px 14px;z-index:12';t.textContent=msg;document.body.appendChild(t);if(typeof gsap!=='undefined'){gsap.fromTo(t,{opacity:0,y:-12},{opacity:1,y:0,duration:.3});setTimeout(()=>gsap.to(t,{opacity:0,y:-10,duration:.3,onComplete:()=>t.remove()}),2200)}else{setTimeout(()=>t.remove(),2200)}}
+const aiTips=DEMO_STATIC_DATA.aiTips;setInterval(()=>{const m=document.createElement('div');m.className='ai-msg';m.textContent=aiTips[Math.floor(Math.random()*aiTips.length)];aiFeed.prepend(m);while(aiFeed.children.length>6)aiFeed.lastChild.remove();},5000);
 setInterval(update,2500);update();setInterval(()=>clock.textContent=new Date().toLocaleString(),1000);
 threshold.oninput=()=>thv.textContent=threshold.value+'%';theme.onchange=()=>document.documentElement.classList.toggle('light',theme.checked);
 </script>
