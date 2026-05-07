@@ -1,7 +1,9 @@
 const STORAGE_KEY = 'waterwise-v9-demo-state';
 const TICK_INTERVAL_MS = 3000;
 const TICK_INTERVAL_SECONDS = TICK_INTERVAL_MS / 1000;
-const MAX_HISTORY_POINTS = 7 * 24 * 20;
+const HISTORY_HOURS_RETAINED = 7 * 24;
+const HISTORY_POINTS_PER_HOUR = 20;
+const MAX_HISTORY_POINTS = HISTORY_HOURS_RETAINED * HISTORY_POINTS_PER_HOUR;
 const SENSOR_ERROR_PROBABILITY = 0.015;
 const TEMPERATURE_CHANGE_PROBABILITY = 0.05;
 const ROUTES = ['dashboard', 'control', 'history', 'faults', 'users', 'weather', 'settings'];
