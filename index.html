@@ -18,7 +18,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .splash-content{position:absolute;top:14%;left:8%;z-index:3}
 .splash-title{font-size:clamp(44px,7vw,84px);font-weight:800;color:#1E7B3F;line-height:1.05;letter-spacing:-2px}
 .splash-subtitle{margin-top:12px;color:#7C7C7C;font-size:clamp(15px,1.5vw,21px);line-height:1.5;max-width:400px}
-.splash-bg{position:absolute;inset:0;width:100%;height:100%;background-image:url('Firefly_Gemini Flash_An IoT agricultural device installed in a farm setting- soil moisture probes in the g 243046.png');background-size:cover;background-position:center bottom;background-repeat:no-repeat;filter:saturate(1.03)}
+.splash-bg{position:absolute;inset:0;width:100%;height:100%;background-image:url('farm-device-243046.png');background-size:cover;background-position:center bottom;background-repeat:no-repeat;filter:saturate(1.03)}
 .logo-orbit{position:absolute;right:8%;top:14%;width:160px;height:160px;border-radius:50%;border:2px dashed rgba(30,123,63,.3);animation:spin 8s linear infinite;z-index:3}
 .logo-orbit::before,.logo-orbit::after{content:"";position:absolute;border-radius:50%;background:#1e7b3f}
 .logo-orbit::before{width:22px;height:22px;top:-11px;left:calc(50% - 11px)}
@@ -37,7 +37,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(
 .btn.primary{background:linear-gradient(90deg,var(--accent),#2f9f63);color:#fff}
 .btn.glass{background:var(--glass);border:1px solid var(--border);color:var(--text)}
 .login-screen{overflow:hidden;background:#fff;z-index:20}
-.login-bg{position:absolute;inset:0;width:100%;height:100%;background-image:url('Firefly_Gemini Flash_An IoT agricultural device installed in a farm setting- soil moisture probes in the g 243046.png');background-size:cover;background-position:center bottom;background-repeat:no-repeat;animation:zoomBg 15s ease-in-out infinite alternate}
+.login-bg{position:absolute;inset:0;width:100%;height:100%;background-image:url('farm-device-243046.png');background-size:cover;background-position:center bottom;background-repeat:no-repeat;animation:zoomBg 15s ease-in-out infinite alternate}
 .login-bg::before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(255,255,255,.5),rgba(255,255,255,.2),rgba(255,255,255,.09));backdrop-filter:blur(10px)}
 .login-wrapper{width:100%;height:100%;display:flex;align-items:center;justify-content:flex-start;position:relative;z-index:5;padding:30px}
 .login-card{width:100%;max-width:560px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(16px);border-radius:34px;padding:34px 28px;box-shadow:0 10px 40px rgba(0,0,0,.12)}
@@ -184,10 +184,13 @@ const state=JSON.parse(localStorage.getItem('ww-state')||'null')||{moisture:61,t
 const navItems=['Dashboard','Irrigation Control','Sensors','Weather','Analytics','Fault Detection','Water Usage','Solar & Battery','Automation Rules','Farm Zones','Notifications','Reports','Settings','Help & Support','Logout'];
 const sensorList=[['Soil Moisture',()=>state.moisture.toFixed(1)+'%'],['Ultrasonic Tank',()=>state.tank.toFixed(1)+'%'],['Flow',()=>state.flow.toFixed(1)+' L/min'],['Float Sensor',()=>state.tank<15?'LOW':'OK'],['Temperature',()=>state.temp.toFixed(1)+'°C'],['Voltage',()=> (11.5+state.battery/100*1.2).toFixed(2)+'V'],['Current',()=> (state.pump?2.4:0.6).toFixed(2)+'A']];
 let slideIndex=0,currentPage='Dashboard',simTimer;
+const INITIAL_RENDER_DELAY=700;
+const SIMULATION_TICK_INTERVAL=2800;
+let audioCtx;
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const save=()=>localStorage.setItem('ww-state',JSON.stringify(state));
 const notify=(msg,type='info')=>{const el=document.createElement('div');el.className='toast';el.textContent=msg;document.getElementById('toasts').prepend(el);setTimeout(()=>el.remove(),3200);if(state.settings.sound)beep(type==='danger'?180:320,.08);};
-const beep=(freq=280,dur=.05)=>{try{const ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator();const g=ac.createGain();o.frequency.value=freq;o.connect(g);g.connect(ac.destination);g.gain.value=.05;o.start();o.stop(ac.currentTime+dur);}catch(_){}}; 
+const beep=(freq=280,dur=.05)=>{try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator();const g=audioCtx.createGain();o.frequency.value=freq;o.connect(g);g.connect(audioCtx.destination);g.gain.value=.05;o.start();o.stop(audioCtx.currentTime+dur)}catch(_){}}; 
 const card=(title,val,sub,span='3',progress)=>`<article class="card span-${span}"><h3>${title}</h3><div class="metric">${val}</div><div class="sub">${sub||''}</div>${progress!==undefined?`<div class="progress"><span style="width:${progress}%"></span></div>`:''}</article>`;
 function setScreen(id){Object.values(appPages).forEach(p=>p.classList.remove('active'));appPages[id].classList.add('active')}
 function initSplash(){setScreen('splash');setTimeout(()=>setScreen('onboarding'),2400)}
@@ -216,7 +219,7 @@ function tick(){const isDay=new Date().getHours()>=6&&new Date().getHours()<=18;
 function applyTheme(){document.body.classList.toggle('dark',state.settings.dark)}
 function initGlobal(){renderNav();switchPage('Dashboard');document.getElementById('fab').onclick=()=>notify('Quick action: AI check completed');document.getElementById('soundToggle').onclick=()=>{state.settings.sound=!state.settings.sound;notify('Sound '+(state.settings.sound?'enabled':'disabled'));save()};document.getElementById('themeToggle').onclick=()=>{state.settings.dark=!state.settings.dark;applyTheme();save()}}
 function initParticles(){const canvas=document.getElementById('particle'),ctx=canvas.getContext('2d');const pts=Array.from({length:50},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.6,vy:(Math.random()-.5)*.6,r:Math.random()*2+1}));const resize=()=>{canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)};resize();addEventListener('resize',resize);(function loop(){ctx.clearRect(0,0,innerWidth,innerHeight);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>innerWidth)p.vx*=-1;if(p.y<0||p.y>innerHeight)p.vy*=-1;ctx.fillStyle='rgba(69,210,255,.35)';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()});requestAnimationFrame(loop)})()}
-function init(){applyTheme();initSplash();initSlides();initLogin();initGlobal();['dashboardGrid','irrigationGrid','sensorGrid','weatherGrid','analyticsGrid','faultGrid','usageGrid','solarGrid','ruleGrid','zoneGrid','notifGrid','reportGrid','settingsGrid','helpGrid'].forEach(id=>skeleton(document.getElementById(id)));setTimeout(renderAll,700);simTimer=setInterval(tick,2800);initParticles()}
+function init(){applyTheme();initSplash();initSlides();initLogin();initGlobal();['dashboardGrid','irrigationGrid','sensorGrid','weatherGrid','analyticsGrid','faultGrid','usageGrid','solarGrid','ruleGrid','zoneGrid','notifGrid','reportGrid','settingsGrid','helpGrid'].forEach(id=>skeleton(document.getElementById(id)));setTimeout(renderAll,INITIAL_RENDER_DELAY);simTimer=setInterval(tick,SIMULATION_TICK_INTERVAL);initParticles()}
 init();
 </script>
 </body>
