@@ -3,536 +3,221 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-<title>Smart Irrigation</title>
-
-<!-- GOOGLE FONT -->
+<title>WaterWise Smart Irrigation</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-<!-- FONT AWESOME -->
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <style>
-
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Poppins',sans-serif;
-}
-
-html,
-body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#ffffff;
-}
-
-/* ========================================= */
-/* APP */
-/* ========================================= */
-
-.app{
-    width:100%;
-    height:100vh;
-    position:relative;
-    overflow:hidden;
-}
-
-/* ========================================= */
-/* COMMON PAGE */
-/* ========================================= */
-
-.page{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    transition:1s ease;
-}
-
-/* ========================================= */
-/* SPLASH SCREEN */
-/* ========================================= */
-
-.splash-screen{
-    background:#F5F4D9;
-    z-index:10;
-    overflow:hidden;
-}
-
-/* SPLASH CONTENT */
-
-.splash-content{
-    position:absolute;
-    top:14%;
-    left:8%;
-    z-index:3;
-}
-
-.splash-title{
-    font-size:clamp(44px,7vw,84px);
-    font-weight:800;
-    color:#1E7B3F;
-    line-height:1.05;
-    letter-spacing:-2px;
-}
-
-.splash-subtitle{
-    margin-top:12px;
-    color:#7C7C7C;
-    font-size:clamp(15px,1.5vw,21px);
-    line-height:1.5;
-    max-width:340px;
-}
-
-/* SPLASH IMAGE */
-
-.splash-bg{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    background-image:url('greenhouse.png');
-    background-size:cover;
-    background-position:center bottom;
-    background-repeat:no-repeat;
-}
-
-/* ========================================= */
-/* LOGIN SCREEN */
-/* ========================================= */
-
-.login-screen{
-    opacity:0;
-    visibility:hidden;
-    overflow:hidden;
-    background:#ffffff;
-}
-
-.login-screen.active{
-    opacity:1;
-    visibility:visible;
-}
-
-/* BACKGROUND IMAGE */
-
-.login-bg{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    background-image:url('Firefly_Gemini Flash_An IoT agricultural device installed in a farm setting- soil moisture probes in the g 243046.png');
-    background-size:cover;
-    background-position:center bottom;
-    background-repeat:no-repeat;
-}
-
-/* GLASS OVERLAY */
-
-.login-bg::before{
-    content:"";
-    position:absolute;
-    inset:0;
-
-    background:
-    linear-gradient(
-        to bottom,
-        rgba(255,255,255,0.35),
-        rgba(255,255,255,0.18),
-        rgba(255,255,255,0.08)
-    );
-
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-}
-
-/* ========================================= */
-/* LOGIN CARD */
-/* ========================================= */
-
-.login-wrapper{
-    width:100%;
-    height:100%;
-    display:flex;
-    align-items:center;
-    justify-content:flex-start;
-    position:relative;
-    z-index:5;
-    padding:30px;
-}
-
-/* GLASS CARD */
-
-.login-card{
-
-    width:100%;
-    max-width:520px;
-
-    background:rgba(255,255,255,0.16);
-
-    border:1px solid rgba(255,255,255,0.28);
-
-    backdrop-filter:blur(16px);
-    -webkit-backdrop-filter:blur(16px);
-
-    border-radius:34px;
-
-    padding:40px 32px;
-
-    box-shadow:
-    0 10px 40px rgba(0,0,0,0.12);
-}
-
-/* TITLES */
-
-.login-title{
-    font-size:clamp(42px,5vw,70px);
-    font-weight:800;
-    color:#101328;
-    line-height:1.05;
-    letter-spacing:-2px;
-}
-
-.login-subtitle{
-    margin-top:12px;
-    color:#646464;
-    font-size:clamp(15px,1.4vw,20px);
-}
-
-/* ========================================= */
-/* FORM */
-/* ========================================= */
-
-.form-group{
-    margin-top:34px;
-}
-
-.label{
-    font-size:20px;
-    font-weight:700;
-    color:#111329;
-    margin-bottom:14px;
-}
-
-/* INPUT */
-
-.input-box{
-    width:100%;
-    height:76px;
-
-    background:rgba(255,255,255,0.42);
-
-    border:1px solid rgba(255,255,255,0.4);
-
-    border-radius:22px;
-
-    display:flex;
-    align-items:center;
-
-    padding:0 22px;
-
-    position:relative;
-}
-
-.input-box i{
-    font-size:22px;
-    color:#5F5F5F;
-}
-
-.input-box input{
-    width:100%;
-    height:100%;
-    border:none;
-    outline:none;
-    background:transparent;
-    padding-left:15px;
-    font-size:17px;
-    color:#222;
-    font-weight:500;
-}
-
-.input-box input::placeholder{
-    color:#6F6F6F;
-    font-weight:400;
-}
-
-/* EYE */
-
-.eye{
-    position:absolute;
-    right:22px;
-    cursor:pointer;
-}
-
-/* ========================================= */
-/* BUTTON */
-/* ========================================= */
-
-.signin-btn{
-    width:100%;
-    height:74px;
-
-    border:none;
-    outline:none;
-
-    border-radius:24px;
-
-    background:#2A7A3E;
-
-    color:#ffffff;
-
-    font-size:21px;
-    font-weight:600;
-
-    margin-top:52px;
-
-    cursor:pointer;
-
-    transition:0.25s;
-
-    box-shadow:
-    0 10px 25px rgba(42,122,62,0.25);
-}
-
-.signin-btn:hover{
-    background:#236735;
-}
-
-.signin-btn:active{
-    transform:scale(0.98);
-}
-
-/* ========================================= */
-/* RESPONSIVE */
-/* ========================================= */
-
-@media(max-width:768px){
-
-    .splash-content{
-        top:12%;
-        left:7%;
-    }
-
-    .splash-bg{
-        background-size:contain;
-        background-position:center bottom;
-    }
-
-    .login-bg{
-        background-size:cover;
-        background-position:center;
-    }
-
-    .login-wrapper{
-        padding:18px;
-        align-items:flex-start;
-    }
-
-    .login-card{
-        margin-top:40px;
-        padding:30px 22px;
-        border-radius:28px;
-    }
-
-    .input-box{
-        height:70px;
-    }
-
-    .signin-btn{
-        height:70px;
-        font-size:19px;
-    }
-
-    .label{
-        font-size:18px;
-    }
-
-}
-
-/* SMALL PHONES */
-
-@media(max-width:480px){
-
-    .login-title,
-    .splash-title{
-        letter-spacing:-1px;
-    }
-
-    .splash-bg{
-        background-size:100% auto;
-    }
-
-    .login-bg{
-        background-size:cover;
-    }
-
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+:root{--bg:#f4f7fb;--text:#101328;--muted:#63708a;--glass:rgba(255,255,255,.65);--border:rgba(255,255,255,.55);--card-shadow:0 15px 35px rgba(27,40,75,.12);--accent:#1e7b3f;--accent2:#00b5d8;--danger:#f35d6f;--warn:#fbbf24}
+body.dark{--bg:#0d1325;--text:#ecf2ff;--muted:#9cb0d9;--glass:rgba(20,30,58,.62);--border:rgba(130,170,255,.2);--card-shadow:0 15px 35px rgba(0,0,0,.35);--accent:#38b46e;--accent2:#45d2ff}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text)}
+.app{width:100%;height:100vh;position:relative;overflow:hidden;background:radial-gradient(circle at 20% 0%,rgba(56,180,110,.15),transparent 40%),radial-gradient(circle at 100% 10%,rgba(0,181,216,.18),transparent 35%),var(--bg)}
+.page{position:absolute;inset:0;width:100%;height:100%;transition:.8s ease;opacity:0;visibility:hidden;pointer-events:none}
+.page.active{opacity:1;visibility:visible;pointer-events:auto}
+.splash-screen{background:#F5F4D9;z-index:30;overflow:hidden}
+.splash-content{position:absolute;top:14%;left:8%;z-index:3}
+.splash-title{font-size:clamp(44px,7vw,84px);font-weight:800;color:#1E7B3F;line-height:1.05;letter-spacing:-2px}
+.splash-subtitle{margin-top:12px;color:#7C7C7C;font-size:clamp(15px,1.5vw,21px);line-height:1.5;max-width:400px}
+.splash-bg{position:absolute;inset:0;width:100%;height:100%;background-image:url('Firefly_Gemini Flash_An IoT agricultural device installed in a farm setting- soil moisture probes in the g 243046.png');background-size:cover;background-position:center bottom;background-repeat:no-repeat;filter:saturate(1.03)}
+.logo-orbit{position:absolute;right:8%;top:14%;width:160px;height:160px;border-radius:50%;border:2px dashed rgba(30,123,63,.3);animation:spin 8s linear infinite;z-index:3}
+.logo-orbit::before,.logo-orbit::after{content:"";position:absolute;border-radius:50%;background:#1e7b3f}
+.logo-orbit::before{width:22px;height:22px;top:-11px;left:calc(50% - 11px)}
+.logo-orbit::after{width:14px;height:14px;left:-7px;top:calc(50% - 7px);background:#00b5d8}
+.loading-line{margin-top:18px;width:min(360px,65vw);height:10px;background:rgba(30,123,63,.12);border-radius:999px;overflow:hidden}
+.loading-line span{display:block;height:100%;width:30%;background:linear-gradient(90deg,#1e7b3f,#00b5d8);border-radius:999px;animation:load 2.2s infinite}
+.onboarding{z-index:25;padding:22px;background:linear-gradient(135deg,#eef7ff,#f8fff0)}
+.slides{height:100%;display:flex;transition:transform .5s ease}
+.slide{min-width:100%;padding:30px 26px 110px;display:flex;flex-direction:column;justify-content:center;gap:15px;position:relative}
+.slide i{font-size:44px;color:var(--accent)}
+.slide h2{font-size:clamp(30px,5vw,42px)}
+.slide p{color:var(--muted);max-width:560px}
+.slide-ctrl{position:absolute;left:20px;right:20px;bottom:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dot{width:9px;height:9px;border-radius:50%;background:#c5cede}.dot.active{background:var(--accent);transform:scale(1.25)}
+.btn{border:none;outline:none;padding:12px 16px;border-radius:12px;cursor:pointer;font-weight:600;background:#e8eef9;color:#0f2555}
+.btn.primary{background:linear-gradient(90deg,var(--accent),#2f9f63);color:#fff}
+.btn.glass{background:var(--glass);border:1px solid var(--border);color:var(--text)}
+.login-screen{overflow:hidden;background:#fff;z-index:20}
+.login-bg{position:absolute;inset:0;width:100%;height:100%;background-image:url('Firefly_Gemini Flash_An IoT agricultural device installed in a farm setting- soil moisture probes in the g 243046.png');background-size:cover;background-position:center bottom;background-repeat:no-repeat;animation:zoomBg 15s ease-in-out infinite alternate}
+.login-bg::before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(255,255,255,.5),rgba(255,255,255,.2),rgba(255,255,255,.09));backdrop-filter:blur(10px)}
+.login-wrapper{width:100%;height:100%;display:flex;align-items:center;justify-content:flex-start;position:relative;z-index:5;padding:30px}
+.login-card{width:100%;max-width:560px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(16px);border-radius:34px;padding:34px 28px;box-shadow:0 10px 40px rgba(0,0,0,.12)}
+.login-title{font-size:clamp(38px,5vw,64px);font-weight:800;color:#101328;line-height:1.05;letter-spacing:-2px}
+.login-subtitle{margin-top:10px;color:#4f5f70;font-size:clamp(14px,1.4vw,18px)}
+.form-group{margin-top:24px}.label{font-size:16px;font-weight:700;color:#0f203f;margin-bottom:10px}
+.input-box{width:100%;height:64px;background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.45);border-radius:18px;display:flex;align-items:center;padding:0 18px;position:relative}
+.input-box i{font-size:18px;color:#5f5f5f}
+.input-box input,.input-box select{width:100%;height:100%;border:none;outline:none;background:transparent;padding-left:12px;font-size:16px;color:#12243f;font-weight:500}
+.eye{position:absolute;right:18px;cursor:pointer}
+.signin-btn{width:100%;height:62px;border:none;border-radius:18px;background:#2A7A3E;color:#fff;font-size:19px;font-weight:600;margin-top:22px;cursor:pointer;transition:.2s;box-shadow:0 10px 25px rgba(42,122,62,.25)}
+.signin-btn:active{transform:scale(.98)}
+.login-meta{margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;color:#38516b}
+.login-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.pulse-btn{background:#111f3e;color:#fff}
+#app-shell{z-index:10;display:grid;grid-template-columns:280px 1fr;background:transparent}
+.sidebar{border-right:1px solid var(--border);background:var(--glass);backdrop-filter:blur(12px);padding:18px 14px;overflow:auto;position:relative}
+.brand{display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:10px}
+.brand i{font-size:26px;color:var(--accent)}
+.brand h1{font-size:22px}
+.nav{display:grid;gap:6px}
+.nav a{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;color:var(--muted);text-decoration:none;font-weight:500}
+.nav a.active,.nav a:hover{background:linear-gradient(90deg,rgba(56,180,110,.22),rgba(69,210,255,.15));color:var(--text)}
+.content{display:grid;grid-template-rows:auto 1fr;min-height:0}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--glass);backdrop-filter:blur(12px)}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.clock,.conn{padding:8px 10px;border-radius:10px;background:var(--glass);border:1px solid var(--border);font-size:13px;color:var(--muted)}
+.conn.online{color:#2fba69}.conn.offline{color:#f36a6a}
+.main-view{overflow:auto;padding:14px;scroll-behavior:smooth;position:relative}
+.page-pane{display:none;animation:fade .35s ease}
+.page-pane.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:12px}
+.card{grid-column:span 3;background:var(--glass);border:1px solid var(--border);backdrop-filter:blur(12px);padding:12px;border-radius:16px;box-shadow:var(--card-shadow);position:relative;overflow:hidden}
+.card h3{font-size:14px;color:var(--muted);font-weight:600}.metric{font-size:30px;font-weight:700;margin-top:8px}.sub{font-size:12px;color:var(--muted)}
+.span-6{grid-column:span 6}.span-4{grid-column:span 4}.span-8{grid-column:span 8}.span-12{grid-column:span 12}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;font-size:12px;font-weight:600}
+.badge.ok{background:rgba(47,186,105,.18);color:#2fba69}.badge.warn{background:rgba(251,191,36,.18);color:#be8900}.badge.danger{background:rgba(243,93,111,.2);color:#d94157}
+.progress{height:10px;background:rgba(142,164,205,.25);border-radius:999px;overflow:hidden;margin-top:10px}
+.progress span{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .35s ease}
+.table{width:100%;border-collapse:collapse}.table th,.table td{padding:10px;border-bottom:1px solid var(--border);text-align:left;font-size:13px}
+.timeline{display:grid;gap:10px}.time-item{padding:10px;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.35)}
+.rule-board{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rule{padding:10px;border-radius:12px;background:rgba(255,255,255,.35);border:1px dashed rgba(89,121,173,.4);cursor:grab}
+.zone-map{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:10px}
+.zone{padding:12px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.35)}
+.fab{position:fixed;right:18px;bottom:18px;width:56px;height:56px;border:none;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-size:20px;box-shadow:0 15px 25px rgba(27,71,107,.35);cursor:pointer;z-index:120}
+.toast-wrap{position:fixed;right:12px;bottom:90px;display:grid;gap:8px;z-index:130}
+.toast{padding:10px 12px;border-radius:10px;background:#101f3e;color:#fff;min-width:220px;animation:slideIn .25s ease}
+.spark{width:100%;height:70px;border-radius:10px;background:rgba(255,255,255,.2)}
+.skeleton{position:relative;overflow:hidden;background:rgba(190,200,223,.25)!important;min-height:64px}
+.skeleton::after{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);animation:skel 1.2s infinite}
+.particle{position:fixed;inset:0;pointer-events:none;z-index:1}
+.mobile-nav{display:none}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes load{0%{transform:translateX(-120%)}100%{transform:translateX(380%)}}
+@keyframes zoomBg{from{transform:scale(1)}to{transform:scale(1.07)}}
+@keyframes slideIn{from{transform:translateX(14px);opacity:0}to{transform:none;opacity:1}}
+@keyframes skel{100%{left:100%}}
+@media (max-width:1100px){#app-shell{grid-template-columns:78px 1fr}.sidebar .brand h1,.sidebar .nav span{display:none}.sidebar .nav a{justify-content:center}.card{grid-column:span 6}}
+@media (max-width:768px){.splash-content{top:10%;left:7%}.logo-orbit{width:110px;height:110px;right:6%;top:7%}#app-shell{grid-template-columns:1fr}.sidebar{display:none}.mobile-nav{display:flex;position:fixed;left:8px;right:8px;bottom:8px;background:var(--glass);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:14px;padding:6px;justify-content:space-around;z-index:100}.mobile-nav a{color:var(--muted);text-decoration:none;padding:8px;border-radius:10px}.mobile-nav a.active{background:rgba(56,180,110,.2);color:var(--text)}.card,.span-6,.span-4,.span-8{grid-column:span 12}.rule-board{grid-template-columns:1fr}.zone-map{grid-template-columns:1fr 1fr}.login-wrapper{padding:16px}.login-card{margin-top:20px;padding:24px 18px}}
 </style>
 </head>
-
 <body>
-
+<canvas class="particle" id="particle"></canvas>
 <div class="app">
-
-    <!-- ================================= -->
-    <!-- SPLASH SCREEN -->
-    <!-- ================================= -->
-
-    <section class="page splash-screen" id="splash">
-
-        <div class="splash-content">
-
-            <h1 class="splash-title">
-                Smart Irrigation
-            </h1>
-
-            <p class="splash-subtitle">
-                Real time status of all your Irrigation Device
-            </p>
-
+  <section class="page splash-screen active" id="splash">
+    <div class="splash-content">
+      <h1 class="splash-title">WaterWise</h1>
+      <p class="splash-subtitle">Futuristic smart irrigation and farm intelligence platform.</p>
+      <div class="loading-line"><span></span></div>
+    </div>
+    <div class="logo-orbit"></div>
+    <div class="splash-bg"></div>
+  </section>
+  <section class="page onboarding" id="onboarding">
+    <div class="slides" id="slides">
+      <article class="slide"><i class="fa-solid fa-droplet"></i><h2>Smart Irrigation Monitoring</h2><p>Track moisture, tank level, and flow with realistic live simulation and instant alerts.</p></article>
+      <article class="slide"><i class="fa-solid fa-solar-panel"></i><h2>Solar-Powered Automation</h2><p>AI-assisted watering decisions adapt to battery health, weather forecasts and farm priorities.</p></article>
+      <article class="slide"><i class="fa-solid fa-cloud-rain"></i><h2>Weather-Aware Optimization</h2><p>Rain prediction and fault detection keep crops healthy while reducing water waste.</p></article>
+    </div>
+    <div class="slide-ctrl">
+      <div id="dots"></div>
+      <button class="btn" id="learnMoreBtn">Learn More</button>
+      <button class="btn" id="skipBtn">Skip</button>
+      <button class="btn primary" id="nextSlideBtn">Get Started</button>
+    </div>
+  </section>
+  <section class="page login-screen" id="login">
+    <div class="login-bg"></div>
+    <div class="login-wrapper">
+      <div class="login-card">
+        <h1 class="login-title">Login Account</h1>
+        <p class="login-subtitle">Demo access for WaterWise command center</p>
+        <div class="form-group"><div class="label">Email</div><div class="input-box"><i class="fa-regular fa-envelope"></i><input id="email" type="email" placeholder="demo@waterwise.ai"></div></div>
+        <div class="form-group"><div class="label">Password</div><div class="input-box"><i class="fa-solid fa-lock"></i><input id="password" type="password" placeholder="••••••••"><i class="fa-regular fa-eye eye" id="toggle"></i></div></div>
+        <div class="login-meta"><label class="chk"><input id="remember" type="checkbox"> Remember me</label><button class="btn glass" id="demoFill">Demo Autofill</button></div>
+        <div class="login-actions"><button class="btn pulse-btn" id="bioBtn"><i class="fa-solid fa-fingerprint"></i> Face/Fingerprint</button><button class="btn" id="loginAnimBtn">Login Animation</button></div>
+        <button class="signin-btn" id="loginBtn">Sign In</button>
+      </div>
+    </div>
+  </section>
+  <section class="page" id="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><i class="fa-solid fa-seedling"></i><h1>WaterWise</h1></div>
+      <nav class="nav" id="nav"></nav>
+    </aside>
+    <div class="content">
+      <header class="topbar">
+        <div><h2 id="pageTitle">Dashboard</h2><small style="color:var(--muted)">Smart irrigation & farm monitoring demo</small></div>
+        <div class="topbar-right">
+          <div class="clock" id="clock"></div>
+          <div class="conn online" id="conn">● Online</div>
+          <button class="btn glass" id="soundToggle">🔊 Sound</button>
+          <button class="btn glass" id="themeToggle">🌓 Theme</button>
         </div>
-
-        <div class="splash-bg"></div>
-
-    </section>
-
-    <!-- ================================= -->
-    <!-- LOGIN SCREEN -->
-    <!-- ================================= -->
-
-    <section class="page login-screen" id="login">
-
-        <!-- BACKGROUND -->
-
-        <div class="login-bg"></div>
-
-        <!-- CONTENT -->
-
-        <div class="login-wrapper">
-
-            <div class="login-card">
-
-                <h1 class="login-title">
-                    Login Account
-                </h1>
-
-                <p class="login-subtitle">
-                    Please login with registered account
-                </p>
-
-                <!-- EMAIL -->
-
-                <div class="form-group">
-
-                    <div class="label">
-                        Email or Phone Number
-                    </div>
-
-                    <div class="input-box">
-
-                        <i class="fa-regular fa-envelope"></i>
-
-                        <input
-                        type="text"
-                        placeholder="Enter your email">
-
-                    </div>
-
-                </div>
-
-                <!-- PASSWORD -->
-
-                <div class="form-group">
-
-                    <div class="label">
-                        Password
-                    </div>
-
-                    <div class="input-box">
-
-                        <i class="fa-solid fa-lock"></i>
-
-                        <input
-                        type="password"
-                        id="password"
-                        placeholder="Enter your password">
-
-                        <i
-                        class="fa-regular fa-eye eye"
-                        id="toggle"></i>
-
-                    </div>
-
-                </div>
-
-                <!-- BUTTON -->
-
-                <button class="signin-btn">
-                    Sign In
-                </button>
-
-            </div>
-
-        </div>
-
-    </section>
-
+      </header>
+      <main class="main-view" id="mainView">
+        <section class="page-pane active" data-page="Dashboard"><div class="grid" id="dashboardGrid"></div></section>
+        <section class="page-pane" data-page="Irrigation Control"><div class="grid" id="irrigationGrid"></div></section>
+        <section class="page-pane" data-page="Sensors"><div class="grid" id="sensorGrid"></div></section>
+        <section class="page-pane" data-page="Weather"><div class="grid" id="weatherGrid"></div></section>
+        <section class="page-pane" data-page="Analytics"><div class="grid" id="analyticsGrid"></div></section>
+        <section class="page-pane" data-page="Fault Detection"><div class="grid" id="faultGrid"></div></section>
+        <section class="page-pane" data-page="Water Usage"><div class="grid" id="usageGrid"></div></section>
+        <section class="page-pane" data-page="Solar & Battery"><div class="grid" id="solarGrid"></div></section>
+        <section class="page-pane" data-page="Automation Rules"><div class="grid" id="ruleGrid"></div></section>
+        <section class="page-pane" data-page="Farm Zones"><div class="grid" id="zoneGrid"></div></section>
+        <section class="page-pane" data-page="Notifications"><div class="grid" id="notifGrid"></div></section>
+        <section class="page-pane" data-page="Reports"><div class="grid" id="reportGrid"></div></section>
+        <section class="page-pane" data-page="Settings"><div class="grid" id="settingsGrid"></div></section>
+        <section class="page-pane" data-page="Help & Support"><div class="grid" id="helpGrid"></div></section>
+      </main>
+    </div>
+  </section>
+  <nav class="mobile-nav" id="mobileNav"></nav>
+  <button class="fab" id="fab"><i class="fa-solid fa-bolt"></i></button>
+  <div class="toast-wrap" id="toasts"></div>
 </div>
-
 <script>
-
-/* ========================================= */
-/* SPLASH TRANSITION */
-/* ========================================= */
-
-const splash = document.getElementById("splash");
-const login = document.getElementById("login");
-
-setTimeout(() => {
-
-    splash.style.opacity = "0";
-    splash.style.pointerEvents = "none";
-
-    login.classList.add("active");
-
-}, 3000);
-
-/* ========================================= */
-/* PASSWORD TOGGLE */
-/* ========================================= */
-
-const toggle = document.getElementById("toggle");
-const password = document.getElementById("password");
-
-toggle.addEventListener("click", () => {
-
-    if(password.type === "password"){
-
-        password.type = "text";
-
-        toggle.classList.replace(
-            "fa-eye",
-            "fa-eye-slash"
-        );
-
-    }else{
-
-        password.type = "password";
-
-        toggle.classList.replace(
-            "fa-eye-slash",
-            "fa-eye"
-        );
-
-    }
-
-});
-
+const appPages={splash:document.getElementById('splash'),onboarding:document.getElementById('onboarding'),login:document.getElementById('login'),shell:document.getElementById('app-shell')};
+const state=JSON.parse(localStorage.getItem('ww-state')||'null')||{moisture:61,tank:78,flow:16.8,temp:27,pump:true,valve:true,battery:74,solar:46,wifi:83,rain:28,weather:'Partly Cloudy',farmStatus:'Optimal',autoMode:true,mode:'Auto',zone:'Zone A',timer:20,faults:[],alerts:['System initialized'],notifications:[],history:{moisture:[61],tank:[78],flow:[16.8],battery:[74],usage:[220,240,215,260,245,230,210]},settings:{dark:false,sound:true,language:'English'}};
+const navItems=['Dashboard','Irrigation Control','Sensors','Weather','Analytics','Fault Detection','Water Usage','Solar & Battery','Automation Rules','Farm Zones','Notifications','Reports','Settings','Help & Support','Logout'];
+const sensorList=[['Soil Moisture',()=>state.moisture.toFixed(1)+'%'],['Ultrasonic Tank',()=>state.tank.toFixed(1)+'%'],['Flow',()=>state.flow.toFixed(1)+' L/min'],['Float Sensor',()=>state.tank<15?'LOW':'OK'],['Temperature',()=>state.temp.toFixed(1)+'°C'],['Voltage',()=> (11.5+state.battery/100*1.2).toFixed(2)+'V'],['Current',()=> (state.pump?2.4:0.6).toFixed(2)+'A']];
+let slideIndex=0,currentPage='Dashboard',simTimer;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const save=()=>localStorage.setItem('ww-state',JSON.stringify(state));
+const notify=(msg,type='info')=>{const el=document.createElement('div');el.className='toast';el.textContent=msg;document.getElementById('toasts').prepend(el);setTimeout(()=>el.remove(),3200);if(state.settings.sound)beep(type==='danger'?180:320,.08);};
+const beep=(freq=280,dur=.05)=>{try{const ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator();const g=ac.createGain();o.frequency.value=freq;o.connect(g);g.connect(ac.destination);g.gain.value=.05;o.start();o.stop(ac.currentTime+dur);}catch(_){}}; 
+const card=(title,val,sub,span='3',progress)=>`<article class="card span-${span}"><h3>${title}</h3><div class="metric">${val}</div><div class="sub">${sub||''}</div>${progress!==undefined?`<div class="progress"><span style="width:${progress}%"></span></div>`:''}</article>`;
+function setScreen(id){Object.values(appPages).forEach(p=>p.classList.remove('active'));appPages[id].classList.add('active')}
+function initSplash(){setScreen('splash');setTimeout(()=>setScreen('onboarding'),2400)}
+function initSlides(){const slides=document.getElementById('slides');const dots=document.getElementById('dots');dots.innerHTML='';for(let i=0;i<3;i++){const d=document.createElement('span');d.className='dot'+(i===0?' active':'');dots.appendChild(d)}const update=()=>{slides.style.transform=`translateX(-${slideIndex*100}%)`;[...dots.children].forEach((d,i)=>d.classList.toggle('active',i===slideIndex));document.getElementById('nextSlideBtn').textContent=slideIndex===2?'Get Started':'Next'};document.getElementById('nextSlideBtn').onclick=()=>{if(slideIndex<2){slideIndex++;update()}else setScreen('login')};document.getElementById('skipBtn').onclick=()=>setScreen('login');document.getElementById('learnMoreBtn').onclick=()=>notify('WaterWise predicts irrigation needs from simulated sensor + weather intelligence.');let startX=0;slides.addEventListener('touchstart',e=>startX=e.touches[0].clientX);slides.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-startX;if(dx<-40&&slideIndex<2)slideIndex++;if(dx>40&&slideIndex>0)slideIndex--;update()})}
+function initLogin(){const toggle=document.getElementById('toggle'),password=document.getElementById('password');toggle.onclick=()=>{const hidden=password.type==='password';password.type=hidden?'text':'password';toggle.classList.toggle('fa-eye');toggle.classList.toggle('fa-eye-slash')};document.getElementById('demoFill').onclick=()=>{document.getElementById('email').value='demo@waterwise.ai';password.value='waterwise123';notify('Demo credentials filled')};document.getElementById('bioBtn').onclick=()=>{document.getElementById('email').value='biometric@waterwise.ai';password.value='********';notify('Biometric verified (demo)')};document.getElementById('loginAnimBtn').onclick=()=>{document.querySelector('.login-card').animate([{transform:'translateY(0)'},{transform:'translateY(-8px)'},{transform:'translateY(0)'}],{duration:600})};document.getElementById('loginBtn').onclick=()=>{if(!document.getElementById('email').value){notify('Enter email first','danger');return}if(document.getElementById('remember').checked)localStorage.setItem('ww-email',document.getElementById('email').value);notify('Welcome to WaterWise');setTimeout(()=>{setScreen('shell');document.querySelector('.mobile-nav').style.display='flex'},420)};const saved=localStorage.getItem('ww-email');if(saved)document.getElementById('email').value=saved}
+function renderNav(){const nav=document.getElementById('nav'),mnav=document.getElementById('mobileNav');nav.innerHTML='';navItems.forEach((name,idx)=>{const icon=['gauge','sliders','microchip','cloud-sun-rain','chart-line','triangle-exclamation','tint','sun','wand-magic-sparkles','seedling','bell','file-lines','gear','life-ring','arrow-right-from-bracket'][idx];const a=document.createElement('a');a.href='#';a.dataset.page=name;a.innerHTML=`<i class="fa-solid fa-${icon}"></i><span>${name}</span>`;a.onclick=e=>{e.preventDefault();if(name==='Logout'){setScreen('login');notify('Logged out (demo)');return}switchPage(name)};nav.appendChild(a)});mnav.innerHTML=['Dashboard','Irrigation Control','Sensors','Settings'].map(name=>`<a href="#" data-page="${name}"><i class="fa-solid fa-circle"></i> ${name.split(' ')[0]}</a>`).join('');mnav.querySelectorAll('a').forEach(a=>a.onclick=e=>{e.preventDefault();switchPage(a.dataset.page)})}
+function switchPage(name){currentPage=name;document.getElementById('pageTitle').textContent=name;document.querySelectorAll('.nav a,.mobile-nav a').forEach(a=>a.classList.toggle('active',a.dataset.page===name));document.querySelectorAll('.page-pane').forEach(p=>p.classList.toggle('active',p.dataset.page===name))}
+function skeleton(container){container.innerHTML='<article class="card span-12 skeleton"></article><article class="card span-6 skeleton"></article><article class="card span-6 skeleton"></article>'}
+function drawSpark(canvas,vals,color='#38b46e'){const c=canvas.getContext('2d');const w=canvas.width=canvas.clientWidth*devicePixelRatio;const h=canvas.height=canvas.clientHeight*devicePixelRatio;c.clearRect(0,0,w,h);c.strokeStyle=color;c.lineWidth=2*devicePixelRatio;c.beginPath();vals.forEach((v,i)=>{const x=i/(vals.length-1)*(w-10*devicePixelRatio)+5*devicePixelRatio;const y=h-(v/100)*(h-10*devicePixelRatio)-5*devicePixelRatio;if(i===0)c.moveTo(x,y);else c.lineTo(x,y)});c.stroke()}
+function renderDashboard(){const g=document.getElementById('dashboardGrid');g.innerHTML='';g.insertAdjacentHTML('beforeend',[card('Soil Moisture',state.moisture.toFixed(1)+'%','Live sensor',3,state.moisture),card('Tank Level',state.tank.toFixed(1)+'%','Ultrasonic estimate',3,state.tank),card('Flow Rate',state.flow.toFixed(1)+' L/min','Pump line',3,Math.min(100,state.flow*4)),card('Temperature',state.temp.toFixed(1)+'°C',state.weather,3,Math.min(100,state.temp*3)),card('Pump',state.pump?'<span class="badge ok">ON</span>':'<span class="badge warn">OFF</span>',state.mode,3),card('Valve',state.valve?'<span class="badge ok">OPEN</span>':'<span class="badge warn">CLOSED</span>','Main relay',3),card('Battery',state.battery.toFixed(1)+'%','Solar-assisted',3,state.battery),card('Solar Charging',state.solar.toFixed(1)+'%','Panel output',3,state.solar),card('Wi‑Fi Strength',state.wifi.toFixed(0)+'%','Gateway signal',3,state.wifi),card('Farm Status',`<span class="badge ${state.faults.length?'danger':'ok'}">${state.faults.length?'Attention':'Optimal'}</span>`,`${state.faults.length} active faults`,3),card('Rain Prediction',state.rain.toFixed(0)+'%','Next 6 hours',3,state.rain),card('AI Recommendation',state.rain>60?'Delay irrigation':'Continue smart watering',`Suggested zone: ${state.zone}`,6),`<article class="card span-6"><h3>Alerts</h3><div class="timeline">${[...state.alerts].slice(0,4).map(a=>`<div class="time-item">${a}</div>`).join('')}</div></article>`,`<article class="card span-6"><h3>Moisture Trend</h3><canvas class="spark" id="dSpark"></canvas></article>`].join(''));drawSpark(document.getElementById('dSpark'),state.history.moisture.map(v=>Math.min(100,Math.max(0,v))),'#00b5d8')}
+function renderIrrigation(){const g=document.getElementById('irrigationGrid');g.innerHTML=`<article class="card span-6"><h3>Pump & Valve Control</h3><div class="metric">${state.pump?'Running':'Stopped'}</div><div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="pumpToggle">Pump ${state.pump?'OFF':'ON'}</button><button class="btn" id="valveToggle">Valve ${state.valve?'CLOSE':'OPEN'}</button><button class="btn" id="stopBtn">Emergency Stop</button></div></article><article class="card span-6"><h3>Mode & Timer</h3><div class="sub">Auto/Manual + irrigation timer</div><div style="display:flex;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap"><button class="btn" id="modeToggle">${state.mode}</button><input id="timerInput" type="range" min="5" max="90" value="${state.timer}"><strong>${state.timer} min</strong></div></article><article class="card span-6"><h3>Zone Selection</h3><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${['Zone A','Zone B','Greenhouse','Orchard','Vegetables'].map(z=>`<button class="btn ${state.zone===z?'primary':''} zone-btn" data-zone="${z}">${z}</button>`).join('')}</div></article><article class="card span-6"><h3>Moisture Threshold</h3><div class="sub">Relay switching trigger</div><input type="range" id="threshold" min="20" max="80" value="45" style="width:100%;margin-top:10px"><div class="progress"><span style="width:45%"></span></div></article><article class="card span-12"><h3>Live Pipe Flow Animation</h3><div style="margin-top:10px;height:32px;border-radius:999px;background:rgba(130,160,220,.15);overflow:hidden"><div id="flowAnim" style="width:${state.pump&&state.valve?100:15}%;height:100%;background:repeating-linear-gradient(90deg,#00b5d8,#00b5d8 14px,#38b46e 14px,#38b46e 28px);transition:width .3s"></div></div></article>`;document.getElementById('pumpToggle').onclick=()=>{state.pump=!state.pump;notify('Pump '+(state.pump?'started':'stopped'));renderAll()};document.getElementById('valveToggle').onclick=()=>{state.valve=!state.valve;notify('Valve '+(state.valve?'opened':'closed'));renderAll()};document.getElementById('modeToggle').onclick=()=>{state.mode=state.mode==='Auto'?'Manual':'Auto';notify('Mode switched to '+state.mode);renderAll()};document.getElementById('stopBtn').onclick=()=>{state.pump=false;state.valve=false;notify('Emergency stop executed','danger');renderAll()};document.querySelectorAll('.zone-btn').forEach(b=>b.onclick=()=>{state.zone=b.dataset.zone;notify('Selected '+state.zone);renderAll()});document.getElementById('timerInput').oninput=e=>{state.timer=+e.target.value;save();renderIrrigation()}}
+function renderSensors(){const g=document.getElementById('sensorGrid');g.innerHTML=sensorList.map(([n,f])=>`<article class="card"><h3>${n}</h3><div class="metric">${f()}</div><div class="sub">Status: <span class="badge ok">Healthy</span> • Updated ${new Date().toLocaleTimeString()}</div><canvas class="spark sensor-chart"></canvas><button class="btn" style="margin-top:10px">Calibrate</button></article>`).join('');g.querySelectorAll('.sensor-chart').forEach(c=>drawSpark(c,Array.from({length:12},()=>35+Math.random()*55)))}
+function renderWeather(){document.getElementById('weatherGrid').innerHTML=`<article class="card span-6"><h3>Current Weather</h3><div class="metric">${state.weather}</div><div class="sub">Temp ${state.temp.toFixed(1)}°C • Humidity ${Math.round(40+state.moisture/2)}%</div><div class="progress"><span style="width:${state.rain}%"></span></div><div class="sub">Rain probability ${state.rain.toFixed(0)}%</div></article><article class="card span-6"><h3>7-Day Forecast</h3><table class="table"><tr><th>Day</th><th>Rain</th><th>Wind</th><th>UV</th></tr>${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<tr><td>${d}</td><td>${Math.round(10+Math.random()*80)}%</td><td>${(4+Math.random()*14).toFixed(1)} m/s</td><td>${Math.round(2+Math.random()*9)}</td></tr>`).join('')}</table></article>`}
+function renderAnalytics(){const g=document.getElementById('analyticsGrid');g.innerHTML=`<article class="card span-8"><h3>Water Consumption Trend</h3><canvas class="spark" id="usageSpark"></canvas></article><article class="card span-4"><h3>Irrigation Efficiency</h3><div class="metric">${Math.round(72+Math.random()*20)}%</div><div class="sub">AI optimization active</div></article><article class="card span-4"><h3>Pump Runtime</h3><div class="metric">${(state.history.flow.reduce((a,b)=>a+b,0)/6).toFixed(1)} h</div></article><article class="card span-4"><h3>Leak Probability</h3><div class="metric">${Math.round(Math.max(5,state.flow>25?45:18))}%</div></article><article class="card span-4"><h3>Solar Yield</h3><div class="metric">${(state.solar*0.12).toFixed(2)} kWh</div></article>`;drawSpark(document.getElementById('usageSpark'),state.history.usage.map(v=>v/4),'#38b46e')}
+function renderFaults(){const g=document.getElementById('faultGrid');if(!state.faults.length)g.innerHTML=`<article class="card span-12"><h3>Fault Detection</h3><div class="metric">No active faults</div><div class="sub">Leak, dry-run, overcurrent, communication checks are healthy.</div></article>`;else g.innerHTML=`<article class="card span-12"><h3>Active Faults</h3>${state.faults.map((f,i)=>`<div class="time-item"><strong>${f.name}</strong> <span class="badge ${f.severity==='High'?'danger':'warn'}">${f.severity}</span><div class="sub">${f.time}</div><button class="btn" data-idx="${i}">Resolve</button></div>`).join('')}</article>`;g.querySelectorAll('button[data-idx]').forEach(b=>b.onclick=()=>{const i=+b.dataset.idx;notify('Resolved '+state.faults[i].name);state.faults.splice(i,1);renderAll()})}
+function renderUsage(){document.getElementById('usageGrid').innerHTML=`<article class="card span-4"><h3>Daily Usage</h3><div class="metric">${Math.round(state.history.usage.at(-1))} L</div></article><article class="card span-4"><h3>Weekly Usage</h3><div class="metric">${Math.round(state.history.usage.reduce((a,b)=>a+b,0))} L</div></article><article class="card span-4"><h3>Monthly Usage</h3><div class="metric">${Math.round(state.history.usage.reduce((a,b)=>a+b,0)*4.1)} L</div></article><article class="card span-6"><h3>Zone-by-Zone</h3><table class="table">${['Zone A','Zone B','Greenhouse','Orchard','Vegetables'].map(z=>`<tr><td>${z}</td><td>${Math.round(40+Math.random()*170)} L</td></tr>`).join('')}</table></article><article class="card span-6"><h3>Savings</h3><div class="metric">${Math.round(12+Math.random()*24)}%</div><div class="sub">Estimated cost saved: $${(18+Math.random()*26).toFixed(2)}</div></article>`}
+function renderSolar(){document.getElementById('solarGrid').innerHTML=`<article class="card span-4"><h3>Solar Generation</h3><div class="metric">${state.solar.toFixed(1)}%</div><div class="progress"><span style="width:${state.solar}%"></span></div></article><article class="card span-4"><h3>Battery</h3><div class="metric">${state.battery.toFixed(1)}%</div><div class="progress"><span style="width:${state.battery}%"></span></div></article><article class="card span-4"><h3>Estimated Runtime</h3><div class="metric">${(state.battery/9).toFixed(1)} h</div></article><article class="card span-12"><h3>Energy Flow</h3><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="badge ok">☀ Solar</span> → <span class="badge warn">🔋 Battery</span> → <span class="badge ok">💧 Pump</span> → <span class="badge ok">🌱 Farm</span></div></article>`}
+function renderRules(){document.getElementById('ruleGrid').innerHTML=`<article class="card span-12"><h3>Automation Rule Builder</h3><div class="rule-board"><div><h4>IF</h4>${['Soil moisture low','Rain expected','Tank low','Flow abnormal','Battery critical'].map(v=>`<div class="rule" draggable="true">${v}</div>`).join('')}</div><div><h4>THEN</h4>${['Start irrigation','Stop irrigation','Send alert','Enable safe mode','Close valve'].map(v=>`<div class="rule" draggable="true">${v}</div>`).join('')}</div></div><button class="btn primary" style="margin-top:10px" id="saveRule">Save Rule Set</button></article>`;document.getElementById('saveRule').onclick=()=>notify('Automation rules saved locally')}
+function renderZones(){document.getElementById('zoneGrid').innerHTML=`<article class="card span-12"><h3>Farm Map</h3><div class="zone-map">${['Zone A','Zone B','Greenhouse','Orchard','Vegetables'].map(z=>`<div class="zone"><strong>${z}</strong><div class="sub">Soil ${(40+Math.random()*50).toFixed(1)}%</div><div class="sub">Irrigation ${Math.random()>.5?'ON':'OFF'}</div><div class="sub">Health ${Math.round(65+Math.random()*30)}%</div></div>`).join('')}</div></article>`}
+function renderNotifs(){document.getElementById('notifGrid').innerHTML=`<article class="card span-12"><h3>Notification Center</h3><table class="table"><tr><th>Event</th><th>Priority</th><th>Time</th><th>Action</th></tr>${state.notifications.slice(-10).reverse().map((n,i)=>`<tr><td>${n.msg}</td><td><span class="badge ${n.level==='High'?'danger':'ok'}">${n.level}</span></td><td>${n.time}</td><td><button class="btn" data-read="${i}">Mark read</button></td></tr>`).join('')||'<tr><td colspan="4">No notifications yet</td></tr>'}</table></article>`}
+function renderReports(){document.getElementById('reportGrid').innerHTML=`<article class="card span-4"><h3>Water Usage Report</h3><div class="metric">Ready</div><button class="btn" data-action="pdf">Export PDF</button></article><article class="card span-4"><h3>Energy Report</h3><div class="metric">Ready</div><button class="btn" data-action="share">Share</button></article><article class="card span-4"><h3>Fault Report</h3><div class="metric">Ready</div><button class="btn" data-action="pdf">Export PDF</button></article><article class="card span-12"><h3>Summary Table</h3><table class="table"><tr><th>Category</th><th>Status</th><th>Score</th></tr><tr><td>Irrigation</td><td>Healthy</td><td>92</td></tr><tr><td>Power</td><td>Stable</td><td>89</td></tr><tr><td>Fault Handling</td><td>Good</td><td>87</td></tr></table></article>`;document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>notify((b.dataset.action==='pdf'?'Exported':'Shared')+' (visual demo)'))}
+function renderSettings(){document.getElementById('settingsGrid').innerHTML=`<article class="card span-6"><h3>Theme & Sound</h3><label class="chk"><input id="darkChk" type="checkbox" ${state.settings.dark?'checked':''}> Dark mode</label><label class="chk"><input id="soundChk" type="checkbox" ${state.settings.sound?'checked':''}> Notification sounds</label></article><article class="card span-6"><h3>Language & Profile</h3><div class="input-box"><i class="fa-solid fa-language"></i><select id="langSel"><option ${state.settings.language==='English'?'selected':''}>English</option><option>Zulu</option><option>French</option></select></div></article><article class="card span-6"><h3>Device Pairing</h3><button class="btn" id="pairBtn">Pair ESP32 (demo)</button><button class="btn" id="wifiBtn">Wi-Fi Setup</button></article><article class="card span-6"><h3>System</h3><button class="btn" id="fwBtn">Update Firmware</button><button class="btn" id="rebootBtn">Reboot</button><button class="btn" id="backupBtn">Backup Settings</button></article>`;document.getElementById('darkChk').onchange=e=>{state.settings.dark=e.target.checked;applyTheme();save()};document.getElementById('soundChk').onchange=e=>{state.settings.sound=e.target.checked;save()};document.getElementById('langSel').onchange=e=>{state.settings.language=e.target.value;save();notify('Language: '+e.target.value)};['pairBtn','wifiBtn','fwBtn','rebootBtn','backupBtn'].forEach(id=>document.getElementById(id).onclick=()=>notify(document.getElementById(id).textContent+' complete'))}
+function renderHelp(){document.getElementById('helpGrid').innerHTML=`<article class="card span-6"><h3>FAQ</h3><div class="time-item"><strong>Why is data changing?</strong><div class="sub">All values are simulated for this frontend demo.</div></div><div class="time-item"><strong>How to control irrigation?</strong><div class="sub">Open Irrigation Control page and toggle pump/valve.</div></div></article><article class="card span-6"><h3>Live Chat (Mock)</h3><div class="time-item">Support: Hello 👋 Need help with sensor calibration?</div><div class="input-box" style="margin-top:10px"><i class="fa-regular fa-comment"></i><input placeholder="Type message..."></div></article><article class="card span-12"><h3>Troubleshooting & Manuals</h3><table class="table"><tr><td>Leak detection guide</td><td>Open</td></tr><tr><td>Pump dry-run prevention</td><td>Open</td></tr><tr><td>Device installation manual</td><td>Open</td></tr><tr><td>Video tutorial: Smart scheduling</td><td>Play</td></tr></table></article>`}
+function renderAll(){renderDashboard();renderIrrigation();renderSensors();renderWeather();renderAnalytics();renderFaults();renderUsage();renderSolar();renderRules();renderZones();renderNotifs();renderReports();renderSettings();renderHelp();save()}
+function tick(){const isDay=new Date().getHours()>=6&&new Date().getHours()<=18;const evap=.35+Math.random()*.7;state.moisture=clamp(state.moisture-(state.pump&&state.valve?-(1.2+Math.random()):evap),5,98);state.tank=clamp(state.tank-(state.pump&&state.valve?(.35+Math.random()*.6):-(state.rain>60?.5:0)),3,100);state.flow=clamp((state.pump&&state.valve?12+Math.random()*12:Math.random()*1.4),0,28);state.temp=clamp(state.temp+(Math.random()-.5)*.8,18,41);state.solar=clamp(isDay?state.solar+(Math.random()*3-1.2):state.solar-(Math.random()*2.2),0,100);state.battery=clamp(state.battery+((state.solar>35?0.9:-1.05)+(state.pump?-.35:0)),3,100);state.wifi=clamp(state.wifi+(Math.random()*8-4),42,99);state.rain=clamp(state.rain+(Math.random()*14-7),2,95);state.weather=state.rain>65?'Rain Incoming':state.rain>35?'Cloudy':'Sunny';state.farmStatus=state.moisture<25?'Dry':state.moisture>85?'Overwater risk':'Optimal';state.history.moisture.push(state.moisture);state.history.tank.push(state.tank);state.history.flow.push(state.flow);state.history.battery.push(state.battery);state.history.usage.push(clamp((state.history.usage.at(-1)||220)+(Math.random()*40-20)+(state.pump?15:0),120,330));['moisture','tank','flow','battery','usage'].forEach(k=>state.history[k]=state.history[k].slice(-24));if(state.tank<15&&!state.faults.find(f=>f.name==='Low Tank'))state.faults.push({name:'Low Tank',severity:'High',time:new Date().toLocaleTimeString()});if(state.battery<18&&!state.faults.find(f=>f.name==='Low Battery'))state.faults.push({name:'Low Battery',severity:'High',time:new Date().toLocaleTimeString()});if(Math.random()<.08&&state.faults.length<4){const fault=['Leak detected','Pump dry-run','Sensor failure','Overcurrent warning','Communication failure'][Math.floor(Math.random()*5)];state.faults.push({name:fault,severity:Math.random()>.5?'High':'Medium',time:new Date().toLocaleTimeString()});notify(fault,'danger')}if(state.faults.length)state.alerts=[`${state.faults[0].name} requires attention`,...state.alerts].slice(0,12);if(Math.random()<.35){state.notifications.push({msg:state.pump?'Pump started cycle':'System heartbeat',level:Math.random()>.75?'High':'Normal',time:new Date().toLocaleTimeString()});state.notifications=state.notifications.slice(-30)}const conn=document.getElementById('conn');if(Math.random()<.06){const off=Math.random()<.45;conn.className='conn '+(off?'offline':'online');conn.textContent=off?'● Intermittent':'● Online'}document.getElementById('clock').textContent=new Date().toLocaleString();renderAll()}
+function applyTheme(){document.body.classList.toggle('dark',state.settings.dark)}
+function initGlobal(){renderNav();switchPage('Dashboard');document.getElementById('fab').onclick=()=>notify('Quick action: AI check completed');document.getElementById('soundToggle').onclick=()=>{state.settings.sound=!state.settings.sound;notify('Sound '+(state.settings.sound?'enabled':'disabled'));save()};document.getElementById('themeToggle').onclick=()=>{state.settings.dark=!state.settings.dark;applyTheme();save()}}
+function initParticles(){const canvas=document.getElementById('particle'),ctx=canvas.getContext('2d');const pts=Array.from({length:50},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.6,vy:(Math.random()-.5)*.6,r:Math.random()*2+1}));const resize=()=>{canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)};resize();addEventListener('resize',resize);(function loop(){ctx.clearRect(0,0,innerWidth,innerHeight);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>innerWidth)p.vx*=-1;if(p.y<0||p.y>innerHeight)p.vy*=-1;ctx.fillStyle='rgba(69,210,255,.35)';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()});requestAnimationFrame(loop)})()}
+function init(){applyTheme();initSplash();initSlides();initLogin();initGlobal();['dashboardGrid','irrigationGrid','sensorGrid','weatherGrid','analyticsGrid','faultGrid','usageGrid','solarGrid','ruleGrid','zoneGrid','notifGrid','reportGrid','settingsGrid','helpGrid'].forEach(id=>skeleton(document.getElementById(id)));setTimeout(renderAll,700);simTimer=setInterval(tick,2800);initParticles()}
+init();
 </script>
-
 </body>
 </html>
