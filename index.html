@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Smart Irrigation</title>
 
@@ -28,8 +28,6 @@ body{
     background:#fff;
 }
 
-/* ================= APP ================= */
-
 .app{
     width:100%;
     height:100vh;
@@ -44,15 +42,17 @@ body{
     inset:0;
     width:100%;
     height:100%;
-    overflow:hidden;
+    transition:1s ease;
 }
 
-/* ================= SPLASH SCREEN ================= */
+/* ================================================= */
+/* SPLASH SCREEN */
+/* ================================================= */
 
 .splash-screen{
-    background:#F5F4D9;
+    background:#F6F4D9;
     z-index:10;
-    transition:1s ease;
+    overflow:hidden;
 }
 
 /* TEXT */
@@ -64,46 +64,43 @@ body{
     z-index:2;
 }
 
-.title{
-    font-size:clamp(42px, 6vw, 78px);
+.splash-title{
+    font-size:clamp(42px,6vw,78px);
     font-weight:800;
-    color:#1F7A3D;
+    color:#20743D;
     line-height:1.05;
     letter-spacing:-2px;
 }
 
-.subtitle{
-    margin-top:14px;
-    font-size:clamp(15px, 1.5vw, 20px);
-    color:#7A7A7A;
+.splash-subtitle{
+    margin-top:12px;
+    color:#7D7D7D;
+    font-size:clamp(15px,1.6vw,21px);
     line-height:1.5;
 }
 
-/* IMAGE */
+/* BACKGROUND IMAGE */
 
-.splash-image{
+.splash-bg{
+    width:100%;
+    height:100vh;
     position:absolute;
     inset:0;
-    width:100%;
-    height:100%;
+    background-image:url('greenhouse.png');
+    background-size:cover;
+    background-position:bottom center;
+    background-repeat:no-repeat;
 }
 
-.splash-image img{
-    position:absolute;
-    bottom:0;
-    left:0;
-    width:100%;
-    height:auto;
-    object-fit:contain;
-}
-
-/* ================= LOGIN SCREEN ================= */
+/* ================================================= */
+/* LOGIN SCREEN */
+/* ================================================= */
 
 .login-screen{
     background:#FFFFFF;
     opacity:0;
     visibility:hidden;
-    transition:1s ease;
+    overflow:hidden;
 }
 
 .login-screen.active{
@@ -111,21 +108,35 @@ body{
     visibility:visible;
 }
 
-/* FORM AREA */
+/* LOGIN BACKGROUND IMAGE */
 
-.login-container{
+.login-bg{
+    width:100%;
+    height:100vh;
+    position:absolute;
+    inset:0;
+    background-image:url('Firefly_Gemini Flash_An IoT agricultural device installed in a farm setting- soil moisture probes in the g 243046.png');
+    background-size:cover;
+    background-position:bottom center;
+    background-repeat:no-repeat;
+    z-index:1;
+}
+
+/* CONTENT */
+
+.login-content{
     position:relative;
     z-index:2;
     width:100%;
-    max-width:550px;
-    padding:50px 35px;
+    max-width:540px;
+    padding:50px 34px;
 }
 
-/* TITLE */
+/* TITLES */
 
 .login-title{
     margin-top:30px;
-    font-size:clamp(42px, 5vw, 68px);
+    font-size:clamp(40px,5vw,70px);
     font-weight:800;
     color:#111329;
     line-height:1.05;
@@ -133,39 +144,39 @@ body{
 }
 
 .login-subtitle{
-    margin-top:14px;
+    margin-top:12px;
     color:#8A8A8A;
-    font-size:clamp(15px, 1.5vw, 20px);
+    font-size:clamp(15px,1.5vw,20px);
 }
 
 /* FORM */
 
 .form-group{
-    margin-top:35px;
+    margin-top:36px;
 }
 
 .label{
+    margin-bottom:14px;
     font-size:22px;
     font-weight:700;
     color:#111329;
-    margin-bottom:14px;
 }
 
 .input-box{
     width:100%;
     height:78px;
-    border-radius:22px;
-    border:2px solid #E8ECE8;
     background:#F8FAF8;
+    border:2px solid #E9ECE9;
+    border-radius:22px;
     display:flex;
     align-items:center;
-    padding:0 20px;
+    padding:0 22px;
     position:relative;
 }
 
 .input-box i{
     font-size:24px;
-    color:#7A7A7A;
+    color:#7D7D7D;
 }
 
 .input-box input{
@@ -174,19 +185,20 @@ body{
     border:none;
     outline:none;
     background:transparent;
-    padding-left:16px;
+    padding-left:15px;
     font-size:18px;
-    color:#222;
     font-weight:500;
+    color:#222;
 }
 
 .input-box input::placeholder{
-    color:#8A8A8A;
+    color:#808080;
+    font-weight:400;
 }
 
 .eye{
     position:absolute;
-    right:20px;
+    right:22px;
     cursor:pointer;
 }
 
@@ -194,14 +206,14 @@ body{
 
 .signin-btn{
     width:100%;
-    height:76px;
+    height:74px;
+    margin-top:55px;
     border:none;
     border-radius:24px;
     background:#2B7A3E;
     color:#fff;
     font-size:22px;
     font-weight:500;
-    margin-top:55px;
     cursor:pointer;
     box-shadow:0 10px 25px rgba(43,122,62,0.18);
 }
@@ -210,36 +222,18 @@ body{
     transform:scale(0.98);
 }
 
-/* ================= LOGIN IMAGE ================= */
+/* ================================================= */
+/* RESPONSIVE */
+/* ================================================= */
 
-.login-bg{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    z-index:1;
-    pointer-events:none;
-}
-
-.login-bg img{
-    position:absolute;
-    bottom:0;
-    left:0;
-    width:100%;
-    height:auto;
-    object-fit:contain;
-}
-
-/* ================= MOBILE ================= */
-
-@media(max-width:768px){
+@media (max-width:768px){
 
     .splash-content{
-        top:16%;
-        left:8%;
+        top:14%;
+        left:7%;
     }
 
-    .login-container{
+    .login-content{
         padding:35px 24px;
     }
 
@@ -248,31 +242,33 @@ body{
     }
 
     .input-box{
-        height:72px;
+        height:70px;
     }
 
     .signin-btn{
-        height:72px;
+        height:70px;
         font-size:20px;
+    }
+
+    /* IMAGE RESPONSIVE */
+
+    .splash-bg,
+    .login-bg{
+        background-size:contain;
+        background-position:bottom center;
     }
 
 }
 
-/* ================= SMALL PHONES ================= */
-
-@media(max-width:420px){
-
-    .title,
-    .login-title{
-        letter-spacing:-1px;
-    }
+@media (max-width:480px){
 
     .splash-content{
-        top:14%;
+        top:13%;
     }
 
-    .login-container{
-        padding:28px 20px;
+    .login-title,
+    .splash-title{
+        letter-spacing:-1px;
     }
 
     .input-box{
@@ -281,6 +277,12 @@ body{
 
     .signin-btn{
         border-radius:20px;
+    }
+
+    .splash-bg,
+    .login-bg{
+        background-size:100% auto;
+        background-position:bottom center;
     }
 
 }
@@ -292,35 +294,33 @@ body{
 
 <div class="app">
 
-    <!-- SPLASH -->
+    <!-- SPLASH SCREEN -->
 
     <section class="page splash-screen" id="splash">
 
         <div class="splash-content">
 
-            <h1 class="title">
+            <h1 class="splash-title">
                 Smart Irrigation
             </h1>
 
-            <p class="subtitle">
+            <p class="splash-subtitle">
                 Real time status of all your Irrigation Device
             </p>
 
         </div>
 
-        <div class="splash-image">
-
-            <img src="greenhouse.png" alt="">
-
-        </div>
+        <div class="splash-bg"></div>
 
     </section>
 
-    <!-- LOGIN -->
+    <!-- LOGIN SCREEN -->
 
     <section class="page login-screen" id="login">
 
-        <div class="login-container">
+        <div class="login-bg"></div>
+
+        <div class="login-content">
 
             <h1 class="login-title">
                 Login Account
@@ -378,21 +378,13 @@ body{
 
         </div>
 
-        <!-- BACKGROUND IMAGE -->
-
-        <div class="login-bg">
-
-            <img src="Firefly_Gemini Flash_An IoT agricultural device installed in a farm setting- soil moisture probes in the g 243046.png" alt="">
-
-        </div>
-
     </section>
 
 </div>
 
 <script>
 
-/* SPLASH TRANSITION */
+/* SPLASH TO LOGIN */
 
 const splash = document.getElementById("splash");
 const login = document.getElementById("login");
@@ -417,13 +409,13 @@ toggle.addEventListener("click", () => {
 
         password.type = "text";
 
-        toggle.classList.replace("fa-eye", "fa-eye-slash");
+        toggle.classList.replace("fa-eye","fa-eye-slash");
 
     }else{
 
         password.type = "password";
 
-        toggle.classList.replace("fa-eye-slash", "fa-eye");
+        toggle.classList.replace("fa-eye-slash","fa-eye");
 
     }
 
