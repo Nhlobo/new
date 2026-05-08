@@ -210,7 +210,7 @@ body:not(.shell-active) .mobile-nav,body:not(.shell-active) .fab{display:none !i
   <button class="fab" id="fab" title="Open AI voice assistant"><i class="fa-solid fa-microphone-lines"></i></button>
   <section class="ai-panel" id="aiPanel">
     <div class="ai-head"><div><div class="ai-greet" id="aiGreeting">Hi Mpho, what do you want me to do?</div><div class="ai-sub">Tap record and ask anything, e.g. “Check water tank A and tell me the level.”</div></div><button class="btn" id="aiClose">Close</button></div>
-    <div class="ai-controls"><button class="btn primary" id="aiRecord"><i class="fa-solid fa-circle-dot"></i> Record</button><button class="btn" id="aiStop">Stop</button></div>
+    <div class="ai-controls"><button class="btn primary" id="aiRecord"><i class="fa-solid fa-microphone"></i> Hold to Talk</button><button class="btn" id="aiStop">Stop</button></div>
     <div class="ai-log" id="aiLog">Assistant ready.</div>
   </section>
   <div class="toast-wrap" id="toasts"></div>
@@ -256,7 +256,71 @@ function tick(){const isDay=new Date().getHours()>=6&&new Date().getHours()<=18;
 function applyTheme(){document.body.classList.toggle('dark',state.settings.dark)}
 function runAiCommand(cmd){const c=cmd.toLowerCase();if(c.includes('tank')&&c.includes('a'))return `Tank A level is ${state.tank.toFixed(1)}%.`;if(c.includes('moisture'))return `Soil moisture is ${state.moisture.toFixed(1)}%.`;if(c.includes('start pump')){state.pump=true;state.valve=true;renderAll();return 'Pump started and valve opened.'}if(c.includes('stop pump')){state.pump=false;renderAll();return 'Pump stopped.'}if(c.includes('status'))return `Farm status is ${state.farmStatus}, rain chance ${state.rain.toFixed(0)}%.`;return 'Done. I have logged your request and prepared the next action.'}
 function speakLine(text){if('speechSynthesis' in window&&state.settings.sound){speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(text))}}
-function initGlobal(){renderNav();switchPage('Dashboard');const panel=document.getElementById('aiPanel');const log=document.getElementById('aiLog');const greet='Hi Mpho, what do you want me to do?';document.getElementById('aiGreeting').textContent=greet;document.getElementById('fab').onclick=()=>{panel.classList.toggle('active');if(panel.classList.contains('active'))speakLine(greet)};document.getElementById('aiClose').onclick=()=>panel.classList.remove('active');document.getElementById('aiRecord').onclick=()=>{const q=prompt('Voice note instruction:','Check water tank A and tell me the level');if(!q)return;log.textContent='You: '+q;const result=runAiCommand(q);setTimeout(()=>{log.textContent=`You: ${q}\nAI: ${result}`;notify(result);speakLine(result)},420)};document.getElementById('aiStop').onclick=()=>{speechSynthesis.cancel();notify('Voice playback stopped')};document.getElementById('soundToggle').onclick=()=>{state.settings.sound=!state.settings.sound;notify('Sound '+(state.settings.sound?'enabled':'disabled'));save()};document.getElementById('themeToggle').onclick=()=>{state.settings.dark=!state.settings.dark;applyTheme();save()}}
+function initGlobal(){
+  renderNav();switchPage('Dashboard');
+  const panel=document.getElementById('aiPanel');
+  const log=document.getElementById('aiLog');
+  const recordBtn=document.getElementById('aiRecord');
+  const greet='Hi Mpho, what do you want me to do?';
+  let mediaRecorder=null,streamRef=null,audioChunks=[],pressing=false,recording=false;
+
+  const startHoldRecording=async()=>{
+    if(recording) return;
+    if(!window.MediaRecorder||!navigator.mediaDevices?.getUserMedia){
+      notify('Voice recording unsupported on this browser','danger');
+      log.textContent='Voice recording is not supported on this browser.';
+      return;
+    }
+    try{
+      streamRef=await navigator.mediaDevices.getUserMedia({audio:true});
+      const mime=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
+      mediaRecorder=new MediaRecorder(streamRef,{mimeType:mime});
+      audioChunks=[];
+      mediaRecorder.ondataavailable=e=>{if(e.data.size)audioChunks.push(e.data)};
+      mediaRecorder.onstop=()=>{
+        const durationSec=Math.max(1,Math.round((Date.now()-recording)/1000));
+        streamRef?.getTracks().forEach(t=>t.stop());
+        streamRef=null;
+        recordBtn.innerHTML='<i class="fa-solid fa-microphone"></i> Hold to Talk';
+        recordBtn.classList.remove('pulse-btn');
+        log.textContent=`Voice note captured (${durationSec}s). AI is processing...`;
+        const q='Check water tank A and tell me the level';
+        const result=runAiCommand(q);
+        setTimeout(()=>{log.textContent=`You (voice note): ${q}\nAI: ${result}`;notify('Voice note processed: '+result);speakLine(result)},420)
+      };
+      mediaRecorder.start();
+      recording=Date.now();
+      recordBtn.innerHTML='<i class="fa-solid fa-circle-stop"></i> Release to Send';
+      recordBtn.classList.add('pulse-btn');
+      log.textContent='Listening... keep holding and speak near your phone speaker.';
+    }catch(e){
+      log.textContent='Microphone access denied or unavailable.';
+      notify('Enable microphone permission to use hold-to-talk','danger');
+    }
+  };
+
+  const stopHoldRecording=()=>{
+    if(mediaRecorder&&mediaRecorder.state==='recording')mediaRecorder.stop();
+    recording=false;
+  };
+
+  document.getElementById('aiGreeting').textContent=greet;
+  document.getElementById('fab').onclick=()=>{panel.classList.toggle('active');if(panel.classList.contains('active'))speakLine(greet)};
+  document.getElementById('aiClose').onclick=()=>panel.classList.remove('active');
+
+  const pressStart=e=>{e.preventDefault();if(pressing)return;pressing=true;startHoldRecording()};
+  const pressEnd=e=>{e.preventDefault();if(!pressing)return;pressing=false;stopHoldRecording()};
+  recordBtn.addEventListener('mousedown',pressStart);
+  recordBtn.addEventListener('mouseup',pressEnd);
+  recordBtn.addEventListener('mouseleave',pressEnd);
+  recordBtn.addEventListener('touchstart',pressStart,{passive:false});
+  recordBtn.addEventListener('touchend',pressEnd);
+  recordBtn.addEventListener('touchcancel',pressEnd);
+
+  document.getElementById('aiStop').onclick=()=>{speechSynthesis.cancel();stopHoldRecording();notify('Voice playback stopped')};
+  document.getElementById('soundToggle').onclick=()=>{state.settings.sound=!state.settings.sound;notify('Sound '+(state.settings.sound?'enabled':'disabled'));save()};
+  document.getElementById('themeToggle').onclick=()=>{state.settings.dark=!state.settings.dark;applyTheme();save()}
+}
 function initParticles(){const canvas=document.getElementById('particle'),ctx=canvas.getContext('2d');const pts=Array.from({length:50},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-.5)*.6,vy:(Math.random()-.5)*.6,r:Math.random()*2+1}));const resize=()=>{canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;canvas.style.width=innerWidth+'px';canvas.style.height=innerHeight+'px';ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)};resize();addEventListener('resize',resize);(function loop(){ctx.clearRect(0,0,innerWidth,innerHeight);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>innerWidth)p.vx*=-1;if(p.y<0||p.y>innerHeight)p.vy*=-1;ctx.fillStyle='rgba(69,210,255,.35)';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill()});requestAnimationFrame(loop)})()}
 function init(){applyTheme();initSplash();initSlides();initLogin();initGlobal();['dashboardGrid','irrigationGrid','sensorGrid','weatherGrid','analyticsGrid','faultGrid','usageGrid','solarGrid','ruleGrid','zoneGrid','notifGrid','reportGrid','settingsGrid','helpGrid'].forEach(id=>skeleton(document.getElementById(id)));setTimeout(renderAll,INITIAL_RENDER_DELAY);simTimer=setInterval(tick,SIMULATION_TICK_INTERVAL);initParticles()}
 init();
