@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
 <title>Smart Irrigation</title>
 
@@ -20,16 +20,19 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     font-family:'Poppins',sans-serif;
 }
 
+html,
 body{
-    background:#fff;
+    width:100%;
+    height:100%;
     overflow:hidden;
+    background:#fff;
 }
 
 /* ================= APP ================= */
 
 .app{
     width:100%;
-    height:100dvh;
+    height:100vh;
     position:relative;
     overflow:hidden;
 }
@@ -41,65 +44,66 @@ body{
     inset:0;
     width:100%;
     height:100%;
-    transition:1s ease;
+    overflow:hidden;
 }
 
 /* ================= SPLASH SCREEN ================= */
 
 .splash-screen{
-    background:#F6F4D9;
+    background:#F5F4D9;
     z-index:10;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    overflow:hidden;
+    transition:1s ease;
 }
 
+/* TEXT */
+
 .splash-content{
-    width:100%;
-    padding:0 34px;
-    margin-top:-120px;
+    position:absolute;
+    top:18%;
+    left:8%;
     z-index:2;
 }
 
 .title{
-    font-size:clamp(2.5rem, 8vw, 4.3rem);
+    font-size:clamp(42px, 6vw, 78px);
     font-weight:800;
-    color:#20743D;
+    color:#1F7A3D;
     line-height:1.05;
     letter-spacing:-2px;
 }
 
 .subtitle{
     margin-top:14px;
-    font-size:clamp(0.95rem, 3vw, 1.2rem);
-    color:#7B7B7B;
+    font-size:clamp(15px, 1.5vw, 20px);
+    color:#7A7A7A;
     line-height:1.5;
-    max-width:330px;
 }
 
+/* IMAGE */
+
 .splash-image{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+}
+
+.splash-image img{
     position:absolute;
     bottom:0;
     left:0;
     width:100%;
-    z-index:1;
-}
-
-.splash-image img{
-    width:100%;
-    display:block;
-    object-fit:cover;
+    height:auto;
+    object-fit:contain;
 }
 
 /* ================= LOGIN SCREEN ================= */
 
 .login-screen{
     background:#FFFFFF;
-    padding:45px 24px 0;
     opacity:0;
     visibility:hidden;
-    overflow-y:auto;
+    transition:1s ease;
 }
 
 .login-screen.active{
@@ -107,37 +111,41 @@ body{
     visibility:visible;
 }
 
+/* FORM AREA */
+
 .login-container{
     position:relative;
     z-index:2;
-    max-width:500px;
-    margin:auto;
-    padding-bottom:260px;
+    width:100%;
+    max-width:550px;
+    padding:50px 35px;
 }
 
+/* TITLE */
+
 .login-title{
-    margin-top:35px;
-    font-size:clamp(2rem, 7vw, 3.7rem);
+    margin-top:30px;
+    font-size:clamp(42px, 5vw, 68px);
     font-weight:800;
     color:#111329;
+    line-height:1.05;
     letter-spacing:-2px;
-    line-height:1.1;
 }
 
 .login-subtitle{
-    margin-top:10px;
+    margin-top:14px;
     color:#8A8A8A;
-    font-size:clamp(0.95rem, 3vw, 1.1rem);
+    font-size:clamp(15px, 1.5vw, 20px);
 }
 
-/* ================= FORM ================= */
+/* FORM */
 
 .form-group{
-    margin-top:34px;
+    margin-top:35px;
 }
 
 .label{
-    font-size:1.15rem;
+    font-size:22px;
     font-weight:700;
     color:#111329;
     margin-bottom:14px;
@@ -145,7 +153,7 @@ body{
 
 .input-box{
     width:100%;
-    height:74px;
+    height:78px;
     border-radius:22px;
     border:2px solid #E8ECE8;
     background:#F8FAF8;
@@ -156,8 +164,8 @@ body{
 }
 
 .input-box i{
-    font-size:1.4rem;
-    color:#7B7B7B;
+    font-size:24px;
+    color:#7A7A7A;
 }
 
 .input-box input{
@@ -167,99 +175,112 @@ body{
     outline:none;
     background:transparent;
     padding-left:16px;
-    font-size:1rem;
-    font-weight:500;
+    font-size:18px;
     color:#222;
+    font-weight:500;
 }
 
 .input-box input::placeholder{
     color:#8A8A8A;
-    font-weight:400;
 }
 
 .eye{
-    cursor:pointer;
     position:absolute;
     right:20px;
+    cursor:pointer;
 }
 
-/* ================= BUTTON ================= */
+/* BUTTON */
 
 .signin-btn{
     width:100%;
-    height:72px;
+    height:76px;
     border:none;
-    outline:none;
     border-radius:24px;
     background:#2B7A3E;
-    color:white;
-    font-size:1.2rem;
+    color:#fff;
+    font-size:22px;
     font-weight:500;
     margin-top:55px;
     cursor:pointer;
-    transition:0.2s;
-    box-shadow:0 10px 25px rgba(43,122,62,0.2);
+    box-shadow:0 10px 25px rgba(43,122,62,0.18);
 }
 
 .signin-btn:active{
     transform:scale(0.98);
 }
 
-/* ================= LOGIN BG IMAGE ================= */
+/* ================= LOGIN IMAGE ================= */
 
 .login-bg{
     position:absolute;
-    left:0;
-    bottom:0;
+    inset:0;
     width:100%;
+    height:100%;
     z-index:1;
     pointer-events:none;
 }
 
 .login-bg img{
+    position:absolute;
+    bottom:0;
+    left:0;
     width:100%;
-    display:block;
-    object-fit:cover;
+    height:auto;
+    object-fit:contain;
 }
 
-/* ================= SMALL DEVICES ================= */
+/* ================= MOBILE ================= */
 
-@media (max-width:480px){
+@media(max-width:768px){
 
-    .login-screen{
-        padding:35px 20px 0;
-    }
-
-    .input-box{
-        height:68px;
-        border-radius:20px;
-    }
-
-    .signin-btn{
-        height:68px;
-        border-radius:22px;
+    .splash-content{
+        top:16%;
+        left:8%;
     }
 
     .login-container{
-        padding-bottom:210px;
+        padding:35px 24px;
+    }
+
+    .label{
+        font-size:18px;
+    }
+
+    .input-box{
+        height:72px;
+    }
+
+    .signin-btn{
+        height:72px;
+        font-size:20px;
     }
 
 }
 
-/* ================= VERY SMALL DEVICES ================= */
+/* ================= SMALL PHONES ================= */
 
-@media (max-width:360px){
+@media(max-width:420px){
 
-    .title{
-        letter-spacing:-1px;
-    }
-
+    .title,
     .login-title{
         letter-spacing:-1px;
     }
 
-    .label{
-        font-size:1rem;
+    .splash-content{
+        top:14%;
+    }
+
+    .login-container{
+        padding:28px 20px;
+    }
+
+    .input-box{
+        border-radius:20px;
+    }
+
+    .signin-btn{
+        border-radius:20px;
     }
 
 }
@@ -271,7 +292,7 @@ body{
 
 <div class="app">
 
-    <!-- SPLASH SCREEN -->
+    <!-- SPLASH -->
 
     <section class="page splash-screen" id="splash">
 
@@ -288,12 +309,14 @@ body{
         </div>
 
         <div class="splash-image">
+
             <img src="greenhouse.png" alt="">
+
         </div>
 
     </section>
 
-    <!-- LOGIN SCREEN -->
+    <!-- LOGIN -->
 
     <section class="page login-screen" id="login">
 
@@ -369,7 +392,7 @@ body{
 
 <script>
 
-/* ================= SPLASH ANIMATION ================= */
+/* SPLASH TRANSITION */
 
 const splash = document.getElementById("splash");
 const login = document.getElementById("login");
@@ -383,7 +406,7 @@ setTimeout(() => {
 
 }, 3000);
 
-/* ================= PASSWORD TOGGLE ================= */
+/* PASSWORD TOGGLE */
 
 const toggle = document.getElementById("toggle");
 const password = document.getElementById("password");
@@ -394,15 +417,13 @@ toggle.addEventListener("click", () => {
 
         password.type = "text";
 
-        toggle.classList.remove("fa-eye");
-        toggle.classList.add("fa-eye-slash");
+        toggle.classList.replace("fa-eye", "fa-eye-slash");
 
     }else{
 
         password.type = "password";
 
-        toggle.classList.remove("fa-eye-slash");
-        toggle.classList.add("fa-eye");
+        toggle.classList.replace("fa-eye-slash", "fa-eye");
 
     }
 
