@@ -17,15 +17,15 @@ body{overflow-x:hidden}
 .page.active{opacity:1;visibility:visible;pointer-events:auto}
 .splash-screen{background:#F5F4D9;z-index:30;overflow:hidden}
 .splash-content{position:absolute;top:14%;left:8%;z-index:3}
-.splash-title{font-size:clamp(44px,7vw,84px);font-weight:800;color:#1E7B3F;line-height:1.05;letter-spacing:-2px}
-.splash-subtitle{margin-top:12px;color:#7C7C7C;font-size:clamp(15px,1.5vw,21px);line-height:1.5;max-width:400px}
+.splash-title{font-size:clamp(44px,7vw,84px);font-weight:800;color:#ffffff;line-height:1.05;letter-spacing:-2px}
+.splash-subtitle{margin-top:12px;color:#ffffff;font-size:clamp(15px,1.5vw,21px);line-height:1.5;max-width:400px}
 .splash-bg{position:absolute;inset:0;width:100%;height:100%;background-image:url('farm-device-243046.png');background-size:cover;background-position:center bottom;background-repeat:no-repeat;filter:saturate(1.03)}
 .logo-orbit{position:absolute;right:8%;top:14%;width:160px;height:160px;border-radius:50%;border:2px dashed rgba(30,123,63,.3);animation:spin 8s linear infinite;z-index:3}
 .logo-orbit::before,.logo-orbit::after{content:"";position:absolute;border-radius:50%;background:#1e7b3f}
 .logo-orbit::before{width:22px;height:22px;top:-11px;left:calc(50% - 11px)}
 .logo-orbit::after{width:14px;height:14px;left:-7px;top:calc(50% - 7px);background:#00b5d8}
-.loading-line{margin-top:18px;width:min(360px,65vw);height:10px;background:rgba(30,123,63,.12);border-radius:999px;overflow:hidden}
-.loading-line span{display:block;height:100%;width:30%;background:linear-gradient(90deg,#1e7b3f,#00b5d8);border-radius:999px;animation:load 2.2s infinite}
+.loading-line{margin-top:18px;width:min(360px,65vw);height:10px;background:rgba(255,255,255,.35);border-radius:999px;overflow:hidden}
+.loading-line span{display:block;height:100%;width:30%;background:#ffffff;border-radius:999px;animation:load 2.2s infinite}
 .onboarding{z-index:25;padding:clamp(.85rem,2vw,1.5rem);background:linear-gradient(135deg,#eef7ff,#f8fff0)}
 .slides{height:100%;display:flex;transition:transform .5s ease}
 .slide{min-width:100%;padding:clamp(1rem,3vw,2rem) clamp(1rem,2.5vw,1.625rem) clamp(5.5rem,13vh,7.5rem);display:flex;flex-direction:column;justify-content:center;gap:clamp(.625rem,1.4vw,1rem);position:relative}
@@ -93,6 +93,13 @@ body{overflow-x:hidden}
 .skeleton{position:relative;overflow:hidden;background:rgba(190,200,223,.25)!important;min-height:64px}
 .skeleton::after{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.6),transparent);animation:skel 1.2s infinite}
 .particle{position:fixed;inset:0;pointer-events:none;z-index:1}
+
+.learn-more-overlay{position:absolute;inset:0;background:rgba(8,15,30,.78);backdrop-filter:blur(6px);z-index:50;display:none;align-items:center;justify-content:center;padding:1rem}
+.learn-more-overlay.active{display:flex}
+.learn-more-card{width:min(760px,96vw);background:#ffffff;border-radius:1rem;padding:1.25rem;box-shadow:0 20px 45px rgba(0,0,0,.3)}
+.learn-more-card h3{font-size:1.5rem;margin-bottom:.5rem;color:#0f2555}
+.learn-more-card p{color:#334155;line-height:1.6;margin-bottom:.5rem}
+.learn-more-actions{display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem;flex-wrap:wrap}
 .mobile-nav{display:none}
 body:not(.shell-active) .mobile-nav,body:not(.shell-active) .fab{display:none !important}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -180,6 +187,17 @@ body:not(.shell-active) .mobile-nav,body:not(.shell-active) .fab{display:none !i
       </main>
     </div>
   </section>
+
+  <section class="learn-more-overlay" id="learnMoreOverlay">
+    <article class="learn-more-card">
+      <h3 id="learnMoreTitle"></h3>
+      <p id="learnMoreBody"></p>
+      <div class="learn-more-actions">
+        <button class="btn" id="learnMoreClose">Back</button>
+        <button class="btn primary" id="learnMoreNext">Next</button>
+      </div>
+    </article>
+  </section>
   <nav class="mobile-nav" id="mobileNav"></nav>
   <button class="fab" id="fab"><i class="fa-solid fa-bolt"></i></button>
   <div class="toast-wrap" id="toasts"></div>
@@ -200,7 +218,7 @@ const beep=(freq=280,dur=.05)=>{try{if(!audioCtx)audioCtx=new(window.AudioContex
 const card=(title,val,sub,span='3',progress)=>`<article class="card span-${span}"><h3>${title}</h3><div class="metric">${val}</div><div class="sub">${sub||''}</div>${progress!==undefined?`<div class="progress"><span style="width:${progress}%"></span></div>`:''}</article>`;
 function setScreen(id){Object.values(appPages).forEach(p=>p.classList.remove('active'));appPages[id].classList.add('active');document.body.classList.toggle('shell-active',id==='shell')}
 function initSplash(){setScreen('splash');setTimeout(()=>setScreen('onboarding'),2400)}
-function initSlides(){const slides=document.getElementById('slides');const dots=document.getElementById('dots');dots.innerHTML='';for(let i=0;i<3;i++){const d=document.createElement('span');d.className='dot'+(i===0?' active':'');dots.appendChild(d)}const update=()=>{slides.style.transform=`translateX(-${slideIndex*100}%)`;[...dots.children].forEach((d,i)=>d.classList.toggle('active',i===slideIndex));document.getElementById('nextSlideBtn').textContent=slideIndex===2?'Get Started':'Next'};document.getElementById('nextSlideBtn').onclick=()=>{if(slideIndex<2){slideIndex++;update()}else setScreen('login')};document.getElementById('skipBtn').onclick=()=>setScreen('login');document.getElementById('learnMoreBtn').onclick=()=>notify('WaterWise predicts irrigation needs from simulated sensor + weather intelligence.');let startX=0;slides.addEventListener('touchstart',e=>startX=e.touches[0].clientX);slides.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-startX;if(dx<-40&&slideIndex<2)slideIndex++;if(dx>40&&slideIndex>0)slideIndex--;update()})}
+function initSlides(){const slides=document.getElementById('slides');const dots=document.getElementById('dots');const learnMore=[{title:'Smart Irrigation Monitoring',body:'View real-time moisture, tank, and flow data to spot stress early. Smart thresholds and live alerts help you irrigate only when needed, reducing overwatering and protecting root health.'},{title:'Solar-Powered Automation',body:'Automation combines battery status, solar charge rate, and weather context to decide the best irrigation window. This keeps pumps efficient and extends runtime during low-power periods.'},{title:'Weather-Aware Optimization',body:'Forecast-informed scheduling delays watering when rain is likely and prioritizes zones during dry windows. Fault checks for leaks and dry-run risk keep the system safe while saving water.'}];const overlay=document.getElementById('learnMoreOverlay');const lmTitle=document.getElementById('learnMoreTitle');const lmBody=document.getElementById('learnMoreBody');const lmNext=document.getElementById('learnMoreNext');dots.innerHTML='';for(let i=0;i<3;i++){const d=document.createElement('span');d.className='dot'+(i===0?' active':'');dots.appendChild(d)}const update=()=>{slides.style.transform=`translateX(-${slideIndex*100}%)`;[...dots.children].forEach((d,i)=>d.classList.toggle('active',i===slideIndex));document.getElementById('nextSlideBtn').textContent=slideIndex===2?'Get Started':'Next'};const openLearnMore=()=>{const page=learnMore[slideIndex];lmTitle.textContent=page.title;lmBody.textContent=page.body;lmNext.textContent=slideIndex===2?'Get Started':'Next';overlay.classList.add('active')};document.getElementById('nextSlideBtn').onclick=()=>{if(slideIndex<2){slideIndex++;update()}else setScreen('login')};document.getElementById('skipBtn').onclick=()=>setScreen('login');document.getElementById('learnMoreBtn').onclick=openLearnMore;document.getElementById('learnMoreClose').onclick=()=>overlay.classList.remove('active');lmNext.onclick=()=>{overlay.classList.remove('active');if(slideIndex<2){slideIndex++;update()}else setScreen('login')};let startX=0;slides.addEventListener('touchstart',e=>startX=e.touches[0].clientX);slides.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-startX;if(dx<-40&&slideIndex<2)slideIndex++;if(dx>40&&slideIndex>0)slideIndex--;update()})}
 function initLogin(){const toggle=document.getElementById('toggle'),password=document.getElementById('password');toggle.onclick=()=>{const hidden=password.type==='password';password.type=hidden?'text':'password';toggle.classList.toggle('fa-eye');toggle.classList.toggle('fa-eye-slash')};document.getElementById('demoFill').onclick=()=>{document.getElementById('email').value='demo@waterwise.ai';password.value='waterwise123';notify('Demo credentials filled')};document.getElementById('bioBtn').onclick=()=>{document.getElementById('email').value='biometric@waterwise.ai';password.value='********';notify('Biometric verified (demo)')};document.getElementById('loginAnimBtn').onclick=()=>{document.querySelector('.login-card').animate([{transform:'translateY(0)'},{transform:'translateY(-8px)'},{transform:'translateY(0)'}],{duration:600})};document.getElementById('loginBtn').onclick=()=>{if(!document.getElementById('email').value){notify('Enter email first','danger');return}if(document.getElementById('remember').checked)localStorage.setItem('ww-email',document.getElementById('email').value);notify('Welcome to WaterWise');setTimeout(()=>{setScreen('shell')},420)};const saved=localStorage.getItem('ww-email');if(saved)document.getElementById('email').value=saved}
 function renderNav(){const nav=document.getElementById('nav'),mnav=document.getElementById('mobileNav');nav.innerHTML='';navItems.forEach((name,idx)=>{const icon=['gauge','sliders','microchip','cloud-sun-rain','chart-line','triangle-exclamation','tint','sun','wand-magic-sparkles','seedling','bell','file-lines','gear','life-ring','arrow-right-from-bracket'][idx];const a=document.createElement('a');a.href='#';a.dataset.page=name;a.innerHTML=`<i class="fa-solid fa-${icon}"></i><span>${name}</span>`;a.onclick=e=>{e.preventDefault();if(name==='Logout'){setScreen('login');notify('Logged out (demo)');return}switchPage(name)};nav.appendChild(a)});mnav.innerHTML=['Dashboard','Irrigation Control','Sensors','Settings'].map(name=>`<a href="#" data-page="${name}"><i class="fa-solid fa-circle"></i> ${name.split(' ')[0]}</a>`).join('');mnav.querySelectorAll('a').forEach(a=>a.onclick=e=>{e.preventDefault();switchPage(a.dataset.page)})}
 function switchPage(name){currentPage=name;document.getElementById('pageTitle').textContent=name;document.querySelectorAll('.nav a,.mobile-nav a').forEach(a=>a.classList.toggle('active',a.dataset.page===name));document.querySelectorAll('.page-pane').forEach(p=>p.classList.toggle('active',p.dataset.page===name))}
