@@ -1,379 +1,412 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Smart Irrigation</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Smart Irrigation</title>
 
-  <!-- Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <style>
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:'Poppins',sans-serif;
-    }
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 
-    body{
-      overflow-x:hidden;
-      background:#F7F6E8;
-    }
+<style>
 
-    .app{
-      width:100%;
-      min-height:100vh;
-      position:relative;
-    }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
 
-    /* ================= SPLASH SCREEN ================= */
+body{
+    background:#fff;
+    overflow:hidden;
+}
 
-    .splash-screen{
-      position:absolute;
-      inset:0;
-      background:#F6F4D9;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      overflow:hidden;
-      z-index:20;
-      animation:hideSplash 1s ease forwards;
-      animation-delay:3.2s;
-    }
+/* ================= APP ================= */
 
-    @keyframes hideSplash{
-      to{
-        opacity:0;
-        visibility:hidden;
-      }
-    }
+.app{
+    width:100%;
+    height:100dvh;
+    position:relative;
+    overflow:hidden;
+}
 
-    .splash-content{
-      width:100%;
-      padding:0 35px;
-      position:absolute;
-      top:42%;
-      transform:translateY(-50%);
-    }
+/* ================= COMMON PAGE ================= */
 
-    .title{
-      font-size:58px;
-      font-weight:800;
-      color:#20743D;
-      line-height:1.1;
-      margin-bottom:14px;
-      letter-spacing:-2px;
-    }
+.page{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    transition:1s ease;
+}
 
-    .subtitle{
-      color:#7E7E7E;
-      font-size:17px;
-      font-weight:400;
-      line-height:1.6;
-    }
+/* ================= SPLASH SCREEN ================= */
 
-    .greenhouse-wrap{
-      position:absolute;
-      bottom:0;
-      width:100%;
-      display:flex;
-      justify-content:center;
-      align-items:flex-end;
-    }
+.splash-screen{
+    background:#F6F4D9;
+    z-index:10;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    overflow:hidden;
+}
 
-    .greenhouse{
-      width:100%;
-      max-width:550px;
-      object-fit:cover;
-      transform:translateY(4px);
-    }
+.splash-content{
+    width:100%;
+    padding:0 34px;
+    margin-top:-120px;
+    z-index:2;
+}
 
-    /* ================= LOGIN SCREEN ================= */
+.title{
+    font-size:clamp(2.5rem, 8vw, 4.3rem);
+    font-weight:800;
+    color:#20743D;
+    line-height:1.05;
+    letter-spacing:-2px;
+}
+
+.subtitle{
+    margin-top:14px;
+    font-size:clamp(0.95rem, 3vw, 1.2rem);
+    color:#7B7B7B;
+    line-height:1.5;
+    max-width:330px;
+}
+
+.splash-image{
+    position:absolute;
+    bottom:0;
+    left:0;
+    width:100%;
+    z-index:1;
+}
+
+.splash-image img{
+    width:100%;
+    display:block;
+    object-fit:cover;
+}
+
+/* ================= LOGIN SCREEN ================= */
+
+.login-screen{
+    background:#FFFFFF;
+    padding:45px 24px 0;
+    opacity:0;
+    visibility:hidden;
+    overflow-y:auto;
+}
+
+.login-screen.active{
+    opacity:1;
+    visibility:visible;
+}
+
+.login-container{
+    position:relative;
+    z-index:2;
+    max-width:500px;
+    margin:auto;
+    padding-bottom:260px;
+}
+
+.login-title{
+    margin-top:35px;
+    font-size:clamp(2rem, 7vw, 3.7rem);
+    font-weight:800;
+    color:#111329;
+    letter-spacing:-2px;
+    line-height:1.1;
+}
+
+.login-subtitle{
+    margin-top:10px;
+    color:#8A8A8A;
+    font-size:clamp(0.95rem, 3vw, 1.1rem);
+}
+
+/* ================= FORM ================= */
+
+.form-group{
+    margin-top:34px;
+}
+
+.label{
+    font-size:1.15rem;
+    font-weight:700;
+    color:#111329;
+    margin-bottom:14px;
+}
+
+.input-box{
+    width:100%;
+    height:74px;
+    border-radius:22px;
+    border:2px solid #E8ECE8;
+    background:#F8FAF8;
+    display:flex;
+    align-items:center;
+    padding:0 20px;
+    position:relative;
+}
+
+.input-box i{
+    font-size:1.4rem;
+    color:#7B7B7B;
+}
+
+.input-box input{
+    width:100%;
+    height:100%;
+    border:none;
+    outline:none;
+    background:transparent;
+    padding-left:16px;
+    font-size:1rem;
+    font-weight:500;
+    color:#222;
+}
+
+.input-box input::placeholder{
+    color:#8A8A8A;
+    font-weight:400;
+}
+
+.eye{
+    cursor:pointer;
+    position:absolute;
+    right:20px;
+}
+
+/* ================= BUTTON ================= */
+
+.signin-btn{
+    width:100%;
+    height:72px;
+    border:none;
+    outline:none;
+    border-radius:24px;
+    background:#2B7A3E;
+    color:white;
+    font-size:1.2rem;
+    font-weight:500;
+    margin-top:55px;
+    cursor:pointer;
+    transition:0.2s;
+    box-shadow:0 10px 25px rgba(43,122,62,0.2);
+}
+
+.signin-btn:active{
+    transform:scale(0.98);
+}
+
+/* ================= LOGIN BG IMAGE ================= */
+
+.login-bg{
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:100%;
+    z-index:1;
+    pointer-events:none;
+}
+
+.login-bg img{
+    width:100%;
+    display:block;
+    object-fit:cover;
+}
+
+/* ================= SMALL DEVICES ================= */
+
+@media (max-width:480px){
 
     .login-screen{
-      position:absolute;
-      inset:0;
-      background:#FFFFFF;
-      padding:60px 42px 120px; /* Added bottom padding */
-      opacity:0;
-      pointer-events:none;
-      transition:1s ease;
-      overflow:auto; /* Allow scrolling within login screen */
-    }
-
-    .login-screen.active{
-      opacity:1;
-      pointer-events:auto;
-    }
-
-    .login-title{
-      margin-top:55px;
-      color:#13152D;
-      font-size:54px;
-      font-weight:800;
-      line-height:1.1;
-      letter-spacing:-2px;
-    }
-
-    .login-subtitle{
-      margin-top:14px;
-      color:#8A8A8A;
-      font-size:20px;
-      font-weight:400;
-    }
-
-    .form-group{
-      margin-top:40px; /* Reduced margin */
-    }
-
-    .label{
-      font-size:22px;
-      font-weight:700;
-      color:#111329;
-      margin-bottom:15px; /* Reduced margin */
+        padding:35px 20px 0;
     }
 
     .input-box{
-      width:100%;
-      height:90px; /* Reduced height */
-      border-radius:24px;
-      border:2px solid #E8ECE8;
-      background:#F8FAF8;
-      display:flex;
-      align-items:center;
-      padding:0 24px;
-      position:relative;
-    }
-
-    .input-box i{
-      color:#7D7D7D;
-      font-size:34px;
-      width:50px;
-    }
-
-    .input-box input{
-      border:none;
-      background:transparent;
-      outline:none;
-      width:100%;
-      font-size:20px;
-      color:#222;
-      padding-left:14px;
-      font-weight:500;
-    }
-
-    .input-box input::placeholder{
-      color:#808080;
-      font-weight:400;
-    }
-
-    .eye{
-      position:absolute;
-      right:24px;
-      font-size:32px !important;
-      cursor:pointer;
+        height:68px;
+        border-radius:20px;
     }
 
     .signin-btn{
-      width:100%;
-      height:88px; /* Reduced height */
-      border:none;
-      margin-top:65px; /* Reduced margin */
-      border-radius:30px;
-      background:#2A7A3E;
-      color:white;
-      font-size:24px;
-      font-weight:500;
-      cursor:pointer;
-      transition:0.3s;
-      box-shadow:0 10px 25px rgba(42,122,62,0.18);
+        height:68px;
+        border-radius:22px;
     }
 
-    .signin-btn:active{
-      transform:scale(0.98);
+    .login-container{
+        padding-bottom:210px;
     }
 
-    /* Bottom Illustration */
+}
 
-    .bottom-bg{
-      position:absolute;
-      bottom:-5px;
-      left:0;
-      width:100%;
-      z-index:-1; /* Sent to back */
+/* ================= VERY SMALL DEVICES ================= */
+
+@media (max-width:360px){
+
+    .title{
+        letter-spacing:-1px;
     }
 
-    .bottom-bg img{
-      width:100%;
-      display:block;
-      object-fit:cover;
+    .login-title{
+        letter-spacing:-1px;
     }
 
-    /* Responsive */
-
-    @media(max-width:480px){
-      .app{
-        height:auto;
-      }
-      .title,
-      .login-title{
-        font-size:42px;
-      }
-
-      .login-screen{
-        padding: 40px 25px 100px;
-      }
-      
-      .login-title{
-        margin-top:35px;
-      }
-
-      .subtitle,
-      .login-subtitle{
-        font-size:16px;
-      }
-      
-      .form-group{
-        margin-top: 30px;
-      }
-
-      .input-box{
-        height:75px;
-        padding: 0 20px;
-      }
-      
-      .input-box input{
-        font-size: 18px;
-      }
-
-      .signin-btn{
-        height:75px;
-        margin-top: 50px;
-        font-size: 20px;
-      }
-    }
-    
-    @media(max-width:380px){
-      .login-title{
-        font-size:36px;
-      }
+    .label{
+        font-size:1rem;
     }
 
-  </style>
+}
+
+</style>
 </head>
 
 <body>
 
 <div class="app">
 
-  <!-- SPLASH SCREEN -->
+    <!-- SPLASH SCREEN -->
 
-  <section class="splash-screen" id="splash">
+    <section class="page splash-screen" id="splash">
 
-    <div class="splash-content">
-      <h1 class="title">Smart Irrigation</h1>
+        <div class="splash-content">
 
-      <p class="subtitle">
-        Real time status of all your Irrigation Device
-      </p>
-    </div>
+            <h1 class="title">
+                Smart Irrigation
+            </h1>
 
-    <div class="greenhouse-wrap">
-      <img 
-        class="greenhouse"
-        src="greenhouse.png"
-        alt="greenhouse"
-      >
-    </div>
+            <p class="subtitle">
+                Real time status of all your Irrigation Device
+            </p>
 
-  </section>
+        </div>
 
-  <!-- LOGIN SCREEN -->
+        <div class="splash-image">
+            <img src="greenhouse.png" alt="">
+        </div>
 
-  <section class="login-screen" id="login">
+    </section>
 
-    <h1 class="login-title">Login Account</h1>
+    <!-- LOGIN SCREEN -->
 
-    <p class="login-subtitle">
-      Please login with registered account
-    </p>
+    <section class="page login-screen" id="login">
 
-    <!-- Email -->
+        <div class="login-container">
 
-    <div class="form-group">
+            <h1 class="login-title">
+                Login Account
+            </h1>
 
-      <div class="label">Email or Phone Number</div>
+            <p class="login-subtitle">
+                Please login with registered account
+            </p>
 
-      <div class="input-box">
-        <i class="fa-regular fa-envelope"></i>
+            <!-- EMAIL -->
 
-        <input type="text" placeholder="Enter your email">
-      </div>
+            <div class="form-group">
 
-    </div>
+                <div class="label">
+                    Email or Phone Number
+                </div>
 
-    <!-- Password -->
+                <div class="input-box">
 
-    <div class="form-group">
+                    <i class="fa-regular fa-envelope"></i>
 
-      <div class="label">Password</div>
+                    <input type="text"
+                    placeholder="Enter your email">
 
-      <div class="input-box">
+                </div>
 
-        <i class="fa-solid fa-lock"></i>
+            </div>
 
-        <input type="password" id="password" placeholder="Enter your password">
+            <!-- PASSWORD -->
 
-        <i class="fa-regular fa-eye eye" id="toggle"></i>
+            <div class="form-group">
 
-      </div>
+                <div class="label">
+                    Password
+                </div>
 
-    </div>
+                <div class="input-box">
 
-    <button class="signin-btn">
-      Sign In
-    </button>
+                    <i class="fa-solid fa-lock"></i>
 
-    <div class="bottom-bg">
-      <img src="Firefly_Gemini Flash_An IoT agricultural device installed in a farm setting- soil moisture probes in the g 243046.png" alt="nature">
-    </div>
+                    <input type="password"
+                    id="password"
+                    placeholder="Enter your password">
 
-  </section>
+                    <i class="fa-regular fa-eye eye"
+                    id="toggle"></i>
+
+                </div>
+
+            </div>
+
+            <button class="signin-btn">
+                Sign In
+            </button>
+
+        </div>
+
+        <!-- BACKGROUND IMAGE -->
+
+        <div class="login-bg">
+
+            <img src="Firefly_Gemini Flash_An IoT agricultural device installed in a farm setting- soil moisture probes in the g 243046.png" alt="">
+
+        </div>
+
+    </section>
 
 </div>
 
 <script>
 
-  // SPLASH TO LOGIN TRANSITION
+/* ================= SPLASH ANIMATION ================= */
 
-  setTimeout(() => {
-    document.getElementById("login").classList.add("active");
-  }, 3200);
+const splash = document.getElementById("splash");
+const login = document.getElementById("login");
 
+setTimeout(() => {
 
-  // PASSWORD SHOW / HIDE
+    splash.style.opacity = "0";
+    splash.style.pointerEvents = "none";
 
-  const toggle = document.getElementById("toggle");
-  const password = document.getElementById("password");
+    login.classList.add("active");
 
-  toggle.addEventListener("click", () => {
+}, 3000);
+
+/* ================= PASSWORD TOGGLE ================= */
+
+const toggle = document.getElementById("toggle");
+const password = document.getElementById("password");
+
+toggle.addEventListener("click", () => {
 
     if(password.type === "password"){
-      password.type = "text";
-      toggle.classList.remove("fa-eye");
-      toggle.classList.add("fa-eye-slash");
+
+        password.type = "text";
+
+        toggle.classList.remove("fa-eye");
+        toggle.classList.add("fa-eye-slash");
+
     }else{
-      password.type = "password";
-      toggle.classList.remove("fa-eye-slash");
-      toggle.classList.add("fa-eye");
+
+        password.type = "password";
+
+        toggle.classList.remove("fa-eye-slash");
+        toggle.classList.add("fa-eye");
+
     }
 
-  });
+});
 
 </script>
 
